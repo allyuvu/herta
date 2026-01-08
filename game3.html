@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>貓咪體感遊戲：手勢抓逗貓棒</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 標題區 */
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #FF9A9E, #FAD0C4, #FAD0C4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 154, 158, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .cat-emoji {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* 主遊戲區 */
+        .main-game {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        /* 相機和遊戲區域 */
+        .camera-game-container {
+            flex: 2;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 4px solid rgba(255, 154, 158, 0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .camera-feed {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            display: block;
+            background: #000;
+        }
+
+        /* 遊戲畫布 */
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 500px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* 手部指示器 */
+        .hand-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 154, 158, 0.5);
+            z-index: 3;
+            backdrop-filter: blur(10px);
+            min-width: 200px;
+        }
+
+        .hand-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .hand-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #FF9A9E;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hand-text {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .hand-position {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* 遊戲資訊面板 */
+        .game-info-panel {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            border: 4px solid rgba(251, 211, 141, 0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #FAD0C4;
+            text-align: center;
+            border-bottom: 2px solid rgba(250, 208, 196, 0.3);
+            padding-bottom: 15px;
+        }
+
+        /* 貓咪狀態 */
+        .cat-status {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+        }
+
+        .cat-avatar {
+            font-size: 4rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .cat-details {
+            flex: 1;
+        }
+
+        .cat-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+
+        .cat-mood {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* 狀態條 */
+        .status-bars {
+            margin-bottom: 30px;
+        }
+
+        .status-item {
+            margin-bottom: 20px;
+        }
+
+        .status-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .status-bar {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .status-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .happiness-fill {
+            background: linear-gradient(90deg, #FF9A9E, #FAD0C4);
+            width: 80%;
+        }
+
+        .energy-fill {
+            background: linear-gradient(90deg, #a8edea, #fed6e3);
+            width: 60%;
+        }
+
+        .hunger-fill {
+            background: linear-gradient(90deg, #ffecd2, #fcb69f);
+            width: 40%;
+        }
+
+        /* 遊戲統計 */
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 154, 158, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #FF9A9E;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: auto;
+        }
+
+        .control-btn {
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(45deg, #FF9A9E, #FAD0C4);
+            color: #000;
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+        }
+
+        .control-btn.primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 154, 158, 0.6);
+        }
+
+        .control-btn.secondary {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            color: #000;
+            box-shadow: 0 5px 15px rgba(168, 237, 234, 0.4);
+        }
+
+        .control-btn.secondary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(168, 237, 234, 0.6);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* 遊戲日誌 */
+        .game-log {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            max-height: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(251, 211, 141, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .log-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #FBD38D;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .log-content {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .log-time {
+            color: #FF9A9E;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+
+        /* 手勢提示 */
+        .gesture-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(255, 154, 158, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .hint-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #FF9A9E;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hint-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hint-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .hint-icon {
+            font-size: 1.5rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .hint-text {
+            font-size: 0.9rem;
+        }
+
+        /* 權限提示 */
+        #permissionPrompt {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .prompt-content {
+            background: linear-gradient(135deg, #FF9A9E, #FAD0C4);
+            padding: 50px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 600px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .prompt-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .prompt-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            color: rgba(0, 0, 0, 0.8);
+        }
+
+        .prompt-btn {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.3rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .prompt-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 載入畫面 */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #FF9A9E;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.5rem;
+            color: white;
+            letter-spacing: 2px;
+        }
+
+        /* 貓咪動畫區 */
+        .cat-animation-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* 自訂滾動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 154, 158, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 154, 158, 0.7);
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 1200px) {
+            .main-game {
+                flex-direction: column;
+            }
+            
+            .camera-game-container,
+            .game-info-panel {
+                width: 100%;
+            }
+            
+            .game-title {
+                font-size: 2.5rem;
+            }
+            
+            .cat-emoji {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 15px 0;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+                padding: 0 10px;
+            }
+            
+            .camera-feed {
+                height: 400px;
+            }
+            
+            #gameCanvas {
+                height: 400px;
+            }
+            
+            .game-log,
+            .gesture-hint {
+                width: calc(100% - 40px);
+                left: 20px;
+                right: 20px;
+            }
+            
+            .game-log {
+                bottom: 240px;
+            }
+            
+            .gesture-hint {
+                bottom: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 1.8rem;
+            }
+            
+            .cat-emoji {
+                font-size: 2.5rem;
+            }
+            
+            .camera-feed {
+                height: 300px;
+            }
+            
+            #gameCanvas {
+                height: 300px;
+            }
+            
+            .game-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .cat-avatar {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 載入畫面 -->
+    <div id="loadingScreen">
+        <div class="loader"></div>
+        <div class="loading-text">載入遊戲中...</div>
+    </div>
+
+    <!-- 貓咪動畫區 -->
+    <div class="cat-animation-area"></div>
+
+    <div class="container">
+        <!-- 標題區 -->
+        <header class="header">
+            <div class="cat-emoji">🐱</div>
+            <h1 class="game-title">貓咪體感遊戲</h1>
+            <p class="subtitle">使用手勢與可愛的貓咪互動！揮動你的手移動逗貓棒，讓貓咪開心玩耍！</p>
+        </header>
+
+        <!-- 主遊戲區 -->
+        <div class="main-game">
+            <!-- 相機和遊戲區域 -->
+            <div class="camera-game-container">
+                <video class="camera-feed" id="cameraFeed"></video>
+                <canvas id="gameCanvas"></canvas>
+                
+                <!-- 手部指示器 -->
+                <div class="hand-indicator">
+                    <div class="hand-status">
+                        <div class="hand-dot"></div>
+                        <div class="hand-text" id="handStatusText">偵測手部中...</div>
+                    </div>
+                    <div class="hand-position" id="handPosition">X: --, Y: --</div>
+                </div>
+            </div>
+
+            <!-- 遊戲資訊面板 -->
+            <div class="game-info-panel">
+                <h2 class="panel-title">🐾 貓咪狀態</h2>
+                
+                <!-- 貓咪狀態 -->
+                <div class="cat-status">
+                    <div class="cat-avatar" id="catAvatar">😺</div>
+                    <div class="cat-details">
+                        <div class="cat-name" id="catName">橘橘</div>
+                        <div class="cat-mood" id="catMood">心情：開心</div>
+                    </div>
+                </div>
+
+                <!-- 狀態條 -->
+                <div class="status-bars">
+                    <div class="status-item">
+                        <div class="status-label">
+                            <span>開心程度</span>
+                            <span id="happinessValue">80%</span>
+                        </div>
+                        <div class="status-bar">
+                            <div class="status-fill happiness-fill" id="happinessBar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-label">
+                            <span>活力值</span>
+                            <span id="energyValue">60%</span>
+                        </div>
+                        <div class="status-bar">
+                            <div class="status-fill energy-fill" id="energyBar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-label">
+                            <span>飢餓度</span>
+                            <span id="hungerValue">40%</span>
+                        </div>
+                        <div class="status-bar">
+                            <div class="status-fill hunger-fill" id="hungerBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 遊戲統計 -->
+                <div class="game-stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="playTime">0</div>
+                        <div class="stat-label">玩耍時間(秒)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="catchCount">0</div>
+                        <div class="stat-label">抓到次數</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="score">0</div>
+                        <div class="stat-label">遊戲分數</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="combo">0</div>
+                        <div class="stat-label">連續抓到</div>
+                    </div>
+                </div>
+
+                <!-- 控制面板 -->
+                <div class="control-panel">
+                    <button class="control-btn primary" id="startBtn">
+                        🎮 開始遊戲
+                    </button>
+                    <button class="control-btn secondary" id="resetBtn">
+                        🔄 重新開始
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 遊戲日誌 -->
+    <div class="game-log">
+        <div class="log-title">📜 遊戲日誌</div>
+        <div class="log-content" id="gameLog">
+            <div class="log-entry">
+                <span class="log-time">[系統]</span>
+                歡迎來到貓咪體感遊戲！
+            </div>
+        </div>
+    </div>
+
+    <!-- 手勢提示 -->
+    <div class="gesture-hint">
+        <div class="hint-title">✋ 手勢控制</div>
+        <div class="hint-list">
+            <div class="hint-item">
+                <div class="hint-icon">👆</div>
+                <div class="hint-text">食指向上：召喚逗貓棒</div>
+            </div>
+            <div class="hint-item">
+                <div class="hint-icon">🤏</div>
+                <div class="hint-text">捏合手勢：抓住逗貓棒</div>
+            </div>
+            <div class="hint-item">
+                <div class="hint-icon">👋</div>
+                <div class="hint-text">揮動手掌：移動逗貓棒</div>
+            </div>
+            <div class="hint-item">
+                <div class="hint-icon">✊</div>
+                <div class="hint-text">握拳：投餵零食</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 權限提示 -->
+    <div id="permissionPrompt" style="display: none;">
+        <div class="prompt-content">
+            <h2 class="prompt-title">需要攝影機權限</h2>
+            <p class="prompt-message">
+                為了進行手勢辨識，需要存取您的攝影機。<br>
+                請允許攝影機權限以開始遊戲。
+            </p>
+            <button class="prompt-btn" id="retryPermissionBtn">允許攝影機存取</button>
+        </div>
+    </div>
+
+    <!-- 載入外部腳本 -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <script>
+        // ==================== 遊戲變數 ====================
+        let cameraStream = null;
+        let hands = null;
+        let gameActive = false;
+        let gameStarted = false;
+        let lastHandUpdate = 0;
+        
+        // 貓咪狀態
+        let cat = {
+            name: "橘橘",
+            mood: "開心",
+            happiness: 80,
+            energy: 60,
+            hunger: 40,
+            avatar: "😺"
+        };
+        
+        // 遊戲狀態
+        let gameStats = {
+            playTime: 0,
+            catchCount: 0,
+            score: 0,
+            combo: 0,
+            maxCombo: 0
+        };
+        
+        // 手勢狀態
+        let handDetected = false;
+        let handPosition = { x: 0, y: 0 };
+        let currentGesture = null;
+        let lastGestureTime = 0;
+        
+        // 遊戲物件
+        let catToy = {
+            x: 0,
+            y: 0,
+            visible: false,
+            speed: 5,
+            size: 40
+        };
+        
+        let catPosition = {
+            x: 0,
+            y: 0,
+            speed: 2,
+            size: 80
+        };
+        
+        let snacks = [];
+        let particles = [];
+        
+        // Canvas 相關
+        let canvas, ctx;
+        let animationFrameId = null;
+        
+        // DOM元素
+        const cameraFeed = document.getElementById('cameraFeed');
+        const gameCanvas = document.getElementById('gameCanvas');
+        const handStatusText = document.getElementById('handStatusText');
+        const handPositionElement = document.getElementById('handPosition');
+        const catAvatar = document.getElementById('catAvatar');
+        const catName = document.getElementById('catName');
+        const catMood = document.getElementById('catMood');
+        const happinessValue = document.getElementById('happinessValue');
+        const energyValue = document.getElementById('energyValue');
+        const hungerValue = document.getElementById('hungerValue');
+        const happinessBar = document.getElementById('happinessBar');
+        const energyBar = document.getElementById('energyBar');
+        const hungerBar = document.getElementById('hungerBar');
+        const playTimeElement = document.getElementById('playTime');
+        const catchCountElement = document.getElementById('catchCount');
+        const scoreElement = document.getElementById('score');
+        const comboElement = document.getElementById('combo');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const gameLog = document.getElementById('gameLog');
+        const permissionPrompt = document.getElementById('permissionPrompt');
+        const retryPermissionBtn = document.getElementById('retryPermissionBtn');
+        const loadingScreen = document.getElementById('loadingScreen');
+        
+        // 遊戲設定
+        const GAME_SETTINGS = {
+            CAT_MOODS: {
+                HAPPY: { emoji: "😺", text: "開心", minHappiness: 70 },
+                CONTENT: { emoji: "😸", text: "滿足", minHappiness: 50 },
+                BORED: { emoji: "😾", text: "無聊", minHappiness: 30 },
+                ANGRY: { emoji: "😿", text: "生氣", minHappiness: 0 }
+            },
+            GESTURE_TYPES: {
+                POINT_UP: "point_up",
+                PINCH: "pinch",
+                WAVE: "wave",
+                FIST: "fist"
+            },
+            TOY_SPEED: 8,
+            CAT_SPEED: 2,
+            SNACK_COUNT: 5,
+            PARTICLE_COUNT: 20
+        };
+        
+        // ==================== 初始化 ====================
+        async function init() {
+            try {
+                // 初始化 Canvas
+                initCanvas();
+                
+                // 初始化 MediaPipe Hands
+                await initMediaPipe();
+                
+                // 設定事件監聽器
+                setupEventListeners();
+                
+                // 初始化遊戲物件
+                initGameObjects();
+                
+                // 開始遊戲循環
+                gameLoop();
+                
+                // 隱藏載入畫面
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }, 1000);
+                
+            } catch (error) {
+                console.error('初始化錯誤:', error);
+                showPermissionPrompt();
+            }
+        }
+        
+        function initCanvas() {
+            canvas = gameCanvas;
+            ctx = canvas.getContext('2d');
+            
+            // 設定 Canvas 大小
+            const container = document.querySelector('.camera-game-container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // 視窗大小調整
+            window.addEventListener('resize', () => {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            });
+        }
+        
+        // ==================== MediaPipe Hands 初始化 ====================
+        async function initMediaPipe() {
+            return new Promise((resolve, reject) => {
+                hands = new Hands({
+                    locateFile: (file) => {
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                    }
+                });
+        
+                hands.setOptions({
+                    maxNumHands: 1,
+                    modelComplexity: 1,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+        
+                hands.onResults(onHandResults);
+        
+                // 請求攝影機權限
+                requestCameraAccess().then(resolve).catch(reject);
+            });
+        }
+        
+        async function requestCameraAccess() {
+            try {
+                const constraints = {
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    }
+                };
+                
+                cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // 設定影片串流
+                cameraFeed.srcObject = cameraStream;
+                
+                // 啟動相機
+                const camera = new Camera(cameraFeed, {
+                    onFrame: async () => {
+                        if (hands) {
+                            await hands.send({ image: cameraFeed });
+                        }
+                    },
+                    width: 640,
+                    height: 480
+                });
+                
+                camera.start();
+                
+            } catch (error) {
+                console.error('攝影機存取錯誤:', error);
+                showPermissionPrompt();
+                throw error;
+            }
+        }
+        
+        // ==================== 手勢結果處理 ====================
+        function onHandResults(results) {
+            if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+                handDetected = false;
+                handStatusText.textContent = "等待手部...";
+                return;
+            }
+        
+            const landmarks = results.multiHandLandmarks[0];
+            handDetected = true;
+            
+            // 計算手部位置（轉換為畫布座標）
+            const indexFinger = landmarks[8]; // 食指尖
+            handPosition.x = indexFinger.x * canvas.width;
+            handPosition.y = indexFinger.y * canvas.height;
+            
+            // 更新顯示
+            handStatusText.textContent = "手部已偵測";
+            handPositionElement.textContent = `X: ${Math.round(handPosition.x)}, Y: ${Math.round(handPosition.y)}`;
+            
+            // 辨識手勢
+            const gesture = recognizeGesture(landmarks);
+            
+            if (gesture && gameActive) {
+                handleGesture(gesture);
+            }
+            
+            lastHandUpdate = Date.now();
+        }
+        
+        // ==================== 手勢辨識 ====================
+        function recognizeGesture(landmarks) {
+            const now = Date.now();
+            if (now - lastGestureTime < 500) return null; // 手勢冷卻時間
+            
+            // 檢查食指向上
+            if (isPointingUp(landmarks)) {
+                lastGestureTime = now;
+                return GAME_SETTINGS.GESTURE_TYPES.POINT_UP;
+            }
+            
+            // 檢查捏合手勢
+            if (isPinching(landmarks)) {
+                lastGestureTime = now;
+                return GAME_SETTINGS.GESTURE_TYPES.PINCH;
+            }
+            
+            // 檢查揮手
+            if (isWaving(landmarks)) {
+                lastGestureTime = now;
+                return GAME_SETTINGS.GESTURE_TYPES.WAVE;
+            }
+            
+            // 檢查握拳
+            if (isFist(landmarks)) {
+                lastGestureTime = now;
+                return GAME_SETTINGS.GESTURE_TYPES.FIST;
+            }
+            
+            return null;
+        }
+        
+        function isPointingUp(landmarks) {
+            const indexTip = landmarks[8];
+            const indexBase = landmarks[5];
+            const middleTip = landmarks[12];
+            
+            // 食指伸直且比其他手指高
+            return indexTip.y < indexBase.y && 
+                   indexTip.y < middleTip.y - 0.05;
+        }
+        
+        function isPinching(landmarks) {
+            const thumbTip = landmarks[4];
+            const indexTip = landmarks[8];
+            
+            // 計算拇指和食指距離
+            const distance = Math.sqrt(
+                Math.pow(thumbTip.x - indexTip.x, 2) +
+                Math.pow(thumbTip.y - indexTip.y, 2)
+            );
+            
+            return distance < 0.05; // 捏合閾值
+        }
+        
+        function isWaving(landmarks) {
+            // 簡單的揮手檢測：手部快速移動
+            // 這裡使用簡單的實現，實際應該檢測手部軌跡
+            const fingersExtended = [8, 12, 16, 20].every(index => {
+                const tip = landmarks[index];
+                const base = landmarks[index - 3];
+                return tip.y < base.y; // 指尖在指節上方
+            });
+            
+            return fingersExtended;
+        }
+        
+        function isFist(landmarks) {
+            const tips = [4, 8, 12, 16, 20];
+            const bases = [2, 5, 9, 13, 17];
+            
+            // 檢查所有指尖是否靠近對應的指節
+            return tips.every((tipIndex, i) => {
+                const tip = landmarks[tipIndex];
+                const base = landmarks[bases[i]];
+                const distance = Math.sqrt(
+                    Math.pow(tip.x - base.x, 2) +
+                    Math.pow(tip.y - base.y, 2)
+                );
+                return distance < 0.03; // 拳頭閾值
+            });
+        }
+        
+        // ==================== 手勢處理 ====================
+        function handleGesture(gesture) {
+            switch(gesture) {
+                case GAME_SETTINGS.GESTURE_TYPES.POINT_UP:
+                    spawnCatToy();
+                    addLog("遊戲", "召喚了逗貓棒！");
+                    break;
+                    
+                case GAME_SETTINGS.GESTURE_TYPES.PINCH:
+                    if (catToy.visible) {
+                        catchCatToy();
+                    }
+                    break;
+                    
+                case GAME_SETTINGS.GESTURE_TYPES.WAVE:
+                    moveCatToy();
+                    break;
+                    
+                case GAME_SETTINGS.GESTURE_TYPES.FIST:
+                    spawnSnack();
+                    break;
+            }
+        }
+        
+        // ==================== 遊戲物件管理 ====================
+        function initGameObjects() {
+            // 初始化貓咪位置
+            catPosition.x = canvas.width / 2;
+            catPosition.y = canvas.height - 100;
+            
+            // 初始化逗貓棒
+            catToy.x = canvas.width / 2;
+            catToy.y = 100;
+            
+            // 初始化零食
+            snacks = [];
+            for (let i = 0; i < GAME_SETTINGS.SNACK_COUNT; i++) {
+                snacks.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height * 0.5,
+                    size: 20,
+                    active: false,
+                    type: Math.floor(Math.random() * 3) // 0: 魚, 1: 肉, 2: 餅乾
+                });
+            }
+        }
+        
+        function spawnCatToy() {
+            if (!catToy.visible) {
+                catToy.visible = true;
+                catToy.x = handPosition.x;
+                catToy.y = handPosition.y;
+                addLog("貓咪", "看到逗貓棒了！");
+            }
+        }
+        
+        function catchCatToy() {
+            // 計算貓咪和逗貓棒的距離
+            const distance = Math.sqrt(
+                Math.pow(catPosition.x - catToy.x, 2) +
+                Math.pow(catPosition.y - catToy.y, 2)
+            );
+            
+            if (distance < catPosition.size + catToy.size) {
+                // 貓咪抓到逗貓棒
+                gameStats.catchCount++;
+                gameStats.combo++;
+                gameStats.score += 10 * gameStats.combo;
+                
+                // 貓咪開心程度增加
+                cat.happiness = Math.min(100, cat.happiness + 5);
+                
+                // 產生粒子效果
+                createParticles(catToy.x, catToy.y, 10);
+                
+                // 隱藏逗貓棒
+                catToy.visible = false;
+                
+                // 更新顯示
+                updateStats();
+                updateCatStatus();
+                
+                addLog("貓咪", `抓到逗貓棒！連續抓到 ${gameStats.combo} 次`);
+                
+                // 如果連續抓到3次，獎勵額外分數
+                if (gameStats.combo >= 3) {
+                    gameStats.score += 50;
+                    addLog("遊戲", `連續抓到獎勵 +50分！`);
+                }
+                
+            } else {
+                // 沒抓到，連續中斷
+                gameStats.combo = 0;
+                addLog("貓咪", "差一點就抓到了！");
+            }
+        }
+        
+        function moveCatToy() {
+            if (catToy.visible) {
+                // 讓逗貓棒跟隨手部移動
+                catToy.x += (handPosition.x - catToy.x) * 0.1;
+                catToy.y += (handPosition.y - catToy.y) * 0.1;
+                
+                // 貓咪會追蹤逗貓棒
+                const dx = catToy.x - catPosition.x;
+                const dy = catToy.y - catPosition.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > 50) {
+                    catPosition.x += (dx / distance) * GAME_SETTINGS.CAT_SPEED;
+                    catPosition.y += (dy / distance) * GAME_SETTINGS.CAT_SPEED;
+                }
+                
+                // 貓咪活力減少
+                cat.energy = Math.max(0, cat.energy - 0.1);
+            }
+        }
+        
+        function spawnSnack() {
+            const snackTypes = ["🐟", "🍖", "🍪"];
+            const snackType = Math.floor(Math.random() * snackTypes.length);
+            
+            snacks.push({
+                x: handPosition.x,
+                y: handPosition.y,
+                size: 20,
+                active: true,
+                type: snackType
+            });
+            
+            addLog("貓咪", `出現了${snackTypes[snackType]}零食！`);
+        }
+        
+        function createParticles(x, y, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    size: Math.random() * 5 + 2,
+                    speedX: (Math.random() - 0.5) * 10,
+                    speedY: (Math.random() - 0.5) * 10,
+                    life: 30,
+                    color: i % 3 === 0 ? '#FF9A9E' : i % 3 === 1 ? '#FAD0C4' : '#FFD700'
+                });
+            }
+        }
+        
+        // ==================== 遊戲循環 ====================
+        function gameLoop() {
+            if (gameActive) {
+                updateGame();
+                updateStats();
+            }
+            
+            drawGame();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+        
+        function updateGame() {
+            // 更新遊戲時間
+            gameStats.playTime += 0.016; // 大約60fps
+            
+            // 自動減少貓咪狀態
+            cat.happiness = Math.max(0, cat.happiness - 0.02);
+            cat.energy = Math.max(0, cat.energy - 0.01);
+            cat.hunger = Math.min(100, cat.hunger + 0.03);
+            
+            // 更新貓咪心情
+            updateCatMood();
+            
+            // 更新粒子
+            updateParticles();
+            
+            // 更新零食
+            updateSnacks();
+            
+            // 檢查貓咪和零食的互動
+            checkSnackCollision();
+        }
+        
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.life--;
+                
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        function updateSnacks() {
+            for (let i = snacks.length - 1; i >= 0; i--) {
+                const snack = snacks[i];
+                if (snack.active) {
+                    // 零食緩慢下落
+                    snack.y += 1;
+                    
+                    // 如果掉出畫面，移除
+                    if (snack.y > canvas.height) {
+                        snacks.splice(i, 1);
+                    }
+                }
+            }
+        }
+        
+        function checkSnackCollision() {
+            for (let i = snacks.length - 1; i >= 0; i--) {
+                const snack = snacks[i];
+                if (!snack.active) continue;
+                
+                const distance = Math.sqrt(
+                    Math.pow(catPosition.x - snack.x, 2) +
+                    Math.pow(catPosition.y - snack.y, 2)
+                );
+                
+                if (distance < catPosition.size + snack.size) {
+                    // 貓咪吃到零食
+                    cat.hunger = Math.max(0, cat.hunger - 20);
+                    cat.happiness = Math.min(100, cat.happiness + 10);
+                    gameStats.score += 20;
+                    
+                    // 產生粒子效果
+                    createParticles(snack.x, snack.y, 15);
+                    
+                    // 移除零食
+                    snacks.splice(i, 1);
+                    
+                    addLog("貓咪", "吃到了美味的零食！");
+                    updateCatStatus();
+                }
+            }
+        }
+        
+        // ==================== 繪製遊戲 ====================
+        function drawGame() {
+            // 清除畫布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 繪製背景裝飾
+            drawBackground();
+            
+            // 繪製零食
+            drawSnacks();
+            
+            // 繪製貓咪
+            drawCat();
+            
+            // 繪製逗貓棒
+            if (catToy.visible) {
+                drawCatToy();
+            }
+            
+            // 繪製粒子
+            drawParticles();
+            
+            // 繪製手部位置指示
+            if (handDetected) {
+                drawHandIndicator();
+            }
+        }
+        
+        function drawBackground() {
+            // 繪製漸層背景
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0,
+                canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2
+            );
+            gradient.addColorStop(0, 'rgba(255, 154, 158, 0.1)');
+            gradient.addColorStop(0.5, 'rgba(250, 208, 196, 0.05)');
+            gradient.addColorStop(1, 'rgba(26, 26, 46, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 繪製地板
+            ctx.fillStyle = 'rgba(139, 69, 19, 0.3)';
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+        }
+        
+        function drawCat() {
+            // 繪製貓咪身體
+            ctx.save();
+            ctx.translate(catPosition.x, catPosition.y);
+            
+            // 繪製貓咪表情
+            ctx.font = `${catPosition.size}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText(cat.avatar, 0, 0);
+            
+            // 繪製貓咪名字
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#FFD700';
+            ctx.fillText(cat.name, 0, -catPosition.size - 20);
+            
+            ctx.restore();
+            
+            // 繪製貓咪影子
+            ctx.beginPath();
+            ctx.ellipse(catPosition.x, catPosition.y + catPosition.size / 2, 
+                       catPosition.size / 2, catPosition.size / 8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fill();
+        }
+        
+        function drawCatToy() {
+            // 繪製逗貓棒棒子
+            ctx.beginPath();
+            ctx.moveTo(catToy.x, catToy.y);
+            ctx.lineTo(catToy.x, catToy.y - 100);
+            ctx.strokeStyle = '#8B4513';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+            
+            // 繪製逗貓棒頂部
+            ctx.beginPath();
+            ctx.arc(catToy.x, catToy.y - 100, 20, 0, Math.PI * 2);
+            ctx.fillStyle = '#FF9A9E';
+            ctx.fill();
+            ctx.strokeStyle = '#FF6B6B';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // 繪製羽毛
+            for (let i = 0; i < 3; i++) {
+                const angle = (i * 120) * Math.PI / 180;
+                ctx.beginPath();
+                ctx.moveTo(catToy.x, catToy.y - 100);
+                ctx.lineTo(
+                    catToy.x + Math.cos(angle) * 30,
+                    catToy.y - 100 + Math.sin(angle) * 30
+                );
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+        
+        function drawSnacks() {
+            const snackEmojis = ["🐟", "🍖", "🍪"];
+            
+            snacks.forEach(snack => {
+                if (!snack.active) return;
+                
+                ctx.save();
+                ctx.translate(snack.x, snack.y);
+                
+                // 繪製零食陰影
+                ctx.font = `${snack.size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillText(snackEmojis[snack.type], 2, 2);
+                
+                // 繪製零食
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillText(snackEmojis[snack.type], 0, 0);
+                
+                ctx.restore();
+            });
+        }
+        
+        function drawParticles() {
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life / 30;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+        }
+        
+        function drawHandIndicator() {
+            // 繪製手部位置圓圈
+            ctx.beginPath();
+            ctx.arc(handPosition.x, handPosition.y, 20, 0, Math.PI * 2);
+            ctx.strokeStyle = '#FF9A9E';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 繪製手部位置點
+            ctx.beginPath();
+            ctx.arc(handPosition.x, handPosition.y, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#FF9A9E';
+            ctx.fill();
+        }
+        
+        // ==================== 遊戲控制 ====================
+        function startGame() {
+            if (gameActive) return;
+            
+            gameActive = true;
+            gameStarted = true;
+            startBtn.disabled = true;
+            startBtn.textContent = "遊戲進行中";
+            
+            // 重置遊戲統計
+            gameStats = {
+                playTime: 0,
+                catchCount: 0,
+                score: 0,
+                combo: 0,
+                maxCombo: 0
+            };
+            
+            // 重置貓咪狀態
+            cat = {
+                name: "橘橘",
+                mood: "開心",
+                happiness: 80,
+                energy: 60,
+                hunger: 40,
+                avatar: "😺"
+            };
+            
+            // 初始化遊戲物件
+            initGameObjects();
+            
+            // 更新顯示
+            updateCatStatus();
+            updateStats();
+            
+            addLog("系統", "遊戲開始！用手勢與貓咪互動吧！");
+        }
+        
+        function resetGame() {
+            if (gameActive && !confirm('確定要重新開始遊戲嗎？')) {
+                return;
+            }
+            
+            gameActive = false;
+            gameStarted = false;
+            startBtn.disabled = false;
+            startBtn.textContent = "🎮 開始遊戲";
+            
+            // 重置遊戲統計
+            gameStats = {
+                playTime: 0,
+                catchCount: 0,
+                score: 0,
+                combo: 0,
+                maxCombo: 0
+            };
+            
+            // 重置貓咪狀態
+            cat = {
+                name: "橘橘",
+                mood: "開心",
+                happiness: 80,
+                energy: 60,
+                hunger: 40,
+                avatar: "😺"
+            };
+            
+            // 初始化遊戲物件
+            initGameObjects();
+            
+            // 更新顯示
+            updateCatStatus();
+            updateStats();
+            
+            addLog("系統", "遊戲已重置");
+        }
+        
+        // ==================== 更新顯示 ====================
+        function updateCatStatus() {
+            catAvatar.textContent = cat.avatar;
+            catName.textContent = cat.name;
+            catMood.textContent = `心情：${cat.mood}`;
+            
+            happinessValue.textContent = `${Math.round(cat.happiness)}%`;
+            energyValue.textContent = `${Math.round(cat.energy)}%`;
+            hungerValue.textContent = `${Math.round(cat.hunger)}%`;
+            
+            happinessBar.style.width = `${cat.happiness}%`;
+            energyBar.style.width = `${cat.energy}%`;
+            hungerBar.style.width = `${cat.hunger}%`;
+        }
+        
+        function updateCatMood() {
+            if (cat.happiness >= 70) {
+                cat.mood = "開心";
+                cat.avatar = "😺";
+            } else if (cat.happiness >= 50) {
+                cat.mood = "滿足";
+                cat.avatar = "😸";
+            } else if (cat.happiness >= 30) {
+                cat.mood = "無聊";
+                cat.avatar = "😾";
+            } else {
+                cat.mood = "生氣";
+                cat.avatar = "😿";
+            }
+            
+            updateCatStatus();
+        }
+        
+        function updateStats() {
+            playTimeElement.textContent = Math.round(gameStats.playTime);
+            catchCountElement.textContent = gameStats.catchCount;
+            scoreElement.textContent = gameStats.score;
+            comboElement.textContent = gameStats.combo;
+            
+            // 更新最大連續抓到
+            if (gameStats.combo > gameStats.maxCombo) {
+                gameStats.maxCombo = gameStats.combo;
+            }
+        }
+        
+        function addLog(sender, message) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-TW', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `<span class="log-time">[${timeString}]</span> [${sender}] ${message}`;
+            
+            gameLog.appendChild(logEntry);
+            gameLog.scrollTop = gameLog.scrollHeight;
+            
+            // 限制日誌數量
+            if (gameLog.children.length > 10) {
+                gameLog.removeChild(gameLog.firstChild);
+            }
+        }
+        
+        // ==================== 事件監聽器 ====================
+        function setupEventListeners() {
+            startBtn.addEventListener('click', startGame);
+            resetBtn.addEventListener('click', resetGame);
+            retryPermissionBtn.addEventListener('click', retryCameraAccess);
+            
+            // 視窗大小調整
+            window.addEventListener('resize', () => {
+                const container = document.querySelector('.camera-game-container');
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            });
+        }
+        
+        function showPermissionPrompt() {
+            permissionPrompt.style.display = 'flex';
+            loadingScreen.style.display = 'none';
+        }
+        
+        async function retryCameraAccess() {
+            permissionPrompt.style.display = 'none';
+            
+            try {
+                await requestCameraAccess();
+            } catch (error) {
+                showPermissionPrompt();
+            }
+        }
+        
+        // ==================== 啟動遊戲 ====================
+        // 等待頁面載入完成
+        window.addEventListener('load', init);
+        
+        // 處理頁面卸載
+        window.addEventListener('beforeunload', () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        });
+    </script>
+</body>
+</html>
