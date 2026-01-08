@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>經典猜數字遊戲</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .game-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #FFD700, #FF8C00, #FF4500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #FFD700;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .number-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .input-label {
+            font-size: 1.2rem;
+            width: 100px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .number-input {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .number-input:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .number-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .range-slider {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .guess-history {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border-left: 5px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            transform: translateX(5px);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .history-item.correct {
+            border-left-color: #4CAF50;
+        }
+
+        .history-item.high {
+            border-left-color: #FF5252;
+        }
+
+        .history-item.low {
+            border-left-color: #2196F3;
+        }
+
+        .history-number {
+            font-size: 2rem;
+            font-weight: bold;
+            width: 80px;
+            text-align: center;
+            color: #FFD700;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-text {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .history-hint {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-box {
+            text-align: center;
+            flex: 1;
+            padding: 15px;
+        }
+
+        .info-label {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+
+        .info-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 18px 35px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 180px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(45deg, #4CAF50, #2E7D32);
+            color: white;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .control-btn.primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .control-btn.secondary {
+            background: linear-gradient(45deg, #2196F3, #0D47A1);
+            color: white;
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .control-btn.secondary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.6);
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(45deg, #f44336, #b71c1c);
+            color: white;
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .control-btn.danger:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(244, 67, 54, 0.6);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .result-display {
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .result-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+
+        .result-message {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .result-display.win {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4CAF50;
+        }
+
+        .result-display.lose {
+            background: rgba(244, 67, 54, 0.2);
+            border-color: #f44336;
+        }
+
+        .result-display.active {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: #FFC107;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            border-color: transparent;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .number-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .number-btn {
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .number-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #FFD700;
+            transform: scale(1.05);
+        }
+
+        .number-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .number-btn.used {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.3);
+            text-decoration: line-through;
+        }
+
+        .hint-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 5px solid #2196F3;
+        }
+
+        .hint-title {
+            font-size: 1.2rem;
+            color: #2196F3;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hint-text {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .loader {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease infinite;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .bounce-in {
+            animation: bounceIn 0.5s ease forwards;
+        }
+
+        /* 自訂滾動條 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.5);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 215, 0, 0.7);
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+            }
+
+            .game-title {
+                font-size: 2.5rem;
+            }
+
+            .control-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .number-buttons {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .info-value {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .result-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- 標題區 -->
+        <header class="header">
+            <h1 class="game-title">經典猜數字</h1>
+            <p class="subtitle">猜測電腦隨機生成的數字，挑戰你的直覺和邏輯！</p>
+        </header>
+
+        <!-- 遊戲區域 -->
+        <div class="game-area">
+            <!-- 輸入區 -->
+            <div class="input-section">
+                <h2 class="section-title">🎯 猜數字</h2>
+                <div class="number-input-container">
+                    <div class="input-row">
+                        <label class="input-label">猜測數字</label>
+                        <input type="number" class="number-input" id="guessInput" 
+                               min="1" max="100" placeholder="輸入1-100的數字" autocomplete="off">
+                    </div>
+                    
+                    <!-- 數字按鈕區 -->
+                    <div class="number-buttons" id="numberButtons">
+                        <!-- 數字按鈕將由JavaScript動態生成 -->
+                    </div>
+                    
+                    <div class="input-row">
+                        <label class="input-label">猜測範圍</label>
+                        <input type="range" class="range-slider" id="rangeSlider" 
+                               min="1" max="100" value="50">
+                        <div class="range-labels">
+                            <span>1</span>
+                            <span>100</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 難度選擇 -->
+                <div class="difficulty-selector">
+                    <button class="difficulty-btn active" data-difficulty="easy">簡單 (1-50)</button>
+                    <button class="difficulty-btn" data-difficulty="normal">普通 (1-100)</button>
+                    <button class="difficulty-btn" data-difficulty="hard">困難 (1-200)</button>
+                    <button class="difficulty-btn" data-difficulty="expert">專家 (1-500)</button>
+                </div>
+            </div>
+
+            <!-- 猜測歷史 -->
+            <div class="guess-history">
+                <h2 class="section-title">📜 猜測歷史</h2>
+                <div class="history-list" id="historyList">
+                    <!-- 歷史記錄將動態添加 -->
+                    <div class="hint-text" id="emptyHistory">還沒有猜測記錄，輸入數字開始遊戲吧！</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遊戲資訊 -->
+        <div class="game-info">
+            <div class="info-box">
+                <div class="info-label">目標數字</div>
+                <div class="info-value" id="targetNumber">?</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">猜測次數</div>
+                <div class="info-value" id="guessCount">0</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">剩餘機會</div>
+                <div class="info-value" id="remainingGuesses">10</div>
+            </div>
+        </div>
+
+        <!-- 結果顯示 -->
+        <div class="result-display" id="resultDisplay">
+            <div class="result-title" id="resultTitle">準備開始！</div>
+            <div class="result-message" id="resultMessage">選擇難度並開始猜測</div>
+            <div class="loader" id="resultLoader"></div>
+        </div>
+
+        <!-- 提示區 -->
+        <div class="hint-section">
+            <div class="hint-title">💡 遊戲提示</div>
+            <div class="hint-text" id="hintText">
+                遊戲目標：猜測電腦隨機生成的數字。<br>
+                每次猜測後，系統會提示你的數字是「太高」、「太低」還是「正確」。<br>
+                使用最少的次數猜中數字來獲得高分！
+            </div>
+        </div>
+
+        <!-- 遊戲控制 -->
+        <div class="game-controls">
+            <button class="control-btn primary" id="startBtn">
+                🎮 開始遊戲
+            </button>
+            <button class="control-btn secondary" id="guessBtn" disabled>
+                🔍 確認猜測
+            </button>
+            <button class="control-btn danger" id="resetBtn">
+                🔄 重新開始
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 遊戲變數 ====================
+        let targetNumber = 0;
+        let currentDifficulty = 'normal';
+        let guessCount = 0;
+        let maxGuesses = 10;
+        let remainingGuesses = maxGuesses;
+        let gameActive = false;
+        let gameWon = false;
+        let usedNumbers = new Set();
+        let gameHistory = [];
+        
+        // 難度設定
+        const DIFFICULTY_SETTINGS = {
+            easy: { min: 1, max: 50, maxGuesses: 8 },
+            normal: { min: 1, max: 100, maxGuesses: 10 },
+            hard: { min: 1, max: 200, maxGuesses: 12 },
+            expert: { min: 1, max: 500, maxGuesses: 15 }
+        };
+        
+        // DOM元素
+        const guessInput = document.getElementById('guessInput');
+        const rangeSlider = document.getElementById('rangeSlider');
+        const guessBtn = document.getElementById('guessBtn');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const targetNumberElement = document.getElementById('targetNumber');
+        const guessCountElement = document.getElementById('guessCount');
+        const remainingGuessesElement = document.getElementById('remainingGuesses');
+        const resultDisplay = document.getElementById('resultDisplay');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultMessage = document.getElementById('resultMessage');
+        const resultLoader = document.getElementById('resultLoader');
+        const historyList = document.getElementById('historyList');
+        const emptyHistory = document.getElementById('emptyHistory');
+        const hintText = document.getElementById('hintText');
+        const numberButtons = document.getElementById('numberButtons');
+        
+        // ==================== 初始化 ====================
+        function init() {
+            setupEventListeners();
+            generateNumberButtons();
+            updateHint();
+        }
+        
+        // ==================== 事件監聽器 ====================
+        function setupEventListeners() {
+            // 開始遊戲按鈕
+            startBtn.addEventListener('click', startGame);
+            
+            // 猜測按鈕
+            guessBtn.addEventListener('click', submitGuess);
+            
+            // 重新開始按鈕
+            resetBtn.addEventListener('click', resetGame);
+            
+            // 輸入框事件
+            guessInput.addEventListener('input', validateInput);
+            guessInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !guessBtn.disabled) {
+                    submitGuess();
+                }
+            });
+            
+            // 滑桿事件
+            rangeSlider.addEventListener('input', () => {
+                guessInput.value = rangeSlider.value;
+            });
+            
+            // 難度選擇按鈕
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    changeDifficulty(btn.dataset.difficulty);
+                });
+            });
+        }
+        
+        // ==================== 遊戲邏輯 ====================
+        function startGame() {
+            if (gameActive) return;
+            
+            gameActive = true;
+            gameWon = false;
+            guessCount = 0;
+            usedNumbers.clear();
+            gameHistory = [];
+            
+            // 根據難度生成目標數字
+            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+            targetNumber = Math.floor(Math.random() * (settings.max - settings.min + 1)) + settings.min;
+            maxGuesses = settings.maxGuesses;
+            remainingGuesses = maxGuesses;
+            
+            // 更新顯示
+            updateGameInfo();
+            updateResultDisplay('active', '遊戲開始！', `猜一個 ${settings.min}-${settings.max} 之間的數字`);
+            updateHistoryDisplay();
+            updateNumberButtons();
+            
+            // 啟用/禁用按鈕
+            guessBtn.disabled = false;
+            guessInput.disabled = false;
+            startBtn.disabled = true;
+            guessInput.focus();
+            
+            // 更新提示
+            updateHint();
+            
+            console.log(`遊戲開始！目標數字: ${targetNumber} (範圍: ${settings.min}-${settings.max})`);
+        }
+        
+        function submitGuess() {
+            if (!gameActive || gameWon) return;
+            
+            const guess = parseInt(guessInput.value);
+            
+            // 驗證輸入
+            if (!validateGuess(guess)) {
+                return;
+            }
+            
+            // 增加猜測次數
+            guessCount++;
+            remainingGuesses--;
+            usedNumbers.add(guess);
+            
+            // 檢查猜測結果
+            let resultType = '';
+            let message = '';
+            
+            if (guess === targetNumber) {
+                gameWon = true;
+                gameActive = false;
+                resultType = 'win';
+                message = `🎉 恭喜！你在 ${guessCount} 次猜測中找到了數字 ${targetNumber}！`;
+                resultTitle.textContent = '勝利！';
+                
+                // 計算分數
+                const score = calculateScore();
+                resultMessage.textContent = `${message} 得分: ${score}`;
+                
+                // 顯示慶祝效果
+                showCelebration();
+                
+            } else if (remainingGuesses <= 0) {
+                gameActive = false;
+                resultType = 'lose';
+                resultTitle.textContent = '遊戲結束';
+                resultMessage.textContent = `很遺憾，機會用完了！正確數字是 ${targetNumber}`;
+                
+            } else {
+                resultType = 'active';
+                resultTitle.textContent = guess < targetNumber ? '太低' : '太高';
+                
+                // 給予提示
+                const diff = Math.abs(guess - targetNumber);
+                let hint = '';
+                
+                if (diff <= 5) hint = '非常接近！';
+                else if (diff <= 10) hint = '接近了！';
+                else if (diff <= 20) hint = '有點距離';
+                else hint = '差很遠';
+                
+                resultMessage.textContent = `數字 ${guess} ${guess < targetNumber ? '太低' : '太高'}。${hint} 還剩 ${remainingGuesses} 次機會。`;
+            }
+            
+            // 添加到歷史記錄
+            addToHistory(guess, guess < targetNumber ? 'low' : guess > targetNumber ? 'high' : 'correct');
+            
+            // 更新顯示
+            updateGameInfo();
+            updateResultDisplay(resultType, resultTitle.textContent, resultMessage.textContent);
+            updateNumberButtons();
+            
+            // 清除輸入
+            guessInput.value = '';
+            rangeSlider.value = Math.floor((DIFFICULTY_SETTINGS[currentDifficulty].min + DIFFICULTY_SETTINGS[currentDifficulty].max) / 2);
+            
+            // 如果遊戲結束，禁用輸入
+            if (!gameActive) {
+                guessBtn.disabled = true;
+                guessInput.disabled = true;
+                startBtn.disabled = false;
+            }
+        }
+        
+        function validateGuess(guess) {
+            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+            
+            if (isNaN(guess)) {
+                showError('請輸入有效的數字');
+                return false;
+            }
+            
+            if (guess < settings.min || guess > settings.max) {
+                showError(`請輸入 ${settings.min} 到 ${settings.max} 之間的數字`);
+                return false;
+            }
+            
+            if (usedNumbers.has(guess)) {
+                showError(`數字 ${guess} 已經猜過了，試試其他數字！`);
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function validateInput() {
+            const value = parseInt(guessInput.value);
+            if (!isNaN(value)) {
+                rangeSlider.value = value;
+            }
+        }
+        
+        function changeDifficulty(difficulty) {
+            if (gameActive && !confirm('更換難度將重新開始遊戲，確定嗎？')) {
+                return;
+            }
+            
+            currentDifficulty = difficulty;
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.difficulty === difficulty) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 更新輸入範圍
+            const settings = DIFFICULTY_SETTINGS[difficulty];
+            guessInput.min = settings.min;
+            guessInput.max = settings.max;
+            guessInput.placeholder = `輸入${settings.min}-${settings.max}的數字`;
+            
+            rangeSlider.min = settings.min;
+            rangeSlider.max = settings.max;
+            rangeSlider.value = Math.floor((settings.min + settings.max) / 2);
+            
+            // 重新生成數字按鈕
+            generateNumberButtons();
+            
+            // 如果遊戲正在進行，重新開始
+            if (gameActive) {
+                startGame();
+            }
+            
+            // 更新提示
+            updateHint();
+        }
+        
+        function resetGame() {
+            if (gameActive && !confirm('確定要重新開始遊戲嗎？')) {
+                return;
+            }
+            
+            gameActive = false;
+            gameWon = false;
+            guessCount = 0;
+            usedNumbers.clear();
+            gameHistory = [];
+            
+            // 重置顯示
+            updateGameInfo();
+            updateResultDisplay('active', '準備開始！', '選擇難度並開始猜測');
+            updateHistoryDisplay();
+            updateNumberButtons();
+            
+            // 重置按鈕狀態
+            guessBtn.disabled = true;
+            guessInput.disabled = false;
+            startBtn.disabled = false;
+            guessInput.value = '';
+            
+            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+            rangeSlider.value = Math.floor((settings.min + settings.max) / 2);
+            
+            // 更新提示
+            updateHint();
+        }
+        
+        // ==================== 計算分數 ====================
+        function calculateScore() {
+            if (!gameWon) return 0;
+            
+            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+            const maxPossibleScore = 1000;
+            const baseScore = maxPossibleScore;
+            
+            // 根據猜測次數扣分
+            const guessPenalty = (guessCount - 1) * 50;
+            
+            // 根據難度加權
+            let difficultyMultiplier = 1;
+            switch(currentDifficulty) {
+                case 'easy': difficultyMultiplier = 0.5; break;
+                case 'normal': difficultyMultiplier = 1; break;
+                case 'hard': difficultyMultiplier = 1.5; break;
+                case 'expert': difficultyMultiplier = 2; break;
+            }
+            
+            // 計算最終分數
+            let score = Math.max(0, baseScore - guessPenalty);
+            score = Math.round(score * difficultyMultiplier);
+            
+            return score;
+        }
+        
+        // ==================== 更新顯示 ====================
+        function updateGameInfo() {
+            targetNumberElement.textContent = gameWon ? targetNumber : '?';
+            guessCountElement.textContent = guessCount;
+            remainingGuessesElement.textContent = remainingGuesses;
+            
+            // 根據剩餘機會改變顏色
+            if (remainingGuesses <= 3) {
+                remainingGuessesElement.style.color = '#f44336';
+            } else if (remainingGuesses <= 5) {
+                remainingGuessesElement.style.color = '#FFC107';
+            } else {
+                remainingGuessesElement.style.color = '#FFD700';
+            }
+        }
+        
+        function updateResultDisplay(type, title, message) {
+            resultDisplay.className = `result-display ${type}`;
+            resultTitle.textContent = title;
+            resultMessage.textContent = message;
+        }
+        
+        function addToHistory(number, type) {
+            const historyItem = {
+                number: number,
+                type: type,
+                time: new Date().toLocaleTimeString('zh-TW', { 
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                })
+            };
+            
+            gameHistory.unshift(historyItem);
+            updateHistoryDisplay();
+        }
+        
+        function updateHistoryDisplay() {
+            if (gameHistory.length === 0) {
+                emptyHistory.style.display = 'block';
+                return;
+            }
+            
+            emptyHistory.style.display = 'none';
+            historyList.innerHTML = '';
+            
+            gameHistory.forEach((item, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = `history-item ${item.type} bounce-in`;
+                historyItem.style.animationDelay = `${index * 0.1}s`;
+                
+                let typeText = '';
+                let hint = '';
+                
+                switch(item.type) {
+                    case 'correct':
+                        typeText = '✅ 正確！';
+                        hint = '找到了目標數字！';
+                        break;
+                    case 'high':
+                        typeText = '📈 太高';
+                        hint = '嘗試更小的數字';
+                        break;
+                    case 'low':
+                        typeText = '📉 太低';
+                        hint = '嘗試更大的數字';
+                        break;
+                }
+                
+                historyItem.innerHTML = `
+                    <div class="history-number">${item.number}</div>
+                    <div class="history-info">
+                        <div class="history-text">${typeText}</div>
+                        <div class="history-hint">${item.time} • ${hint}</div>
+                    </div>
+                `;
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        function generateNumberButtons() {
+            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+            numberButtons.innerHTML = '';
+            
+            // 生成數字按鈕（只顯示部分）
+            const numbersPerRow = window.innerWidth < 768 ? 3 : 5;
+            const totalNumbers = numbersPerRow * 3; // 顯示3行
+            
+            // 隨機選擇要顯示的數字
+            const availableNumbers = [];
+            for (let i = settings.min; i <= settings.max; i++) {
+                availableNumbers.push(i);
+            }
+            
+            // 打亂順序並取前totalNumbers個
+            const shuffled = [...availableNumbers].sort(() => Math.random() - 0.5);
+            const selectedNumbers = shuffled.slice(0, Math.min(totalNumbers, availableNumbers.length));
+            
+            // 排序
+            selectedNumbers.sort((a, b) => a - b);
+            
+            // 創建按鈕
+            selectedNumbers.forEach(number => {
+                const button = document.createElement('button');
+                button.className = 'number-btn';
+                button.textContent = number;
+                button.dataset.number = number;
+                
+                button.addEventListener('click', () => {
+                    if (!gameActive) return;
+                    
+                    guessInput.value = number;
+                    rangeSlider.value = number;
+                    guessInput.focus();
+                });
+                
+                numberButtons.appendChild(button);
+            });
+        }
+        
+        function updateNumberButtons() {
+            document.querySelectorAll('.number-btn').forEach(btn => {
+                const number = parseInt(btn.dataset.number);
+                
+                if (usedNumbers.has(number)) {
+                    btn.classList.add('used');
+                    btn.disabled = true;
+                } else {
+                    btn.classList.remove('used');
+                    btn.disabled = false;
+                }
+            });
+        }
+        
+        function updateHint() {
+            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+            
+            let hint = '';
+            switch(currentDifficulty) {
+                case 'easy':
+                    hint = '簡單模式：數字範圍 1-50，最多 8 次猜測機會。適合新手練習！';
+                    break;
+                case 'normal':
+                    hint = '普通模式：數字範圍 1-100，最多 10 次猜測機會。標準難度，挑戰你的直覺！';
+                    break;
+                case 'hard':
+                    hint = '困難模式：數字範圍 1-200，最多 12 次猜測機會。需要更好的策略！';
+                    break;
+                case 'expert':
+                    hint = '專家模式：數字範圍 1-500，最多 15 次猜測機會。真正的大師級挑戰！';
+                    break;
+            }
+            
+            hintText.innerHTML = `
+                <strong>當前難度：${getDifficultyName(currentDifficulty)}</strong><br>
+                ${hint}<br><br>
+                <strong>遊戲技巧：</strong><br>
+                • 使用二分查找法：每次都猜中間值<br>
+                • 注意歷史記錄中的高低提示<br>
+                • 充分利用數字按鈕快速選擇<br>
+                • 保持冷靜，仔細思考！
+            `;
+        }
+        
+        function getDifficultyName(difficulty) {
+            const names = {
+                easy: '簡單',
+                normal: '普通',
+                hard: '困難',
+                expert: '專家'
+            };
+            return names[difficulty] || difficulty;
+        }
+        
+        // ==================== 特效功能 ====================
+        function showError(message) {
+            const originalType = resultDisplay.className.replace('result-display ', '');
+            updateResultDisplay('lose', '錯誤', message);
+            
+            setTimeout(() => {
+                updateResultDisplay(originalType, resultTitle.textContent, resultMessage.textContent);
+            }, 2000);
+        }
+        
+        function showCelebration() {
+            // 顯示加載動畫（模擬計算分數）
+            resultLoader.style.display = 'block';
+            
+            setTimeout(() => {
+                resultLoader.style.display = 'none';
+                
+                // 添加脈衝動畫
+                resultTitle.classList.add('pulse');
+                setTimeout(() => {
+                    resultTitle.classList.remove('pulse');
+                }, 3000);
+                
+                // 顯示分數
+                const score = calculateScore();
+                resultMessage.textContent += ` 🏆 最終得分: ${score}`;
+                
+                // 添加到歷史記錄
+                addToHistory(targetNumber, 'correct');
+                
+            }, 1500);
+        }
+        
+        // ==================== 初始化遊戲 ====================
+        // 等待頁面載入完成
+        window.addEventListener('load', init);
+        
+        // 處理頁面卸載
+        window.addEventListener('beforeunload', () => {
+            if (gameActive) {
+                return '遊戲正在進行中，確定要離開嗎？';
+            }
+        });
+    </script>
+</body>
+</html>
