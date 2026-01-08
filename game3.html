@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>貓咪體感遊戲：手勢抓逗貓棒</title>
+    <title>手勢虛擬鋼琴</title>
     <style>
         * {
             margin: 0;
@@ -13,10 +13,10 @@
 
         body {
             font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             color: white;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .container {
@@ -39,18 +39,19 @@
             font-size: 3.5rem;
             font-weight: 800;
             margin-bottom: 10px;
-            background: linear-gradient(45deg, #FF9A9E, #FAD0C4, #FAD0C4);
+            background: linear-gradient(45deg, #f8cdda, #1d2b64);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 30px rgba(255, 154, 158, 0.3);
-            letter-spacing: 1px;
+            text-shadow: 0 0 30px rgba(248, 205, 218, 0.3);
+            letter-spacing: 2px;
         }
 
-        .cat-emoji {
+        .piano-emoji {
             font-size: 4rem;
             margin-bottom: 10px;
             animation: float 3s ease-in-out infinite;
+            display: inline-block;
         }
 
         @keyframes float {
@@ -75,14 +76,14 @@
             margin-bottom: 20px;
         }
 
-        /* 相機和遊戲區域 */
-        .camera-game-container {
+        /* 相機區域 */
+        .camera-container {
             flex: 2;
             min-width: 300px;
             background: rgba(0, 0, 0, 0.4);
             border-radius: 20px;
             overflow: hidden;
-            border: 4px solid rgba(255, 154, 158, 0.3);
+            border: 4px solid rgba(248, 205, 218, 0.3);
             backdrop-filter: blur(10px);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
             position: relative;
@@ -115,7 +116,7 @@
             background: rgba(0, 0, 0, 0.7);
             padding: 15px;
             border-radius: 15px;
-            border: 2px solid rgba(255, 154, 158, 0.5);
+            border: 2px solid rgba(248, 205, 218, 0.5);
             z-index: 3;
             backdrop-filter: blur(10px);
             min-width: 200px;
@@ -132,7 +133,7 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #FF9A9E;
+            background: #f8cdda;
             animation: pulse 2s infinite;
         }
 
@@ -146,19 +147,19 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
-        .hand-position {
+        .finger-info {
             font-size: 0.9rem;
             color: rgba(255, 255, 255, 0.7);
         }
 
-        /* 遊戲資訊面板 */
-        .game-info-panel {
+        /* 鋼琴控制面板 */
+        .piano-panel {
             flex: 1;
             min-width: 300px;
             background: rgba(0, 0, 0, 0.4);
             border-radius: 20px;
             padding: 30px;
-            border: 4px solid rgba(251, 211, 141, 0.3);
+            border: 4px solid rgba(29, 43, 100, 0.3);
             backdrop-filter: blur(10px);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
             display: flex;
@@ -168,92 +169,148 @@
         .panel-title {
             font-size: 1.8rem;
             margin-bottom: 25px;
-            color: #FAD0C4;
+            color: #f8cdda;
             text-align: center;
-            border-bottom: 2px solid rgba(250, 208, 196, 0.3);
+            border-bottom: 2px solid rgba(248, 205, 218, 0.3);
             padding-bottom: 15px;
         }
 
-        /* 貓咪狀態 */
-        .cat-status {
+        /* 鋼琴鍵盤顯示 */
+        .keyboard-display {
+            flex: 1;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .keyboard-keys {
             display: flex;
-            align-items: center;
-            gap: 20px;
+            justify-content: center;
+            height: 150px;
+            position: relative;
+        }
+
+        .piano-key {
+            position: relative;
+            margin: 0 2px;
+            transition: all 0.1s ease;
+        }
+
+        .white-key {
+            width: 40px;
+            height: 150px;
+            background: linear-gradient(to bottom, #fff 0%, #f0f0f0 100%);
+            border-radius: 0 0 8px 8px;
+            border: 2px solid #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .black-key {
+            width: 28px;
+            height: 100px;
+            background: linear-gradient(to bottom, #333 0%, #000 100%);
+            border-radius: 0 0 6px 6px;
+            position: absolute;
+            top: 0;
+            z-index: 2;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .piano-key.active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .white-key.active {
+            background: linear-gradient(to bottom, #f8cdda 0%, #f0b4c8 100%);
+        }
+
+        .black-key.active {
+            background: linear-gradient(to bottom, #666 0%, #444 100%);
+        }
+
+        /* 鋼琴設定 */
+        .piano-settings {
             margin-bottom: 30px;
             padding: 20px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
         }
 
-        .cat-avatar {
-            font-size: 4rem;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .cat-details {
-            flex: 1;
-        }
-
-        .cat-name {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #FFD700;
-            margin-bottom: 5px;
-        }
-
-        .cat-mood {
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        /* 狀態條 */
-        .status-bars {
-            margin-bottom: 30px;
-        }
-
-        .status-item {
+        .settings-group {
             margin-bottom: 20px;
         }
 
-        .status-label {
+        .settings-label {
+            display: block;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+        }
+
+        .octave-selector {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 15px;
         }
 
-        .status-bar {
-            height: 20px;
+        .octave-btn {
+            padding: 10px 15px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            margin: 0 5px;
+            text-align: center;
         }
 
-        .status-fill {
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.5s ease;
+        .octave-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
-        .happiness-fill {
-            background: linear-gradient(90deg, #FF9A9E, #FAD0C4);
-            width: 80%;
+        .octave-btn.active {
+            background: linear-gradient(45deg, #f8cdda, #1d2b64);
+            border-color: transparent;
+            box-shadow: 0 5px 15px rgba(248, 205, 218, 0.3);
         }
 
-        .energy-fill {
-            background: linear-gradient(90deg, #a8edea, #fed6e3);
-            width: 60%;
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
-        .hunger-fill {
-            background: linear-gradient(90deg, #ffecd2, #fcb69f);
-            width: 40%;
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, #f8cdda, #1d2b64);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: right;
+            color: #fff;
+            font-weight: 500;
         }
 
         /* 遊戲統計 */
@@ -276,13 +333,13 @@
         .stat-box:hover {
             transform: translateY(-5px);
             background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 154, 158, 0.3);
+            border-color: rgba(248, 205, 218, 0.3);
         }
 
         .stat-value {
             font-size: 2.2rem;
             font-weight: bold;
-            color: #FF9A9E;
+            color: #f8cdda;
             margin-bottom: 5px;
         }
 
@@ -316,25 +373,25 @@
         }
 
         .control-btn.primary {
-            background: linear-gradient(45deg, #FF9A9E, #FAD0C4);
+            background: linear-gradient(45deg, #f8cdda, #e8adc8);
             color: #000;
-            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+            box-shadow: 0 5px 15px rgba(248, 205, 218, 0.4);
         }
 
         .control-btn.primary:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(255, 154, 158, 0.6);
+            box-shadow: 0 8px 20px rgba(248, 205, 218, 0.6);
         }
 
         .control-btn.secondary {
-            background: linear-gradient(45deg, #a8edea, #fed6e3);
-            color: #000;
-            box-shadow: 0 5px 15px rgba(168, 237, 234, 0.4);
+            background: linear-gradient(45deg, #1d2b64, #0f0c29);
+            color: white;
+            box-shadow: 0 5px 15px rgba(29, 43, 100, 0.4);
         }
 
         .control-btn.secondary:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(168, 237, 234, 0.6);
+            box-shadow: 0 8px 20px rgba(29, 43, 100, 0.6);
         }
 
         .control-btn:disabled {
@@ -344,8 +401,8 @@
             box-shadow: none !important;
         }
 
-        /* 遊戲日誌 */
-        .game-log {
+        /* 樂曲選擇 */
+        .song-selection {
             position: fixed;
             bottom: 20px;
             right: 20px;
@@ -354,49 +411,58 @@
             background: rgba(0, 0, 0, 0.8);
             border-radius: 15px;
             padding: 20px;
-            border: 2px solid rgba(251, 211, 141, 0.3);
+            border: 2px solid rgba(248, 205, 218, 0.3);
             backdrop-filter: blur(10px);
             z-index: 100;
             overflow-y: auto;
         }
 
-        .log-title {
+        .song-title {
             font-size: 1.2rem;
             margin-bottom: 15px;
-            color: #FBD38D;
+            color: #f8cdda;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .log-content {
-            font-size: 0.9rem;
-            line-height: 1.4;
+        .song-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .log-entry {
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.8);
+        .song-btn {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
         }
 
-        .log-time {
-            color: #FF9A9E;
-            font-size: 0.8rem;
-            margin-right: 10px;
+        .song-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .song-btn.active {
+            background: linear-gradient(45deg, #f8cdda, #1d2b64);
+            border-color: transparent;
         }
 
         /* 手勢提示 */
         .gesture-hint {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
+            bottom: 240px;
+            right: 20px;
             width: 300px;
             background: rgba(0, 0, 0, 0.8);
             border-radius: 15px;
             padding: 20px;
-            border: 2px solid rgba(255, 154, 158, 0.3);
+            border: 2px solid rgba(29, 43, 100, 0.3);
             backdrop-filter: blur(10px);
             z-index: 100;
         }
@@ -404,7 +470,7 @@
         .hint-title {
             font-size: 1.2rem;
             margin-bottom: 15px;
-            color: #FF9A9E;
+            color: #f8cdda;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -449,7 +515,7 @@
         }
 
         .prompt-content {
-            background: linear-gradient(135deg, #FF9A9E, #FAD0C4);
+            background: linear-gradient(135deg, #f8cdda, #1d2b64);
             padding: 50px;
             border-radius: 25px;
             text-align: center;
@@ -496,7 +562,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -508,7 +574,7 @@
             width: 80px;
             height: 80px;
             border: 5px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #FF9A9E;
+            border-top-color: #f8cdda;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 30px;
@@ -524,15 +590,34 @@
             letter-spacing: 2px;
         }
 
-        /* 貓咪動畫區 */
-        .cat-animation-area {
+        /* 音符視覺化 */
+        .note-visualizer {
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             width: 100%;
-            height: 200px;
-            z-index: 1;
+            height: 500px;
             pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .note-particle {
+            position: absolute;
+            font-size: 2rem;
+            animation: noteFloat 3s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes noteFloat {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(0.5);
+                opacity: 0;
+            }
         }
 
         /* 自訂滾動條 */
@@ -546,12 +631,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 154, 158, 0.5);
+            background: rgba(248, 205, 218, 0.5);
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 154, 158, 0.7);
+            background: rgba(248, 205, 218, 0.7);
         }
 
         /* 響應式設計 */
@@ -560,8 +645,8 @@
                 flex-direction: column;
             }
             
-            .camera-game-container,
-            .game-info-panel {
+            .camera-container,
+            .piano-panel {
                 width: 100%;
             }
             
@@ -569,7 +654,7 @@
                 font-size: 2.5rem;
             }
             
-            .cat-emoji {
+            .piano-emoji {
                 font-size: 3rem;
             }
         }
@@ -600,19 +685,27 @@
                 height: 400px;
             }
             
-            .game-log,
+            .song-selection,
             .gesture-hint {
                 width: calc(100% - 40px);
                 left: 20px;
                 right: 20px;
             }
             
-            .game-log {
-                bottom: 240px;
+            .song-selection {
+                bottom: 20px;
             }
             
             .gesture-hint {
-                bottom: 20px;
+                bottom: 260px;
+            }
+            
+            .white-key {
+                width: 30px;
+            }
+            
+            .black-key {
+                width: 20px;
             }
         }
 
@@ -621,7 +714,7 @@
                 font-size: 1.8rem;
             }
             
-            .cat-emoji {
+            .piano-emoji {
                 font-size: 2.5rem;
             }
             
@@ -637,9 +730,52 @@
                 grid-template-columns: 1fr;
             }
             
-            .cat-avatar {
-                font-size: 3rem;
+            .white-key {
+                width: 25px;
             }
+            
+            .black-key {
+                width: 16px;
+            }
+            
+            .octave-selector {
+                flex-wrap: wrap;
+            }
+            
+            .octave-btn {
+                flex: none;
+                width: calc(50% - 10px);
+                margin-bottom: 10px;
+            }
+        }
+
+        /* 樂譜顯示器 */
+        .sheet-music {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .sheet-title {
+            font-size: 1.1rem;
+            color: #f8cdda;
+            margin-bottom: 10px;
+        }
+
+        .note-sequence {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+        }
+
+        .note-sequence .current {
+            color: #f8cdda;
+            font-weight: bold;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -647,24 +783,24 @@
     <!-- 載入畫面 -->
     <div id="loadingScreen">
         <div class="loader"></div>
-        <div class="loading-text">載入遊戲中...</div>
+        <div class="loading-text">載入鋼琴遊戲中...</div>
     </div>
 
-    <!-- 貓咪動畫區 -->
-    <div class="cat-animation-area"></div>
+    <!-- 音符視覺化區域 -->
+    <div class="note-visualizer" id="noteVisualizer"></div>
 
     <div class="container">
         <!-- 標題區 -->
         <header class="header">
-            <div class="cat-emoji">🐱</div>
-            <h1 class="game-title">貓咪體感遊戲</h1>
-            <p class="subtitle">使用手勢與可愛的貓咪互動！揮動你的手移動逗貓棒，讓貓咪開心玩耍！</p>
+            <div class="piano-emoji">🎹</div>
+            <h1 class="game-title">手勢虛擬鋼琴</h1>
+            <p class="subtitle">使用手指在空中彈奏鋼琴！讓攝影機偵測你的手勢，開始你的音樂創作之旅！</p>
         </header>
 
         <!-- 主遊戲區 -->
         <div class="main-game">
-            <!-- 相機和遊戲區域 -->
-            <div class="camera-game-container">
+            <!-- 相機區域 -->
+            <div class="camera-container">
                 <video class="camera-feed" id="cameraFeed"></video>
                 <canvas id="gameCanvas"></canvas>
                 
@@ -674,52 +810,43 @@
                         <div class="hand-dot"></div>
                         <div class="hand-text" id="handStatusText">偵測手部中...</div>
                     </div>
-                    <div class="hand-position" id="handPosition">X: --, Y: --</div>
+                    <div class="finger-info" id="fingerInfo">使用食指彈奏鋼琴鍵</div>
                 </div>
             </div>
 
-            <!-- 遊戲資訊面板 -->
-            <div class="game-info-panel">
-                <h2 class="panel-title">🐾 貓咪狀態</h2>
+            <!-- 鋼琴控制面板 -->
+            <div class="piano-panel">
+                <h2 class="panel-title">🎵 鋼琴控制台</h2>
                 
-                <!-- 貓咪狀態 -->
-                <div class="cat-status">
-                    <div class="cat-avatar" id="catAvatar">😺</div>
-                    <div class="cat-details">
-                        <div class="cat-name" id="catName">橘橘</div>
-                        <div class="cat-mood" id="catMood">心情：開心</div>
+                <!-- 鋼琴鍵盤顯示 -->
+                <div class="keyboard-display">
+                    <div class="keyboard-keys" id="keyboardKeys">
+                        <!-- 鋼琴鍵將由JavaScript動態生成 -->
                     </div>
                 </div>
 
-                <!-- 狀態條 -->
-                <div class="status-bars">
-                    <div class="status-item">
-                        <div class="status-label">
-                            <span>開心程度</span>
-                            <span id="happinessValue">80%</span>
-                        </div>
-                        <div class="status-bar">
-                            <div class="status-fill happiness-fill" id="happinessBar"></div>
+                <!-- 鋼琴設定 -->
+                <div class="piano-settings">
+                    <div class="settings-group">
+                        <label class="settings-label">🎶 八度音階</label>
+                        <div class="octave-selector" id="octaveSelector">
+                            <!-- 八度音階按鈕將由JavaScript動態生成 -->
                         </div>
                     </div>
                     
-                    <div class="status-item">
-                        <div class="status-label">
-                            <span>活力值</span>
-                            <span id="energyValue">60%</span>
-                        </div>
-                        <div class="status-bar">
-                            <div class="status-fill energy-fill" id="energyBar"></div>
+                    <div class="settings-group">
+                        <label class="settings-label">🎚️ 靈敏度調整</label>
+                        <div class="slider-container">
+                            <input type="range" id="sensitivitySlider" min="1" max="10" step="0.5" value="5">
+                            <span class="slider-value" id="sensitivityValue">5.0</span>
                         </div>
                     </div>
                     
-                    <div class="status-item">
-                        <div class="status-label">
-                            <span>飢餓度</span>
-                            <span id="hungerValue">40%</span>
-                        </div>
-                        <div class="status-bar">
-                            <div class="status-fill hunger-fill" id="hungerBar"></div>
+                    <div class="settings-group">
+                        <label class="settings-label">🎵 音量控制</label>
+                        <div class="slider-container">
+                            <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5">
+                            <span class="slider-value" id="volumeValue">0.5</span>
                         </div>
                     </div>
                 </div>
@@ -727,44 +854,51 @@
                 <!-- 遊戲統計 -->
                 <div class="game-stats">
                     <div class="stat-box">
+                        <div class="stat-value" id="notesPlayed">0</div>
+                        <div class="stat-label">彈奏音符數</div>
+                    </div>
+                    <div class="stat-box">
                         <div class="stat-value" id="playTime">0</div>
-                        <div class="stat-label">玩耍時間(秒)</div>
+                        <div class="stat-label">演奏時間(秒)</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-value" id="catchCount">0</div>
-                        <div class="stat-label">抓到次數</div>
+                        <div class="stat-value" id="accuracy">100%</div>
+                        <div class="stat-label">演奏準確率</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-value" id="score">0</div>
-                        <div class="stat-label">遊戲分數</div>
+                        <div class="stat-value" id="currentOctave">4</div>
+                        <div class="stat-label">當前八度音</div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="combo">0</div>
-                        <div class="stat-label">連續抓到</div>
-                    </div>
+                </div>
+
+                <!-- 樂譜顯示 -->
+                <div class="sheet-music">
+                    <div class="sheet-title">🎼 當前樂曲</div>
+                    <div class="note-sequence" id="currentSongDisplay">小星星</div>
+                    <div class="note-sequence" id="noteSequence">C C G G A A G</div>
                 </div>
 
                 <!-- 控制面板 -->
                 <div class="control-panel">
                     <button class="control-btn primary" id="startBtn">
-                        🎮 開始遊戲
+                        🎮 開始演奏
                     </button>
-                    <button class="control-btn secondary" id="resetBtn">
-                        🔄 重新開始
+                    <button class="control-btn secondary" id="recordBtn">
+                        ⏺️ 開始錄音
+                    </button>
+                    <button class="control-btn secondary" id="playbackBtn">
+                        ▶️ 播放錄音
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 遊戲日誌 -->
-    <div class="game-log">
-        <div class="log-title">📜 遊戲日誌</div>
-        <div class="log-content" id="gameLog">
-            <div class="log-entry">
-                <span class="log-time">[系統]</span>
-                歡迎來到貓咪體感遊戲！
-            </div>
+    <!-- 樂曲選擇 -->
+    <div class="song-selection">
+        <div class="song-title">🎵 樂曲選擇</div>
+        <div class="song-list" id="songList">
+            <!-- 樂曲選擇按鈕將由JavaScript動態生成 -->
         </div>
     </div>
 
@@ -774,19 +908,19 @@
         <div class="hint-list">
             <div class="hint-item">
                 <div class="hint-icon">👆</div>
-                <div class="hint-text">食指向上：召喚逗貓棒</div>
+                <div class="hint-text">食指下壓：彈奏白鍵</div>
             </div>
             <div class="hint-item">
-                <div class="hint-icon">🤏</div>
-                <div class="hint-text">捏合手勢：抓住逗貓棒</div>
+                <div class="hint-icon">🤞</div>
+                <div class="hint-text">中指下壓：彈奏黑鍵</div>
             </div>
             <div class="hint-item">
-                <div class="hint-icon">👋</div>
-                <div class="hint-text">揮動手掌：移動逗貓棒</div>
+                <div class="hint-icon">👌</div>
+                <div class="hint-text">拇指和食指：調整八度音</div>
             </div>
             <div class="hint-item">
-                <div class="hint-icon">✊</div>
-                <div class="hint-text">握拳：投餵零食</div>
+                <div class="hint-icon">🤲</div>
+                <div class="hint-text">雙手平放：停止所有音</div>
             </div>
         </div>
     </div>
@@ -797,7 +931,7 @@
             <h2 class="prompt-title">需要攝影機權限</h2>
             <p class="prompt-message">
                 為了進行手勢辨識，需要存取您的攝影機。<br>
-                請允許攝影機權限以開始遊戲。
+                請允許攝影機權限以開始演奏。
             </p>
             <button class="prompt-btn" id="retryPermissionBtn">允許攝影機存取</button>
         </div>
@@ -812,101 +946,88 @@
         let cameraStream = null;
         let hands = null;
         let gameActive = false;
-        let gameStarted = false;
-        let lastHandUpdate = 0;
+        let recording = false;
+        let playback = false;
         
-        // 貓咪狀態
-        let cat = {
-            name: "橘橘",
-            mood: "開心",
-            happiness: 80,
-            energy: 60,
-            hunger: 40,
-            avatar: "😺"
-        };
+        // 鋼琴狀態
+        let currentOctave = 4;
+        let sensitivity = 5.0;
+        let volume = 0.5;
+        let audioContext = null;
+        let oscillators = {};
         
-        // 遊戲狀態
+        // 遊戲統計
         let gameStats = {
+            notesPlayed: 0,
             playTime: 0,
-            catchCount: 0,
-            score: 0,
-            combo: 0,
-            maxCombo: 0
+            correctNotes: 0,
+            totalNotes: 0
         };
+        
+        // 錄音功能
+        let recordingData = [];
+        let recordedNotes = [];
+        let playbackIndex = 0;
+        let playbackInterval = null;
         
         // 手勢狀態
         let handDetected = false;
-        let handPosition = { x: 0, y: 0 };
-        let currentGesture = null;
-        let lastGestureTime = 0;
+        let fingerPositions = {};
+        let lastNoteTime = 0;
+        let noteCooldown = 100; // 毫秒
         
-        // 遊戲物件
-        let catToy = {
-            x: 0,
-            y: 0,
-            visible: false,
-            speed: 5,
-            size: 40
+        // 樂曲資料
+        let currentSong = null;
+        let songProgress = 0;
+        let songInterval = null;
+        
+        const PIANO_NOTES = [
+            // 白鍵: C, D, E, F, G, A, B
+            // 黑鍵: C#, D#, F#, G#, A#
+            'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'
+        ];
+        
+        const PIANO_SONGS = {
+            '小星星': ['C', 'C', 'G', 'G', 'A', 'A', 'G', 'F', 'F', 'E', 'E', 'D', 'D', 'C'],
+            '歡樂頌': ['E', 'E', 'F', 'G', 'G', 'F', 'E', 'D', 'C', 'C', 'D', 'E', 'E', 'D', 'D'],
+            '生日快樂': ['C', 'C', 'D', 'C', 'F', 'E', 'C', 'C', 'D', 'C', 'G', 'F'],
+            '兩隻老虎': ['C', 'D', 'E', 'C', 'C', 'D', 'E', 'C', 'E', 'F', 'G', 'E', 'F', 'G'],
+            '瑪莉有隻小綿羊': ['E', 'D', 'C', 'D', 'E', 'E', 'E', 'D', 'D', 'D', 'E', 'G', 'G']
         };
-        
-        let catPosition = {
-            x: 0,
-            y: 0,
-            speed: 2,
-            size: 80
-        };
-        
-        let snacks = [];
-        let particles = [];
         
         // Canvas 相關
         let canvas, ctx;
         let animationFrameId = null;
         
+        // 鋼琴鍵視覺化
+        let pianoKeys = [];
+        let activeKeys = new Set();
+        
         // DOM元素
         const cameraFeed = document.getElementById('cameraFeed');
         const gameCanvas = document.getElementById('gameCanvas');
         const handStatusText = document.getElementById('handStatusText');
-        const handPositionElement = document.getElementById('handPosition');
-        const catAvatar = document.getElementById('catAvatar');
-        const catName = document.getElementById('catName');
-        const catMood = document.getElementById('catMood');
-        const happinessValue = document.getElementById('happinessValue');
-        const energyValue = document.getElementById('energyValue');
-        const hungerValue = document.getElementById('hungerValue');
-        const happinessBar = document.getElementById('happinessBar');
-        const energyBar = document.getElementById('energyBar');
-        const hungerBar = document.getElementById('hungerBar');
+        const fingerInfo = document.getElementById('fingerInfo');
+        const keyboardKeys = document.getElementById('keyboardKeys');
+        const octaveSelector = document.getElementById('octaveSelector');
+        const sensitivitySlider = document.getElementById('sensitivitySlider');
+        const sensitivityValue = document.getElementById('sensitivityValue');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const notesPlayedElement = document.getElementById('notesPlayed');
         const playTimeElement = document.getElementById('playTime');
-        const catchCountElement = document.getElementById('catchCount');
-        const scoreElement = document.getElementById('score');
-        const comboElement = document.getElementById('combo');
+        const accuracyElement = document.getElementById('accuracy');
+        const currentOctaveElement = document.getElementById('currentOctave');
+        const currentSongDisplay = document.getElementById('currentSongDisplay');
+        const noteSequence = document.getElementById('noteSequence');
         const startBtn = document.getElementById('startBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const gameLog = document.getElementById('gameLog');
+        const recordBtn = document.getElementById('recordBtn');
+        const playbackBtn = document.getElementById('playbackBtn');
+        const songList = document.getElementById('songList');
+        const noteVisualizer = document.getElementById('noteVisualizer');
         const permissionPrompt = document.getElementById('permissionPrompt');
         const retryPermissionBtn = document.getElementById('retryPermissionBtn');
         const loadingScreen = document.getElementById('loadingScreen');
-        
-        // 遊戲設定
-        const GAME_SETTINGS = {
-            CAT_MOODS: {
-                HAPPY: { emoji: "😺", text: "開心", minHappiness: 70 },
-                CONTENT: { emoji: "😸", text: "滿足", minHappiness: 50 },
-                BORED: { emoji: "😾", text: "無聊", minHappiness: 30 },
-                ANGRY: { emoji: "😿", text: "生氣", minHappiness: 0 }
-            },
-            GESTURE_TYPES: {
-                POINT_UP: "point_up",
-                PINCH: "pinch",
-                WAVE: "wave",
-                FIST: "fist"
-            },
-            TOY_SPEED: 8,
-            CAT_SPEED: 2,
-            SNACK_COUNT: 5,
-            PARTICLE_COUNT: 20
-        };
         
         // ==================== 初始化 ====================
         async function init() {
@@ -914,14 +1035,23 @@
                 // 初始化 Canvas
                 initCanvas();
                 
+                // 初始化 Web Audio API
+                initAudio();
+                
+                // 初始化鋼琴鍵盤
+                initPianoKeys();
+                
+                // 初始化八度音選擇器
+                initOctaveSelector();
+                
+                // 初始化樂曲選擇
+                initSongList();
+                
                 // 初始化 MediaPipe Hands
                 await initMediaPipe();
                 
                 // 設定事件監聽器
                 setupEventListeners();
-                
-                // 初始化遊戲物件
-                initGameObjects();
                 
                 // 開始遊戲循環
                 gameLoop();
@@ -945,7 +1075,7 @@
             ctx = canvas.getContext('2d');
             
             // 設定 Canvas 大小
-            const container = document.querySelector('.camera-game-container');
+            const container = document.querySelector('.camera-container');
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
             
@@ -954,6 +1084,16 @@
                 canvas.width = container.clientWidth;
                 canvas.height = container.clientHeight;
             });
+        }
+        
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('Web Audio API 初始化成功');
+            } catch (error) {
+                console.error('Web Audio API 初始化失敗:', error);
+                alert('您的瀏覽器不支援 Web Audio API，部分音效功能可能無法使用。');
+            }
         }
         
         // ==================== MediaPipe Hands 初始化 ====================
@@ -966,7 +1106,7 @@
                 });
         
                 hands.setOptions({
-                    maxNumHands: 1,
+                    maxNumHands: 2,
                     modelComplexity: 1,
                     minDetectionConfidence: 0.5,
                     minTrackingConfidence: 0.5
@@ -1014,6 +1154,83 @@
             }
         }
         
+        // ==================== 鋼琴鍵盤初始化 ====================
+        function initPianoKeys() {
+            keyboardKeys.innerHTML = '';
+            pianoKeys = [];
+            
+            // 一個八度音有12個鍵（7個白鍵 + 5個黑鍵）
+            const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const blackKeys = ['C#', 'D#', '', 'F#', 'G#', 'A#', ''];
+            
+            let whiteKeyIndex = 0;
+            let blackKeyIndex = 0;
+            
+            for (let i = 0; i < 12; i++) {
+                const noteName = PIANO_NOTES[i];
+                const isBlackKey = noteName.includes('#');
+                
+                const keyElement = document.createElement('div');
+                keyElement.className = `piano-key ${isBlackKey ? 'black-key' : 'white-key'}`;
+                keyElement.dataset.note = noteName;
+                keyElement.dataset.index = i;
+                
+                if (isBlackKey) {
+                    // 黑鍵位置在白鍵之間
+                    const leftPosition = (blackKeyIndex * 40 + 25) + 'px';
+                    keyElement.style.left = leftPosition;
+                    blackKeyIndex++;
+                } else {
+                    // 白鍵
+                    whiteKeyIndex++;
+                }
+                
+                keyboardKeys.appendChild(keyElement);
+                
+                pianoKeys.push({
+                    element: keyElement,
+                    note: noteName,
+                    isBlack: isBlackKey,
+                    isActive: false
+                });
+            }
+        }
+        
+        function initOctaveSelector() {
+            octaveSelector.innerHTML = '';
+            
+            // 3-6八度音
+            for (let octave = 3; octave <= 6; octave++) {
+                const btn = document.createElement('button');
+                btn.className = `octave-btn ${octave === 4 ? 'active' : ''}`;
+                btn.textContent = octave.toString();
+                btn.dataset.octave = octave;
+                
+                btn.addEventListener('click', () => {
+                    changeOctave(octave);
+                });
+                
+                octaveSelector.appendChild(btn);
+            }
+        }
+        
+        function initSongList() {
+            songList.innerHTML = '';
+            
+            Object.keys(PIANO_SONGS).forEach(songName => {
+                const btn = document.createElement('button');
+                btn.className = 'song-btn';
+                btn.textContent = songName;
+                btn.dataset.song = songName;
+                
+                btn.addEventListener('click', () => {
+                    selectSong(songName);
+                });
+                
+                songList.appendChild(btn);
+            });
+        }
+        
         // ==================== 手勢結果處理 ====================
         function onHandResults(results) {
             if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
@@ -1022,262 +1239,482 @@
                 return;
             }
         
-            const landmarks = results.multiHandLandmarks[0];
             handDetected = true;
-            
-            // 計算手部位置（轉換為畫布座標）
-            const indexFinger = landmarks[8]; // 食指尖
-            handPosition.x = indexFinger.x * canvas.width;
-            handPosition.y = indexFinger.y * canvas.height;
-            
-            // 更新顯示
             handStatusText.textContent = "手部已偵測";
-            handPositionElement.textContent = `X: ${Math.round(handPosition.x)}, Y: ${Math.round(handPosition.y)}`;
             
-            // 辨識手勢
-            const gesture = recognizeGesture(landmarks);
+            // 清除之前的指尖位置
+            fingerPositions = {};
             
-            if (gesture && gameActive) {
-                handleGesture(gesture);
-            }
+            // 處理每隻手
+            results.multiHandLandmarks.forEach((landmarks, handIndex) => {
+                // 追蹤指尖位置
+                const fingerTips = {
+                    thumb: landmarks[4],
+                    index: landmarks[8],
+                    middle: landmarks[12],
+                    ring: landmarks[16],
+                    pinky: landmarks[20]
+                };
+                
+                // 轉換為畫布座標
+                Object.keys(fingerTips).forEach(finger => {
+                    const tip = fingerTips[finger];
+                    fingerPositions[`hand${handIndex}_${finger}`] = {
+                        x: tip.x * canvas.width,
+                        y: tip.y * canvas.height,
+                        z: tip.z
+                    };
+                });
+                
+                // 檢查手勢並彈奏音符
+                if (gameActive) {
+                    detectAndPlayNotes(landmarks, handIndex);
+                }
+            });
             
-            lastHandUpdate = Date.now();
+            updateFingerInfo();
         }
         
-        // ==================== 手勢辨識 ====================
-        function recognizeGesture(landmarks) {
+        function detectAndPlayNotes(landmarks, handIndex) {
             const now = Date.now();
-            if (now - lastGestureTime < 500) return null; // 手勢冷卻時間
+            if (now - lastNoteTime < noteCooldown) return;
             
-            // 檢查食指向上
-            if (isPointingUp(landmarks)) {
-                lastGestureTime = now;
-                return GAME_SETTINGS.GESTURE_TYPES.POINT_UP;
-            }
+            // 檢查每個指尖是否在按壓位置
+            const fingerIndices = [
+                { finger: 'index', keyType: 'white' },
+                { finger: 'middle', keyType: 'black' },
+                { finger: 'thumb', keyType: 'special' }
+            ];
             
-            // 檢查捏合手勢
-            if (isPinching(landmarks)) {
-                lastGestureTime = now;
-                return GAME_SETTINGS.GESTURE_TYPES.PINCH;
-            }
+            fingerIndices.forEach(({ finger, keyType }) => {
+                const tipIndex = finger === 'thumb' ? 4 : 
+                               finger === 'index' ? 8 :
+                               finger === 'middle' ? 12 : 8;
+                
+                const tip = landmarks[tipIndex];
+                const mcp = landmarks[tipIndex - 3]; // 手指根部關節
+                
+                // 計算指尖與根部的距離（按壓深度）
+                const pressDepth = tip.y - mcp.y;
+                
+                // 根據靈敏度調整閾值
+                const pressThreshold = 0.02 + (0.05 / sensitivity);
+                
+                if (pressDepth > pressThreshold) {
+                    // 手指在按壓狀態
+                    const fingerKey = `hand${handIndex}_${finger}`;
+                    const pos = fingerPositions[fingerKey];
+                    
+                    if (pos) {
+                        // 根據手指位置確定要彈奏的鍵
+                        let noteIndex = Math.floor((pos.x / canvas.width) * 12);
+                        noteIndex = Math.max(0, Math.min(11, noteIndex));
+                        
+                        const noteName = PIANO_NOTES[noteIndex];
+                        
+                        // 檢查是否為正確的鍵類型
+                        const isBlackKey = noteName.includes('#');
+                        const shouldPlay = (keyType === 'white' && !isBlackKey) || 
+                                          (keyType === 'black' && isBlackKey) ||
+                                          (keyType === 'special');
+                        
+                        if (shouldPlay) {
+                            playNote(noteName, currentOctave);
+                            activatePianoKey(noteIndex);
+                            lastNoteTime = now;
+                            
+                            // 如果是錄音模式，記錄音符
+                            if (recording) {
+                                recordNote(noteName, currentOctave, now);
+                            }
+                        }
+                    }
+                }
+            });
             
-            // 檢查揮手
-            if (isWaving(landmarks)) {
-                lastGestureTime = now;
-                return GAME_SETTINGS.GESTURE_TYPES.WAVE;
-            }
-            
-            // 檢查握拳
-            if (isFist(landmarks)) {
-                lastGestureTime = now;
-                return GAME_SETTINGS.GESTURE_TYPES.FIST;
-            }
-            
-            return null;
-        }
-        
-        function isPointingUp(landmarks) {
-            const indexTip = landmarks[8];
-            const indexBase = landmarks[5];
-            const middleTip = landmarks[12];
-            
-            // 食指伸直且比其他手指高
-            return indexTip.y < indexBase.y && 
-                   indexTip.y < middleTip.y - 0.05;
-        }
-        
-        function isPinching(landmarks) {
+            // 檢查拇指和食指的捏合手勢（調整八度音）
             const thumbTip = landmarks[4];
             const indexTip = landmarks[8];
-            
-            // 計算拇指和食指距離
             const distance = Math.sqrt(
                 Math.pow(thumbTip.x - indexTip.x, 2) +
                 Math.pow(thumbTip.y - indexTip.y, 2)
             );
             
-            return distance < 0.05; // 捏合閾值
-        }
-        
-        function isWaving(landmarks) {
-            // 簡單的揮手檢測：手部快速移動
-            // 這裡使用簡單的實現，實際應該檢測手部軌跡
-            const fingersExtended = [8, 12, 16, 20].every(index => {
-                const tip = landmarks[index];
-                const base = landmarks[index - 3];
-                return tip.y < base.y; // 指尖在指節上方
-            });
+            if (distance < 0.05) {
+                // 捏合手勢 - 調整八度音
+                const octaveChange = thumbTip.y < indexTip.y ? 1 : -1;
+                const newOctave = Math.max(3, Math.min(6, currentOctave + octaveChange));
+                
+                if (newOctave !== currentOctave) {
+                    changeOctave(newOctave);
+                    lastNoteTime = now + 500; // 防止連續觸發
+                }
+            }
             
-            return fingersExtended;
+            // 檢查是否雙手平放（停止所有音）
+            const handsFlat = checkHandsFlat(landmarks);
+            if (handsFlat) {
+                stopAllNotes();
+            }
         }
         
-        function isFist(landmarks) {
+        function checkHandsFlat(landmarks) {
+            // 簡單檢查：所有指尖都在相似的高度
             const tips = [4, 8, 12, 16, 20];
-            const bases = [2, 5, 9, 13, 17];
+            const tipYs = tips.map(index => landmarks[index].y);
+            const maxY = Math.max(...tipYs);
+            const minY = Math.min(...tipYs);
             
-            // 檢查所有指尖是否靠近對應的指節
-            return tips.every((tipIndex, i) => {
-                const tip = landmarks[tipIndex];
-                const base = landmarks[bases[i]];
-                const distance = Math.sqrt(
-                    Math.pow(tip.x - base.x, 2) +
-                    Math.pow(tip.y - base.y, 2)
-                );
-                return distance < 0.03; // 拳頭閾值
+            return (maxY - minY) < 0.05; // 指尖高度差很小
+        }
+        
+        function updateFingerInfo() {
+            if (!handDetected) {
+                fingerInfo.textContent = "使用食指彈奏鋼琴鍵";
+                return;
+            }
+            
+            const info = [];
+            
+            // 檢查是否有指尖在按壓位置
+            Object.keys(fingerPositions).forEach(key => {
+                if (key.includes('index')) {
+                    info.push("食指: 準備彈奏");
+                } else if (key.includes('middle')) {
+                    info.push("中指: 黑鍵控制");
+                }
+            });
+            
+            fingerInfo.textContent = info.length > 0 ? info.join(" | ") : "移動手指彈奏鋼琴";
+        }
+        
+        // ==================== 音效處理 ====================
+        function playNote(noteName, octave) {
+            if (!audioContext) return;
+            
+            // 計算頻率
+            const frequency = getNoteFrequency(noteName, octave);
+            
+            // 停止相同音符的現有振盪器
+            const noteKey = `${noteName}${octave}`;
+            if (oscillators[noteKey]) {
+                oscillators[noteKey].stop();
+                delete oscillators[noteKey];
+            }
+            
+            // 創建振盪器
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 設定波形和頻率
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            
+            // 設定音量
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            
+            // 淡入效果
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+            
+            // 開始播放
+            oscillator.start();
+            
+            // 儲存振盪器以便停止
+            oscillators[noteKey] = {
+                oscillator: oscillator,
+                gainNode: gainNode,
+                stopTime: audioContext.currentTime + 2
+            };
+            
+            // 更新統計
+            gameStats.notesPlayed++;
+            gameStats.totalNotes++;
+            
+            // 視覺化效果
+            createNoteVisualization(noteName);
+            
+            // 更新顯示
+            updateStats();
+        }
+        
+        function getNoteFrequency(noteName, octave) {
+            // A4 = 440Hz
+            const noteIndex = PIANO_NOTES.indexOf(noteName);
+            const semitonesFromA4 = (octave - 4) * 12 + (noteIndex - 9); // A = index 9
+            
+            return 440 * Math.pow(2, semitonesFromA4 / 12);
+        }
+        
+        function stopAllNotes() {
+            Object.values(oscillators).forEach(({ oscillator, gainNode }) => {
+                try {
+                    gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(gainNode.gain.value, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+                    
+                    setTimeout(() => {
+                        oscillator.stop();
+                    }, 100);
+                } catch (e) {
+                    console.error('停止音效時發生錯誤:', e);
+                }
+            });
+            
+            oscillators = {};
+            
+            // 停用所有鋼琴鍵
+            deactivateAllKeys();
+        }
+        
+        // ==================== 鋼琴鍵視覺化 ====================
+        function activatePianoKey(keyIndex) {
+            if (keyIndex < 0 || keyIndex >= pianoKeys.length) return;
+            
+            const key = pianoKeys[keyIndex];
+            key.isActive = true;
+            key.element.classList.add('active');
+            
+            // 自動停用
+            setTimeout(() => {
+                deactivatePianoKey(keyIndex);
+            }, 300);
+        }
+        
+        function deactivatePianoKey(keyIndex) {
+            if (keyIndex < 0 || keyIndex >= pianoKeys.length) return;
+            
+            const key = pianoKeys[keyIndex];
+            key.isActive = false;
+            key.element.classList.remove('active');
+        }
+        
+        function deactivateAllKeys() {
+            pianoKeys.forEach((key, index) => {
+                deactivatePianoKey(index);
             });
         }
         
-        // ==================== 手勢處理 ====================
-        function handleGesture(gesture) {
-            switch(gesture) {
-                case GAME_SETTINGS.GESTURE_TYPES.POINT_UP:
-                    spawnCatToy();
-                    addLog("遊戲", "召喚了逗貓棒！");
-                    break;
-                    
-                case GAME_SETTINGS.GESTURE_TYPES.PINCH:
-                    if (catToy.visible) {
-                        catchCatToy();
-                    }
-                    break;
-                    
-                case GAME_SETTINGS.GESTURE_TYPES.WAVE:
-                    moveCatToy();
-                    break;
-                    
-                case GAME_SETTINGS.GESTURE_TYPES.FIST:
-                    spawnSnack();
-                    break;
-            }
-        }
-        
-        // ==================== 遊戲物件管理 ====================
-        function initGameObjects() {
-            // 初始化貓咪位置
-            catPosition.x = canvas.width / 2;
-            catPosition.y = canvas.height - 100;
+        // ==================== 音符視覺化 ====================
+        function createNoteVisualization(noteName) {
+            const noteEmojis = {
+                'C': '🎵', 'C#': '🎶', 'D': '♪', 'D#': '♫', 'E': '🎶',
+                'F': '🎵', 'F#': '🎶', 'G': '♪', 'G#': '♫', 'A': '🎶', 'A#': '♬', 'B': '🎵'
+            };
             
-            // 初始化逗貓棒
-            catToy.x = canvas.width / 2;
-            catToy.y = 100;
+            const noteEmoji = noteEmojis[noteName] || '🎵';
             
-            // 初始化零食
-            snacks = [];
-            for (let i = 0; i < GAME_SETTINGS.SNACK_COUNT; i++) {
-                snacks.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height * 0.5,
-                    size: 20,
-                    active: false,
-                    type: Math.floor(Math.random() * 3) // 0: 魚, 1: 肉, 2: 餅乾
-                });
-            }
-        }
-        
-        function spawnCatToy() {
-            if (!catToy.visible) {
-                catToy.visible = true;
-                catToy.x = handPosition.x;
-                catToy.y = handPosition.y;
-                addLog("貓咪", "看到逗貓棒了！");
-            }
-        }
-        
-        function catchCatToy() {
-            // 計算貓咪和逗貓棒的距離
-            const distance = Math.sqrt(
-                Math.pow(catPosition.x - catToy.x, 2) +
-                Math.pow(catPosition.y - catToy.y, 2)
-            );
+            // 隨機位置
+            const x = Math.random() * canvas.width;
+            const y = canvas.height;
             
-            if (distance < catPosition.size + catToy.size) {
-                // 貓咪抓到逗貓棒
-                gameStats.catchCount++;
-                gameStats.combo++;
-                gameStats.score += 10 * gameStats.combo;
-                
-                // 貓咪開心程度增加
-                cat.happiness = Math.min(100, cat.happiness + 5);
-                
-                // 產生粒子效果
-                createParticles(catToy.x, catToy.y, 10);
-                
-                // 隱藏逗貓棒
-                catToy.visible = false;
-                
-                // 更新顯示
-                updateStats();
-                updateCatStatus();
-                
-                addLog("貓咪", `抓到逗貓棒！連續抓到 ${gameStats.combo} 次`);
-                
-                // 如果連續抓到3次，獎勵額外分數
-                if (gameStats.combo >= 3) {
-                    gameStats.score += 50;
-                    addLog("遊戲", `連續抓到獎勵 +50分！`);
+            const noteElement = document.createElement('div');
+            noteElement.className = 'note-particle';
+            noteElement.textContent = noteEmoji;
+            noteElement.style.left = `${x}px`;
+            noteElement.style.top = `${y}px`;
+            noteElement.style.color = getNoteColor(noteName);
+            
+            noteVisualizer.appendChild(noteElement);
+            
+            // 移除動畫結束的元素
+            setTimeout(() => {
+                if (noteElement.parentNode === noteVisualizer) {
+                    noteVisualizer.removeChild(noteElement);
                 }
-                
+            }, 3000);
+        }
+        
+        function getNoteColor(noteName) {
+            const colors = {
+                'C': '#FF6B6B', 'C#': '#4ECDC4', 'D': '#FFD166', 'D#': '#06D6A0',
+                'E': '#118AB2', 'F': '#EF476F', 'F#': '#FFD166', 'G': '#073B4C',
+                'G#': '#7209B7', 'A': '#3A86FF', 'A#': '#8338EC', 'B': '#FF006E'
+            };
+            return colors[noteName] || '#FFFFFF';
+        }
+        
+        // ==================== 遊戲控制 ====================
+        function startGame() {
+            gameActive = !gameActive;
+            
+            if (gameActive) {
+                startBtn.textContent = "⏸️ 暫停演奏";
+                startBtn.classList.add('secondary');
+                startBtn.classList.remove('primary');
             } else {
-                // 沒抓到，連續中斷
-                gameStats.combo = 0;
-                addLog("貓咪", "差一點就抓到了！");
+                startBtn.textContent = "🎮 開始演奏";
+                startBtn.classList.add('primary');
+                startBtn.classList.remove('secondary');
+                stopAllNotes();
             }
-        }
-        
-        function moveCatToy() {
-            if (catToy.visible) {
-                // 讓逗貓棒跟隨手部移動
-                catToy.x += (handPosition.x - catToy.x) * 0.1;
-                catToy.y += (handPosition.y - catToy.y) * 0.1;
-                
-                // 貓咪會追蹤逗貓棒
-                const dx = catToy.x - catPosition.x;
-                const dy = catToy.y - catPosition.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance > 50) {
-                    catPosition.x += (dx / distance) * GAME_SETTINGS.CAT_SPEED;
-                    catPosition.y += (dy / distance) * GAME_SETTINGS.CAT_SPEED;
-                }
-                
-                // 貓咪活力減少
-                cat.energy = Math.max(0, cat.energy - 0.1);
-            }
-        }
-        
-        function spawnSnack() {
-            const snackTypes = ["🐟", "🍖", "🍪"];
-            const snackType = Math.floor(Math.random() * snackTypes.length);
             
-            snacks.push({
-                x: handPosition.x,
-                y: handPosition.y,
-                size: 20,
-                active: true,
-                type: snackType
+            updateGameStatus();
+        }
+        
+        function startRecording() {
+            recording = !recording;
+            
+            if (recording) {
+                recordingData = [];
+                recordedNotes = [];
+                recordBtn.textContent = "⏹️ 停止錄音";
+                recordBtn.classList.add('primary');
+                recordBtn.classList.remove('secondary');
+            } else {
+                recordBtn.textContent = "⏺️ 開始錄音";
+                recordBtn.classList.add('secondary');
+                recordBtn.classList.remove('primary');
+                
+                if (recordedNotes.length > 0) {
+                    alert(`錄音完成！共錄製了 ${recordedNotes.length} 個音符。`);
+                }
+            }
+        }
+        
+        function startPlayback() {
+            if (recordedNotes.length === 0) {
+                alert('沒有錄音可以播放！請先錄製一些音符。');
+                return;
+            }
+            
+            playback = !playback;
+            
+            if (playback) {
+                playbackBtn.textContent = "⏹️ 停止播放";
+                playbackBtn.classList.add('primary');
+                playbackBtn.classList.remove('secondary');
+                playbackIndex = 0;
+                playRecordedNotes();
+            } else {
+                playbackBtn.textContent = "▶️ 播放錄音";
+                playbackBtn.classList.add('secondary');
+                playbackBtn.classList.remove('primary');
+                stopPlayback();
+            }
+        }
+        
+        function playRecordedNotes() {
+            if (!playback || playbackIndex >= recordedNotes.length) {
+                playback = false;
+                playbackBtn.textContent = "▶️ 播放錄音";
+                playbackBtn.classList.add('secondary');
+                playbackBtn.classList.remove('primary');
+                return;
+            }
+            
+            const note = recordedNotes[playbackIndex];
+            playNote(note.note, note.octave);
+            
+            playbackIndex++;
+            
+            if (playbackIndex < recordedNotes.length) {
+                const nextNote = recordedNotes[playbackIndex];
+                const delay = nextNote.time - note.time;
+                
+                playbackInterval = setTimeout(playRecordedNotes, delay);
+            } else {
+                playback = false;
+                playbackBtn.textContent = "▶️ 播放錄音";
+                playbackBtn.classList.add('secondary');
+                playbackBtn.classList.remove('primary');
+            }
+        }
+        
+        function stopPlayback() {
+            if (playbackInterval) {
+                clearTimeout(playbackInterval);
+                playbackInterval = null;
+            }
+            playback = false;
+            stopAllNotes();
+        }
+        
+        function recordNote(noteName, octave, time) {
+            recordedNotes.push({
+                note: noteName,
+                octave: octave,
+                time: time
+            });
+        }
+        
+        // ==================== 樂曲功能 ====================
+        function selectSong(songName) {
+            currentSong = songName;
+            
+            // 更新歌曲選擇按鈕狀態
+            document.querySelectorAll('.song-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.song === songName) {
+                    btn.classList.add('active');
+                }
             });
             
-            addLog("貓咪", `出現了${snackTypes[snackType]}零食！`);
+            // 更新顯示
+            currentSongDisplay.textContent = songName;
+            noteSequence.textContent = PIANO_SONGS[songName].join(' ');
+            
+            // 如果正在播放，重新開始
+            if (songInterval) {
+                clearInterval(songInterval);
+                startSongPlayback();
+            }
         }
         
-        function createParticles(x, y, count) {
-            for (let i = 0; i < count; i++) {
-                particles.push({
-                    x: x,
-                    y: y,
-                    size: Math.random() * 5 + 2,
-                    speedX: (Math.random() - 0.5) * 10,
-                    speedY: (Math.random() - 0.5) * 10,
-                    life: 30,
-                    color: i % 3 === 0 ? '#FF9A9E' : i % 3 === 1 ? '#FAD0C4' : '#FFD700'
-                });
-            }
+        function startSongPlayback() {
+            if (!currentSong) return;
+            
+            songProgress = 0;
+            const songNotes = PIANO_SONGS[currentSong];
+            
+            songInterval = setInterval(() => {
+                if (songProgress >= songNotes.length) {
+                    clearInterval(songInterval);
+                    return;
+                }
+                
+                const note = songNotes[songProgress];
+                playNote(note, currentOctave);
+                
+                // 更新樂譜顯示
+                updateSheetMusicDisplay(songProgress);
+                
+                songProgress++;
+            }, 500); // 每半秒一個音符
+        }
+        
+        function updateSheetMusicDisplay(currentIndex) {
+            const notes = PIANO_SONGS[currentSong];
+            const displayNotes = notes.map((note, index) => {
+                if (index === currentIndex) {
+                    return `<span class="current">${note}</span>`;
+                }
+                return note;
+            }).join(' ');
+            
+            noteSequence.innerHTML = displayNotes;
+        }
+        
+        // ==================== 設定變更 ====================
+        function changeOctave(newOctave) {
+            currentOctave = newOctave;
+            currentOctaveElement.textContent = currentOctave;
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('.octave-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.octave) === newOctave) {
+                    btn.classList.add('active');
+                }
+            });
         }
         
         // ==================== 遊戲循環 ====================
         function gameLoop() {
             if (gameActive) {
-                updateGame();
+                gameStats.playTime += 0.016; // 大約60fps
                 updateStats();
             }
             
@@ -1285,397 +1722,150 @@
             animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        function updateGame() {
-            // 更新遊戲時間
-            gameStats.playTime += 0.016; // 大約60fps
-            
-            // 自動減少貓咪狀態
-            cat.happiness = Math.max(0, cat.happiness - 0.02);
-            cat.energy = Math.max(0, cat.energy - 0.01);
-            cat.hunger = Math.min(100, cat.hunger + 0.03);
-            
-            // 更新貓咪心情
-            updateCatMood();
-            
-            // 更新粒子
-            updateParticles();
-            
-            // 更新零食
-            updateSnacks();
-            
-            // 檢查貓咪和零食的互動
-            checkSnackCollision();
-        }
-        
-        function updateParticles() {
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.speedX;
-                p.y += p.speedY;
-                p.life--;
-                
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                }
-            }
-        }
-        
-        function updateSnacks() {
-            for (let i = snacks.length - 1; i >= 0; i--) {
-                const snack = snacks[i];
-                if (snack.active) {
-                    // 零食緩慢下落
-                    snack.y += 1;
-                    
-                    // 如果掉出畫面，移除
-                    if (snack.y > canvas.height) {
-                        snacks.splice(i, 1);
-                    }
-                }
-            }
-        }
-        
-        function checkSnackCollision() {
-            for (let i = snacks.length - 1; i >= 0; i--) {
-                const snack = snacks[i];
-                if (!snack.active) continue;
-                
-                const distance = Math.sqrt(
-                    Math.pow(catPosition.x - snack.x, 2) +
-                    Math.pow(catPosition.y - snack.y, 2)
-                );
-                
-                if (distance < catPosition.size + snack.size) {
-                    // 貓咪吃到零食
-                    cat.hunger = Math.max(0, cat.hunger - 20);
-                    cat.happiness = Math.min(100, cat.happiness + 10);
-                    gameStats.score += 20;
-                    
-                    // 產生粒子效果
-                    createParticles(snack.x, snack.y, 15);
-                    
-                    // 移除零食
-                    snacks.splice(i, 1);
-                    
-                    addLog("貓咪", "吃到了美味的零食！");
-                    updateCatStatus();
-                }
-            }
-        }
-        
-        // ==================== 繪製遊戲 ====================
         function drawGame() {
             // 清除畫布
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // 繪製背景裝飾
-            drawBackground();
+            if (!handDetected || !gameActive) return;
             
-            // 繪製零食
-            drawSnacks();
-            
-            // 繪製貓咪
-            drawCat();
-            
-            // 繪製逗貓棒
-            if (catToy.visible) {
-                drawCatToy();
-            }
-            
-            // 繪製粒子
-            drawParticles();
-            
-            // 繪製手部位置指示
-            if (handDetected) {
-                drawHandIndicator();
-            }
-        }
-        
-        function drawBackground() {
-            // 繪製漸層背景
-            const gradient = ctx.createRadialGradient(
-                canvas.width / 2, canvas.height / 2, 0,
-                canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2
-            );
-            gradient.addColorStop(0, 'rgba(255, 154, 158, 0.1)');
-            gradient.addColorStop(0.5, 'rgba(250, 208, 196, 0.05)');
-            gradient.addColorStop(1, 'rgba(26, 26, 46, 0)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // 繪製地板
-            ctx.fillStyle = 'rgba(139, 69, 19, 0.3)';
-            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-        }
-        
-        function drawCat() {
-            // 繪製貓咪身體
-            ctx.save();
-            ctx.translate(catPosition.x, catPosition.y);
-            
-            // 繪製貓咪表情
-            ctx.font = `${catPosition.size}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillText(cat.avatar, 0, 0);
-            
-            // 繪製貓咪名字
-            ctx.font = '16px Arial';
-            ctx.fillStyle = '#FFD700';
-            ctx.fillText(cat.name, 0, -catPosition.size - 20);
-            
-            ctx.restore();
-            
-            // 繪製貓咪影子
-            ctx.beginPath();
-            ctx.ellipse(catPosition.x, catPosition.y + catPosition.size / 2, 
-                       catPosition.size / 2, catPosition.size / 8, 0, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.fill();
-        }
-        
-        function drawCatToy() {
-            // 繪製逗貓棒棒子
-            ctx.beginPath();
-            ctx.moveTo(catToy.x, catToy.y);
-            ctx.lineTo(catToy.x, catToy.y - 100);
-            ctx.strokeStyle = '#8B4513';
-            ctx.lineWidth = 5;
-            ctx.stroke();
-            
-            // 繪製逗貓棒頂部
-            ctx.beginPath();
-            ctx.arc(catToy.x, catToy.y - 100, 20, 0, Math.PI * 2);
-            ctx.fillStyle = '#FF9A9E';
-            ctx.fill();
-            ctx.strokeStyle = '#FF6B6B';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            
-            // 繪製羽毛
-            for (let i = 0; i < 3; i++) {
-                const angle = (i * 120) * Math.PI / 180;
+            // 繪製指尖位置
+            Object.keys(fingerPositions).forEach(key => {
+                const pos = fingerPositions[key];
+                
+                // 不同手指不同顏色
+                let color = '#FFFFFF';
+                let radius = 10;
+                
+                if (key.includes('thumb')) {
+                    color = '#FF6B6B';
+                    radius = 12;
+                } else if (key.includes('index')) {
+                    color = '#4ECDC4';
+                    radius = 15;
+                } else if (key.includes('middle')) {
+                    color = '#FFD166';
+                    radius = 15;
+                } else if (key.includes('ring')) {
+                    color = '#06D6A0';
+                } else if (key.includes('pinky')) {
+                    color = '#118AB2';
+                }
+                
+                // 繪製指尖圓圈
                 ctx.beginPath();
-                ctx.moveTo(catToy.x, catToy.y - 100);
-                ctx.lineTo(
-                    catToy.x + Math.cos(angle) * 30,
-                    catToy.y - 100 + Math.sin(angle) * 30
-                );
-                ctx.strokeStyle = '#FFD700';
+                ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#FFFFFF';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-            }
-        }
-        
-        function drawSnacks() {
-            const snackEmojis = ["🐟", "🍖", "🍪"];
-            
-            snacks.forEach(snack => {
-                if (!snack.active) return;
                 
-                ctx.save();
-                ctx.translate(snack.x, snack.y);
-                
-                // 繪製零食陰影
-                ctx.font = `${snack.size}px Arial`;
+                // 繪製手指標籤
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#FFFFFF';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-                ctx.fillText(snackEmojis[snack.type], 2, 2);
                 
-                // 繪製零食
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillText(snackEmojis[snack.type], 0, 0);
-                
-                ctx.restore();
+                const fingerName = key.split('_')[1];
+                ctx.fillText(fingerName.charAt(0).toUpperCase(), pos.x, pos.y - radius - 10);
             });
+            
+            // 繪製鋼琴鍵盤位置提示
+            drawPianoGuide();
         }
         
-        function drawParticles() {
-            particles.forEach(p => {
+        function drawPianoGuide() {
+            const keyWidth = canvas.width / 12;
+            
+            for (let i = 0; i < 12; i++) {
+                const x = i * keyWidth;
+                const isBlackKey = PIANO_NOTES[i].includes('#');
+                
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = p.life / 30;
+                ctx.rect(x, canvas.height - 50, keyWidth, 50);
+                ctx.fillStyle = isBlackKey ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.1)';
                 ctx.fill();
-                ctx.globalAlpha = 1;
-            });
-        }
-        
-        function drawHandIndicator() {
-            // 繪製手部位置圓圈
-            ctx.beginPath();
-            ctx.arc(handPosition.x, handPosition.y, 20, 0, Math.PI * 2);
-            ctx.strokeStyle = '#FF9A9E';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([5, 5]);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // 繪製手部位置點
-            ctx.beginPath();
-            ctx.arc(handPosition.x, handPosition.y, 5, 0, Math.PI * 2);
-            ctx.fillStyle = '#FF9A9E';
-            ctx.fill();
-        }
-        
-        // ==================== 遊戲控制 ====================
-        function startGame() {
-            if (gameActive) return;
-            
-            gameActive = true;
-            gameStarted = true;
-            startBtn.disabled = true;
-            startBtn.textContent = "遊戲進行中";
-            
-            // 重置遊戲統計
-            gameStats = {
-                playTime: 0,
-                catchCount: 0,
-                score: 0,
-                combo: 0,
-                maxCombo: 0
-            };
-            
-            // 重置貓咪狀態
-            cat = {
-                name: "橘橘",
-                mood: "開心",
-                happiness: 80,
-                energy: 60,
-                hunger: 40,
-                avatar: "😺"
-            };
-            
-            // 初始化遊戲物件
-            initGameObjects();
-            
-            // 更新顯示
-            updateCatStatus();
-            updateStats();
-            
-            addLog("系統", "遊戲開始！用手勢與貓咪互動吧！");
-        }
-        
-        function resetGame() {
-            if (gameActive && !confirm('確定要重新開始遊戲嗎？')) {
-                return;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                
+                // 顯示音符名稱
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#FFFFFF';
+                ctx.textAlign = 'center';
+                ctx.fillText(PIANO_NOTES[i], x + keyWidth / 2, canvas.height - 20);
             }
-            
-            gameActive = false;
-            gameStarted = false;
-            startBtn.disabled = false;
-            startBtn.textContent = "🎮 開始遊戲";
-            
-            // 重置遊戲統計
-            gameStats = {
-                playTime: 0,
-                catchCount: 0,
-                score: 0,
-                combo: 0,
-                maxCombo: 0
-            };
-            
-            // 重置貓咪狀態
-            cat = {
-                name: "橘橘",
-                mood: "開心",
-                happiness: 80,
-                energy: 60,
-                hunger: 40,
-                avatar: "😺"
-            };
-            
-            // 初始化遊戲物件
-            initGameObjects();
-            
-            // 更新顯示
-            updateCatStatus();
-            updateStats();
-            
-            addLog("系統", "遊戲已重置");
         }
         
         // ==================== 更新顯示 ====================
-        function updateCatStatus() {
-            catAvatar.textContent = cat.avatar;
-            catName.textContent = cat.name;
-            catMood.textContent = `心情：${cat.mood}`;
-            
-            happinessValue.textContent = `${Math.round(cat.happiness)}%`;
-            energyValue.textContent = `${Math.round(cat.energy)}%`;
-            hungerValue.textContent = `${Math.round(cat.hunger)}%`;
-            
-            happinessBar.style.width = `${cat.happiness}%`;
-            energyBar.style.width = `${cat.energy}%`;
-            hungerBar.style.width = `${cat.hunger}%`;
-        }
-        
-        function updateCatMood() {
-            if (cat.happiness >= 70) {
-                cat.mood = "開心";
-                cat.avatar = "😺";
-            } else if (cat.happiness >= 50) {
-                cat.mood = "滿足";
-                cat.avatar = "😸";
-            } else if (cat.happiness >= 30) {
-                cat.mood = "無聊";
-                cat.avatar = "😾";
-            } else {
-                cat.mood = "生氣";
-                cat.avatar = "😿";
-            }
-            
-            updateCatStatus();
-        }
-        
         function updateStats() {
+            notesPlayedElement.textContent = gameStats.notesPlayed;
             playTimeElement.textContent = Math.round(gameStats.playTime);
-            catchCountElement.textContent = gameStats.catchCount;
-            scoreElement.textContent = gameStats.score;
-            comboElement.textContent = gameStats.combo;
             
-            // 更新最大連續抓到
-            if (gameStats.combo > gameStats.maxCombo) {
-                gameStats.maxCombo = gameStats.combo;
+            if (gameStats.totalNotes > 0) {
+                const accuracy = Math.round((gameStats.correctNotes / gameStats.totalNotes) * 100);
+                accuracyElement.textContent = `${accuracy}%`;
             }
         }
         
-        function addLog(sender, message) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('zh-TW', { 
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
+        function updateGameStatus() {
+            const statusText = gameActive ? '演奏中' : '暫停中';
+            const statusColor = gameActive ? '#4CAF50' : '#FF9800';
             
-            const logEntry = document.createElement('div');
-            logEntry.className = 'log-entry';
-            logEntry.innerHTML = `<span class="log-time">[${timeString}]</span> [${sender}] ${message}`;
-            
-            gameLog.appendChild(logEntry);
-            gameLog.scrollTop = gameLog.scrollHeight;
-            
-            // 限制日誌數量
-            if (gameLog.children.length > 10) {
-                gameLog.removeChild(gameLog.firstChild);
-            }
+            // 可以更新狀態指示器
         }
         
         // ==================== 事件監聽器 ====================
         function setupEventListeners() {
             startBtn.addEventListener('click', startGame);
-            resetBtn.addEventListener('click', resetGame);
+            recordBtn.addEventListener('click', startRecording);
+            playbackBtn.addEventListener('click', startPlayback);
             retryPermissionBtn.addEventListener('click', retryCameraAccess);
+            
+            // 靈敏度滑桿
+            sensitivitySlider.addEventListener('input', () => {
+                sensitivity = parseFloat(sensitivitySlider.value);
+                sensitivityValue.textContent = sensitivity.toFixed(1);
+            });
+            
+            // 音量滑桿
+            volumeSlider.addEventListener('input', () => {
+                volume = parseFloat(volumeSlider.value);
+                volumeValue.textContent = volume.toFixed(1);
+            });
             
             // 視窗大小調整
             window.addEventListener('resize', () => {
-                const container = document.querySelector('.camera-game-container');
+                const container = document.querySelector('.camera-container');
                 canvas.width = container.clientWidth;
                 canvas.height = container.clientHeight;
+            });
+            
+            // 鍵盤控制（輔助功能）
+            document.addEventListener('keydown', (e) => {
+                if (!gameActive) return;
+                
+                const keyMap = {
+                    'a': 'C', 'w': 'C#', 's': 'D', 'e': 'D#', 'd': 'E',
+                    'f': 'F', 't': 'F#', 'g': 'G', 'y': 'G#', 'h': 'A',
+                    'u': 'A#', 'j': 'B'
+                };
+                
+                if (keyMap[e.key]) {
+                    playNote(keyMap[e.key], currentOctave);
+                    
+                    const noteIndex = PIANO_NOTES.indexOf(keyMap[e.key]);
+                    if (noteIndex !== -1) {
+                        activatePianoKey(noteIndex);
+                    }
+                }
+                
+                // 八度音控制
+                if (e.key === 'ArrowUp') {
+                    changeOctave(Math.min(6, currentOctave + 1));
+                } else if (e.key === 'ArrowDown') {
+                    changeOctave(Math.max(3, currentOctave - 1));
+                }
             });
         }
         
@@ -1706,6 +1896,11 @@
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
             }
+            if (songInterval) {
+                clearInterval(songInterval);
+            }
+            stopAllNotes();
+            stopPlayback();
         });
     </script>
 </body>
