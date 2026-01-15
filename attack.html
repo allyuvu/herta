@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>體感攻擊：數學老師！</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Arial', sans-serif; }
+        #ui { position: absolute; top: 10px; left: 10px; color: yellow; z-index: 10; text-shadow: 2px 2px #000; }
+        canvas { position: absolute; top: 0; left: 0; }
+        /* 隱藏原始鏡頭畫面，我們把它畫在 Canvas 上 */
+        #video { display: none; }
+        .loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px; }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <h2>👋 手勢體感版：擊退實習老師</h2>
+    <p>分數: <span id="score">0</span> | 時間: <span id="timer">30</span>s</p>
+    <p style="color: #00ff00;">提示：移動食指尖端即可攻擊！</p>
+</div>
+<div id="loading" class="loading">模型載入中，請稍候並開啟鏡頭...</div>
+
+<video id="video"></video>
+<canvas id="gameCanvas"></canvas>
+
+<script>
+const videoElement = document.getElementById('video');
+const canvasElement = document.getElementById('gameCanvas');
+const canvasCtx = canvasElement.getContext('2d');
+const scoreEl = document.getElementById('score');
+const timerEl = document.getElementById('timer');
+const loadingEl = document.getElementById('loading');
+
+canvasElement.width = window.innerWidth;
+canvasElement.height = window.innerHeight;
+
+let score = 0;
+let timeLeft = 30;
+let gameActive = true;
+const formulas = ['f(x)', '∫', 'dx', 'lim', 'Σ', '√x'];
+
+// 老師物件
+const teacher = { x: 200, y: 200, dx: 4, dy: 4, size: 100, emoji: '👨‍🏫' };
+
+// 手部偵測邏輯
+function onResults(results) {
+    loadingEl.style.display = 'none';
+    canvasCtx.save();
+    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    
+    // 鏡像翻轉並畫出背景鏡頭影像
+    canvasCtx.translate(canvasElement.width, 0);
+    canvasCtx.scale(-1, 1);
+    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+    
+    // 遊戲邏輯
+    if (gameActive) {
+        updateTeacher();
+        drawTeacher();
+
+        if (results.multiHandLandmarks) {
+            for (const landmarks of results.multiHandLandmarks) {
+                // 取得食指尖端 (點 8)
+                const indexTip = landmarks[8];
+                const x = (1 - indexTip.x) * canvasElement.width; // 因為鏡像所以 1-x
+                const y = indexTip.y * canvasElement.height;
+
+                // 畫出準星
+                drawCrosshair(x, y);
+                
+                // 碰撞偵測
+                checkHit(x, y);
+            }
+        }
+    }
+    canvasCtx.restore();
+}
+
+function updateTeacher() {
+    teacher.x += teacher.dx;
+    teacher.y += teacher.dy;
+    if (teacher.x > canvasElement.width - 100 || teacher.x < 0) teacher.dx *= -1;
+    if (teacher.y > canvasElement.height - 100 || teacher.y < 0) teacher.dy *= -1;
+}
+
+function drawTeacher() {
+    canvasCtx.font = '100px Arial';
+    // 這裡要處理鏡像後的文字翻轉問題
+    canvasCtx.save();
+    canvasCtx.translate(teacher.x + 50, teacher.y + 50);
+    canvasCtx.scale(-1, 1);
+    canvasCtx.fillText(teacher.emoji, -50, 40);
+    canvasCtx.restore();
+}
+
+function drawCrosshair(x, y) {
+    canvasCtx.fillStyle = '#ff3e3e';
+    canvasCtx.font = '30px Arial';
+    canvasCtx.fillText(formulas[Math.floor(Date.now()/500) % formulas.length], x - 20, y);
+    
+    canvasCtx.strokeStyle = 'lime';
+    canvasCtx.beginPath();
+    canvasCtx.arc(x, y, 15, 0, Math.PI * 2);
+    canvasCtx.stroke();
+}
+
+function checkHit(x, y) {
+    const dist = Math.hypot(x - (teacher.x + 50), y - (teacher.y + 50));
+    if (dist < 60) {
+        score++;
+        scoreEl.innerText = score;
+        // 被打到閃爍一下
+        teacher.x = Math.random() * (canvasElement.width - 100);
+        teacher.y = Math.random() * (canvasElement.height - 100);
+    }
+}
+
+// 初始化 MediaPipe
+const hands = new Hands({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+});
+hands.setOptions({
+    maxNumHands: 1,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+});
+hands.onResults(onResults);
+
+const camera = new Camera(videoElement, {
+    onFrame: async () => {
+        await hands.send({image: videoElement});
+    },
+    width: 1280,
+    height: 720
+});
+camera.start();
+
+// 計時器
+const timerInterval = setInterval(() => {
+    if (timeLeft > 0) {
+        timeLeft--;
+        timerEl.innerText = timeLeft;
+    } else {
+        gameActive = false;
+        alert("時間到！你成功阻止了實習老師的出題！總分：" + score);
+        clearInterval(timerInterval);
+    }
+}, 1000);
+</script>
+</body>
+</html>

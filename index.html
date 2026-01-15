@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的遊戲館 | 經典遊戲集合</title>
+    <title>我的遊戲館 | 多樣化遊戲集合</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -36,7 +36,7 @@
         .header h1 {
             font-size: 3.5rem;
             margin-bottom: 15px;
-            background: linear-gradient(45deg, #ff8a00, #e52e71, #9d50bb);
+            background: linear-gradient(45deg, #ff8a00, #e52e71, #9d50bb, #00ffcc);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -47,7 +47,7 @@
         .header p {
             font-size: 1.2rem;
             color: #b0b0d0;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
             line-height: 1.6;
         }
@@ -58,10 +58,41 @@
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 200px;
+            width: 300px;
             height: 4px;
-            background: linear-gradient(90deg, transparent, #00ffcc, transparent);
+            background: linear-gradient(90deg, #ff8a00, #e52e71, #9d50bb, #00ffcc);
             border-radius: 2px;
+        }
+
+        /* 遊戲分類 */
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #b0b0d0;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, #e52e71, #9d50bb);
+            color: white;
+            box-shadow: 0 5px 15px rgba(229, 46, 113, 0.3);
         }
 
         /* 遊戲卡片區域 */
@@ -83,15 +114,14 @@
 
         .section-title::before,
         .section-title::after {
-            content: '✦';
-            color: #e52e71;
+            content: '🎮';
             font-size: 1.5rem;
         }
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
             justify-content: center;
         }
 
@@ -111,7 +141,7 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            min-height: 220px;
+            min-height: 250px;
         }
 
         .game-card::before {
@@ -137,18 +167,18 @@
         }
 
         .game-icon {
-            font-size: 4rem;
+            font-size: 4.5rem;
             margin-bottom: 20px;
             transition: transform 0.3s ease;
             filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
         }
 
         .game-card:hover .game-icon {
-            transform: scale(1.2) rotate(5deg);
+            transform: scale(1.3) rotate(8deg);
         }
 
         .game-title {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 700;
             margin-bottom: 10px;
             color: #fff;
@@ -156,59 +186,120 @@
         }
 
         .game-desc {
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: #b0b0d0;
-            line-height: 1.5;
+            line-height: 1.6;
             margin-bottom: 15px;
             flex-grow: 1;
         }
 
-        .game-tag {
-            display: inline-block;
-            background: rgba(0, 255, 204, 0.2);
-            color: #00ffcc;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 10px;
-            border: 1px solid rgba(0, 255, 204, 0.3);
+        .game-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        /* 特色區塊 */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 60px;
-            padding: 40px;
+        .game-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+
+        .tag-new {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffd54f;
+            border-color: rgba(255, 193, 7, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .tag-love {
+            background: rgba(255, 105, 180, 0.2);
+            color: #ff69b4;
+            border-color: rgba(255, 105, 180, 0.3);
+        }
+
+        .tag-music {
+            background: rgba(156, 39, 176, 0.2);
+            color: #ce93d8;
+            border-color: rgba(156, 39, 176, 0.3);
+        }
+
+        .tag-action {
+            background: rgba(229, 46, 113, 0.2);
+            color: #ff6b9d;
+            border-color: rgba(229, 46, 113, 0.3);
+        }
+
+        .tag-classic {
+            background: rgba(0, 255, 204, 0.2);
+            color: #00ffcc;
+            border-color: rgba(0, 255, 204, 0.3);
+        }
+
+        .tag-puzzle {
+            background: rgba(33, 150, 243, 0.2);
+            color: #64b5f6;
+            border-color: rgba(33, 150, 243, 0.3);
+        }
+
+        /* 特別推薦卡片 */
+        .featured-card {
+            background: linear-gradient(145deg, rgba(157, 80, 187, 0.2), rgba(45, 45, 68, 0.9));
+            border: 2px solid rgba(157, 80, 187, 0.4);
+            position: relative;
+        }
+
+        .featured-card::after {
+            content: '🔥 熱門遊戲';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, #ff8a00, #e52e71);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* 底部統計 */
+        .stats-section {
             background: rgba(20, 20, 40, 0.6);
             border-radius: 20px;
+            padding: 40px;
+            margin-top: 60px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .feature {
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        .stat-item {
             text-align: center;
             padding: 25px;
         }
 
-        .feature-icon {
-            font-size: 2.5rem;
-            color: #9d50bb;
-            margin-bottom: 15px;
-            display: inline-block;
-        }
-
-        .feature h3 {
-            font-size: 1.3rem;
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: block;
             margin-bottom: 10px;
-            color: #00ffcc;
         }
 
-        .feature p {
+        .stat-label {
+            font-size: 1.1rem;
             color: #b0b0d0;
-            font-size: 0.95rem;
-            line-height: 1.5;
         }
 
         /* 底部樣式 */
@@ -225,34 +316,53 @@
             margin: 10px 0;
         }
 
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 25px 0;
-            flex-wrap: wrap;
+        /* 動畫效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .stat-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px 25px;
-            border-radius: 15px;
-            min-width: 150px;
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+            }
         }
 
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #00ffcc;
-            display: block;
+        .game-card {
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            color: #b0b0d0;
-        }
+        /* 卡片出現動畫延遲 */
+        .game-card:nth-child(1) { animation-delay: 0.1s; }
+        .game-card:nth-child(2) { animation-delay: 0.2s; }
+        .game-card:nth-child(3) { animation-delay: 0.3s; }
+        .game-card:nth-child(4) { animation-delay: 0.4s; }
+        .game-card:nth-child(5) { animation-delay: 0.5s; }
+        .game-card:nth-child(6) { animation-delay: 0.6s; }
+        .game-card:nth-child(7) { animation-delay: 0.7s; }
+        .game-card:nth-child(8) { animation-delay: 0.8s; }
+        .game-card:nth-child(9) { animation-delay: 0.9s; }
 
         /* 響應式設計 */
+        @media (max-width: 1200px) {
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2.5rem;
@@ -260,15 +370,19 @@
 
             .games-grid {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
             }
 
-            .features {
-                grid-template-columns: 1fr;
-                padding: 25px;
+            .game-icon {
+                font-size: 3.5rem;
             }
 
-            .stat-item {
-                min-width: 120px;
+            .game-title {
+                font-size: 1.4rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -288,136 +402,180 @@
             .games-grid {
                 grid-template-columns: 1fr;
             }
-        }
 
-        /* 動畫效果 */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+
+            .category-tabs {
+                gap: 5px;
+            }
+
+            .tab-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
             }
         }
-
-        .game-card {
-            animation: fadeInUp 0.6s ease forwards;
-            opacity: 0;
-        }
-
-        .game-card:nth-child(1) { animation-delay: 0.1s; }
-        .game-card:nth-child(2) { animation-delay: 0.2s; }
-        .game-card:nth-child(3) { animation-delay: 0.3s; }
-        .game-card:nth-child(4) { animation-delay: 0.4s; }
-        .game-card:nth-child(5) { animation-delay: 0.5s; }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
             <h1>🎮 我的遊戲館</h1>
-            <p>集合經典與創意遊戲，為你帶來無限樂趣與挑戰！隨時隨地享受遊戲時光。</p>
+            <p>集合經典與創意遊戲，現在擁有9款精彩遊戲！涵蓋動作、音樂、戀愛、益智等多種類型</p>
         </header>
 
-        <main>
-            <section class="games-section">
-                <h2 class="section-title">精選遊戲</h2>
-                <div class="games-grid">
-                    <!-- 貪吃蛇遊戲 -->
-                    <a href="snake.html" class="game-card">
-                        <div class="game-icon">🐍</div>
-                        <h3 class="game-title">貪吃蛇</h3>
-                        <p class="game-desc">經典街機遊戲，控制小蛇吃食物成長，避開牆壁和自己！</p>
-                        <span class="game-tag">經典 | 街機</span>
-                    </a>
-                    
-                    <!-- 賽車遊戲 -->
-                    <a href="mario.html" class="game-card">
-                        <div class="game-icon">🏎️</div>
-                        <h3 class="game-title">極速賽車</h3>
-                        <p class="game-desc">駕駛賽車收集道具，避開障礙物，挑戰最高分數！</p>
-                        <span class="game-tag">競速 | 刺激</span>
-                    </a>
-                    
-                    <!-- 猜數字遊戲 -->
-                    <a href="game1.html" class="game-card">
-                        <div class="game-icon">🎯</div>
-                        <h3 class="game-title">猜數字</h3>
-                        <p class="game-desc">考驗你的直覺和邏輯，猜中隱藏的數字！</p>
-                        <span class="game-tag">益智 | 邏輯</span>
-                    </a>
-                    
-                    <!-- 包剪揼遊戲 -->
-                    <a href="game2.html" class="game-card">
-                        <div class="game-icon">✊</div>
-                        <h3 class="game-title">包剪揼</h3>
-                        <p class="game-desc">與電腦對戰，測試你的策略和運氣！</p>
-                        <span class="game-tag">對戰 | 策略</span>
-                    </a>
-                    
-                    <!-- 更多遊戲預留 -->
-                    <a href="#" class="game-card" style="opacity: 0.8;">
-                        <div class="game-icon">🕹️</div>
-                        <h3 class="game-title">更多遊戲</h3>
-                        <p class="game-desc">持續開發中，敬請期待更多精彩遊戲！</p>
-                        <span class="game-tag">即將推出</span>
-                    </a>
-                </div>
-            </section>
+        <!-- 遊戲分類標籤 -->
+        <div class="category-tabs">
+            <button class="tab-btn active" data-category="all">全部遊戲</button>
+            <button class="tab-btn" data-category="new">新遊戲</button>
+            <button class="tab-btn" data-category="action">動作遊戲</button>
+            <button class="tab-btn" data-category="music">音樂遊戲</button>
+            <button class="tab-btn" data-category="classic">經典遊戲</button>
+        </div>
 
-            <section class="features">
-                <div class="feature">
-                    <div class="feature-icon">🎮</div>
-                    <h3>隨時遊玩</h3>
-                    <p>無需下載安裝，打開瀏覽器即可享受遊戲樂趣</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🚀</div>
-                    <h3>流暢體驗</h3>
-                    <p>優化性能，提供流暢的遊戲體驗與快速載入</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🎯</div>
-                    <h3>多樣選擇</h3>
-                    <p>涵蓋多種類型遊戲，滿足不同玩家的喜好</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">❤️</div>
-                    <h3>完全免費</h3>
-                    <p>所有遊戲免費遊玩，無需註冊或付費</p>
-                </div>
-            </section>
-        </main>
+        <section class="games-section">
+            <h2 class="section-title">全部遊戲</h2>
+            <div class="games-grid">
+                <!-- 攻擊大作戰 -->
+                <a href="attack-game.html" class="game-card featured-card" data-category="new action">
+                    <div class="game-icon">⚔️</div>
+                    <h3 class="game-title">攻擊大作戰</h3>
+                    <p class="game-desc">全新動作遊戲！控制英雄使用連擊技能擊敗敵人，挑戰無限模式！</p>
+                    <div class="game-tags">
+                        <span class="game-tag tag-new">新遊戲</span>
+                        <span class="game-tag tag-action">動作</span>
+                    </div>
+                </a>
+                
+                <!-- 戀愛模擬遊戲 -->
+                <a href="love-sim.html" class="game-card" data-category="new">
+                    <div class="game-icon">💖</div>
+                    <h3 class="game-title">心動時刻</h3>
+                    <p class="game-desc">浪漫戀愛模擬遊戲，與虛擬角色互動，發展獨特的故事線！</p>
+                    <div class="game-tags">
+                        <span class="game-tag tag-new">新遊戲</span>
+                        <span class="game-tag tag-love">戀愛</span>
+                        <span class="game-tag tag-puzzle">劇情</span>
+                    </div>
+                </a>
+                
+                <!-- 躲貓貓遊戲 -->
+                <a href="hide-seek.html" class="game-card" data-category="new action">
+                    <div class="game-icon">👻</div>
+                    <h3 class="game-title">躲貓貓大作戰</h3>
+                    <p class="game-desc">躲藏與尋找的刺激遊戲，利用環境隱藏自己或找出所有玩家！</p>
+                    <div class="game-tags">
+                        <span class="game-tag tag-new">新遊戲</span>
+                        <span class="game-tag tag-action">動作</span>
+                    </div>
+                </a>
+                
+                <!-- 小提琴遊戲 -->
+                <a href="violin-game.html" class="game-card" data-category="new music">
+                    <div class="game-icon">🎻</div>
+                    <h3 class="game-title">小提琴大師</h3>
+                    <p class="game-desc">學習演奏小提琴，跟隨音符演奏經典樂曲，體驗音樂的魅力！</p>
+                    <div class="game-tags">
+                        <span class="game-tag tag-new">新遊戲</span>
+                        <span class="game-tag tag-music">音樂</span>
+                    </div>
+                </a>
+                
+                <!-- 音樂遊戲 -->
+                <a href="music-game.html" class="game-card" data-category="new music">
+                    <div class="game-icon">🎵</div>
+                    <h3 class="game-title">節奏大師</h3>
+                    <p class="game-desc">跟隨節奏點擊音符，挑戰你的反應速度與節奏感！</p>
+                    <div class="game-tags">
+                        <span class="game-tag tag-new">新遊戲</span>
+                        <span class="game-tag tag-music">音樂</span>
+                        <span class="game-tag tag-action">節奏</span>
+                    </div>
+                </a>
+                
+                <!-- 貪吃蛇遊戲 -->
+                <a href="snake.html" class="game-card" data-category="classic">
+                    <div class="game-icon">🐍</div>
+                    <h3 class="game-title">經典貪吃蛇</h3>
+                    <p class="game-desc">懷舊經典遊戲，控制小蛇吃食物成長，挑戰最高分數！</p>
+                    <div class="game-tags">
+                        <span class="game-tag tag-classic">經典</span>
+                        <span class="game-tag tag-puzzle">益智</span>
+                    </div>
+                </a>
+                
+                <!-- 賽車遊戲 -->
+                <a href="mario.html" class="game-card" data-category="action">
+                    <div class="game-icon">🏎️</div>
+                    <h3 class="game-title">極速賽車</h3>
+                    <p class="game-desc">駕駛賽車收集道具，避開障礙物，體驗刺激的競速快感！</p>
+                    <div class="game-tags">
+                        <span class="game-tag tag-action">競速</span>
+                        <span class="game-tag tag-classic">經典</span>
+                    </div>
+                </a>
+                
+                <!-- 猜數字遊戲 -->
+                <a href="game1.html" class="game-card" data-category="puzzle">
+                    <div class="game-icon">🎯</div>
+                    <h3 class="game-title">數字猜謎</h3>
+                    <p class="game-desc">考驗你的邏輯思維，用最少的次數猜中隱藏數字！</p>
+                    <div class="game-tags">
+                        <span class="game-tag tag-puzzle">益智</span>
+                        <span class="game-tag tag-classic">經典</span>
+                    </div>
+                </a>
+                
+                <!-- 包剪揼遊戲 -->
+                <a href="game2.html" class="game-card" data-category="classic">
+                    <div class="game-icon">✊</div>
+                    <h3 class="game-title">包剪揼對決</h3>
+                    <p class="game-desc">經典對戰遊戲，與電腦比拼策略與運氣，看誰能連勝！</p>
+                    <div class="game-tags">
+                        <span class="game-tag tag-classic">經典</span>
+                        <span class="game-tag tag-puzzle">策略</span>
+                    </div>
+                </a>
+            </div>
+        </section>
 
-        <footer class="footer">
-            <div class="stats">
+        <!-- 統計區塊 -->
+        <div class="stats-section">
+            <div class="stats-grid">
                 <div class="stat-item">
-                    <span class="stat-number">4+</span>
-                    <span class="stat-label">精選遊戲</span>
+                    <span class="stat-number">9</span>
+                    <span class="stat-label">遊戲總數</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">新遊戲</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">4</span>
+                    <span class="stat-label">遊戲類型</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-number">100%</span>
                     <span class="stat-label">免費遊玩</span>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number">∞</span>
-                    <span class="stat-label">遊戲時光</span>
-                </div>
             </div>
-            <p>我的遊戲館 © 2023 | 經典遊戲集合，創造無限樂趣</p>
-            <p>使用 HTML5、CSS3 和 JavaScript 精心打造</p>
+        </div>
+
+        <footer class="footer">
+            <p>我的遊戲館 © 2023 | 多樣化遊戲集合，創造無限樂趣</p>
+            <p>使用 HTML5、CSS3 和 JavaScript 精心打造 | 持續更新中</p>
         </footer>
     </div>
 
     <script>
-        // 添加簡單的交互效果
+        // 分類過濾功能
         document.addEventListener('DOMContentLoaded', function() {
-            // 卡片懸停效果增強
-            const cards = document.querySelectorAll('.game-card');
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const gameCards = document.querySelectorAll('.game-card');
             
-            cards.forEach(card => {
+            // 卡片懸停效果
+            gameCards.forEach(card => {
                 card.addEventListener('mouseenter', function() {
                     const icon = this.querySelector('.game-icon');
                     icon.style.transform = 'scale(1.3) rotate(8deg)';
@@ -427,6 +585,46 @@
                     const icon = this.querySelector('.game-icon');
                     icon.style.transform = 'scale(1) rotate(0deg)';
                 });
+            });
+            
+            // 分類過濾
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 移除所有按鈕的active類
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // 添加active類到當前按鈕
+                    this.classList.add('active');
+                    
+                    const category = this.getAttribute('data-category');
+                    
+                    // 過濾遊戲卡片
+                    gameCards.forEach(card => {
+                        const cardCategories = card.getAttribute('data-category').split(' ');
+                        
+                        if (category === 'all' || cardCategories.includes(category)) {
+                            card.style.display = 'flex';
+                            card.style.animation = 'fadeInUp 0.6s ease forwards';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // 為新遊戲添加閃爍效果
+            const newTags = document.querySelectorAll('.tag-new');
+            newTags.forEach(tag => {
+                const card = tag.closest('.game-card');
+                if (card) {
+                    card.addEventListener('mouseenter', function() {
+                        tag.style.animation = 'pulse 0.5s infinite';
+                    });
+                    
+                    card.addEventListener('mouseleave', function() {
+                        tag.style.animation = 'pulse 2s infinite';
+                    });
+                }
             });
             
             // 頁面載入動畫
