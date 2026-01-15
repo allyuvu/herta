@@ -2,155 +2,829 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>體感攻擊：數學老師！</title>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>攻擊數學實習老師</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Arial', sans-serif; }
-        #ui { position: absolute; top: 10px; left: 10px; color: yellow; z-index: 10; text-shadow: 2px 2px #000; }
-        canvas { position: absolute; top: 0; left: 0; }
-        /* 隱藏原始鏡頭畫面，我們把它畫在 Canvas 上 */
-        #video { display: none; }
-        .loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .game-container {
+            max-width: 1200px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 25px;
+        }
+        
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #4a6fa5;
+        }
+        
+        .game-header h1 {
+            color: #d32f2f;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .game-header p {
+            color: #555;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .game-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+        
+        .game-panel {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f5f7fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e74c3c;
+        }
+        
+        /* 左側 - 數學題目區 */
+        #math-problem {
+            font-size: 2.2rem;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            color: #2c3e50;
+            min-height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .answers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .answer-btn {
+            padding: 18px 10px;
+            font-size: 1.4rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #2980b9;
+        }
+        
+        .answer-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1c6ea4;
+        }
+        
+        .answer-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #1c6ea4;
+        }
+        
+        .answer-btn.correct {
+            background-color: #27ae60;
+            box-shadow: 0 4px 0 #219653;
+        }
+        
+        .answer-btn.wrong {
+            background-color: #e74c3c;
+            box-shadow: 0 4px 0 #c0392b;
+        }
+        
+        /* 中間 - 老師區域 */
+        .teacher-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .teacher {
+            width: 200px;
+            height: 300px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .teacher-body {
+            width: 180px;
+            height: 240px;
+            background-color: #7b8fd9;
+            border-radius: 50% 50% 40% 40%;
+            position: absolute;
+            bottom: 0;
+            left: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .teacher-face {
+            width: 120px;
+            height: 120px;
+            background-color: #f8d7b6;
+            border-radius: 50%;
+            position: absolute;
+            top: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .teacher-eyes {
+            display: flex;
+            justify-content: space-between;
+            width: 80px;
+            position: absolute;
+            top: 40px;
+        }
+        
+        .eye {
+            width: 20px;
+            height: 30px;
+            background-color: #2c3e50;
+            border-radius: 50%;
+        }
+        
+        .teacher-mouth {
+            width: 60px;
+            height: 20px;
+            background-color: #c0392b;
+            border-radius: 0 0 30px 30px;
+            position: absolute;
+            top: 80px;
+        }
+        
+        .teacher-glasses {
+            width: 90px;
+            height: 40px;
+            border: 5px solid #2c3e50;
+            border-radius: 20px;
+            position: absolute;
+            top: 35px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .health-bar-container {
+            width: 100%;
+            margin-top: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 30px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .health-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #2ecc71, #f1c40f, #e74c3c);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .health-text {
+            font-size: 1.5rem;
+            margin-top: 10px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .attack-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: bold;
+            color: #e74c3c;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        /* 右側 - 遊戲狀態 */
+        .game-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .info-item {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-item h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+        
+        .info-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e74c3c;
+            text-align: center;
+        }
+        
+        .streak {
+            color: #f39c12;
+        }
+        
+        .game-message {
+            font-size: 1.3rem;
+            text-align: center;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            margin-top: 15px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        #restart-btn {
+            background-color: #2ecc71;
+            color: white;
+            box-shadow: 0 4px 0 #27ae60;
+        }
+        
+        #restart-btn:hover {
+            background-color: #27ae60;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #219653;
+        }
+        
+        #hint-btn {
+            background-color: #3498db;
+            color: white;
+            box-shadow: 0 4px 0 #2980b9;
+        }
+        
+        #hint-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1c6ea4;
+        }
+        
+        .game-instructions {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .game-instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .game-instructions ul {
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+        
+        .game-instructions li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 1100px) {
+            .game-content {
+                flex-direction: column;
+            }
+            
+            .teacher {
+                width: 150px;
+                height: 250px;
+            }
+            
+            .teacher-body {
+                width: 140px;
+                height: 190px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .answers {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            #math-problem {
+                font-size: 1.8rem;
+            }
+        }
     </style>
 </head>
 <body>
-
-<div id="ui">
-    <h2>👋 手勢體感版：擊退實習老師</h2>
-    <p>分數: <span id="score">0</span> | 時間: <span id="timer">30</span>s</p>
-    <p style="color: #00ff00;">提示：移動食指尖端即可攻擊！</p>
-</div>
-<div id="loading" class="loading">模型載入中，請稍候並開啟鏡頭...</div>
-
-<video id="video"></video>
-<canvas id="gameCanvas"></canvas>
-
-<script>
-const videoElement = document.getElementById('video');
-const canvasElement = document.getElementById('gameCanvas');
-const canvasCtx = canvasElement.getContext('2d');
-const scoreEl = document.getElementById('score');
-const timerEl = document.getElementById('timer');
-const loadingEl = document.getElementById('loading');
-
-canvasElement.width = window.innerWidth;
-canvasElement.height = window.innerHeight;
-
-let score = 0;
-let timeLeft = 30;
-let gameActive = true;
-const formulas = ['f(x)', '∫', 'dx', 'lim', 'Σ', '√x'];
-
-// 老師物件
-const teacher = { x: 200, y: 200, dx: 4, dy: 4, size: 100, emoji: '👨‍🏫' };
-
-// 手部偵測邏輯
-function onResults(results) {
-    loadingEl.style.display = 'none';
-    canvasCtx.save();
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    
-    // 鏡像翻轉並畫出背景鏡頭影像
-    canvasCtx.translate(canvasElement.width, 0);
-    canvasCtx.scale(-1, 1);
-    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-    
-    // 遊戲邏輯
-    if (gameActive) {
-        updateTeacher();
-        drawTeacher();
-
-        if (results.multiHandLandmarks) {
-            for (const landmarks of results.multiHandLandmarks) {
-                // 取得食指尖端 (點 8)
-                const indexTip = landmarks[8];
-                const x = (1 - indexTip.x) * canvasElement.width; // 因為鏡像所以 1-x
-                const y = indexTip.y * canvasElement.height;
-
-                // 畫出準星
-                drawCrosshair(x, y);
+    <div class="game-container">
+        <div class="game-header">
+            <h1>體感攻擊數學實習老師</h1>
+            <p>通過解決數學問題來攻擊實習老師！每答對一題，老師就會受到傷害。答錯則老師會恢復生命值。看看你能多快擊敗老師！</p>
+        </div>
+        
+        <div class="game-content">
+            <!-- 左側面板：數學題目 -->
+            <div class="game-panel">
+                <h2 class="panel-title">數學攻擊題</h2>
+                <div id="math-problem">準備題目中...</div>
                 
-                // 碰撞偵測
-                checkHit(x, y);
+                <div class="answers">
+                    <button class="answer-btn" id="answer1">選項 1</button>
+                    <button class="answer-btn" id="answer2">選項 2</button>
+                    <button class="answer-btn" id="answer3">選項 3</button>
+                    <button class="answer-btn" id="answer4">選項 4</button>
+                </div>
+                
+                <div class="game-message" id="message">
+                    選擇正確答案來攻擊老師！
+                </div>
+            </div>
+            
+            <!-- 中間面板：老師 -->
+            <div class="game-panel teacher-container">
+                <h2 class="panel-title">數學實習老師</h2>
+                
+                <div class="teacher">
+                    <div class="teacher-body">
+                        <div class="teacher-face">
+                            <div class="teacher-eyes">
+                                <div class="eye"></div>
+                                <div class="eye"></div>
+                            </div>
+                            <div class="teacher-glasses"></div>
+                            <div class="teacher-mouth"></div>
+                        </div>
+                    </div>
+                    <div class="attack-effect" id="attack-effect">-10</div>
+                </div>
+                
+                <div class="health-bar-container">
+                    <div class="health-bar" id="health-bar"></div>
+                </div>
+                <div class="health-text">生命值: <span id="health-value">100</span>/100</div>
+                
+                <div class="controls">
+                    <button class="control-btn" id="restart-btn">重新開始</button>
+                    <button class="control-btn" id="hint-btn">提示</button>
+                </div>
+            </div>
+            
+            <!-- 右側面板：遊戲狀態 -->
+            <div class="game-panel">
+                <h2 class="panel-title">攻擊狀態</h2>
+                
+                <div class="game-info">
+                    <div class="info-item">
+                        <h3>得分</h3>
+                        <div class="info-value" id="score">0</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <h3>連續正確</h3>
+                        <div class="info-value streak" id="streak">0</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <h3>已回答問題</h3>
+                        <div class="info-value" id="questions-answered">0</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <h3>正確率</h3>
+                        <div class="info-value" id="accuracy">0%</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <h3>遊戲時間</h3>
+                        <div class="info-value" id="game-time">00:00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-instructions">
+            <h3>遊戲說明</h3>
+            <ul>
+                <li>選擇正確的數學答案來攻擊實習老師</li>
+                <li>每答對一題，老師會損失10-20點生命值，取決於題目難度</li>
+                <li>每答錯一題，老師會恢復5點生命值</li>
+                <li>連續答對會獲得額外分數獎勵</li>
+                <li>當老師的生命值降到0時，你獲勝！</li>
+                <li>如果老師的生命值恢復到100以上，你失敗！</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 遊戲變數
+        let score = 0;
+        let streak = 0;
+        let questionsAnswered = 0;
+        let correctAnswers = 0;
+        let teacherHealth = 100;
+        let gameTime = 0;
+        let gameActive = true;
+        let timerInterval;
+        
+        // 數學問題類型
+        const problemTypes = [
+            { name: "加法", difficulty: 1, operator: "+" },
+            { name: "減法", difficulty: 1, operator: "-" },
+            { name: "乘法", difficulty: 2, operator: "×" },
+            { name: "除法", difficulty: 2, operator: "÷" },
+            { name: "混合運算", difficulty: 3, operator: "混合" }
+        ];
+        
+        // DOM元素
+        const mathProblemElement = document.getElementById('math-problem');
+        const answerButtons = [
+            document.getElementById('answer1'),
+            document.getElementById('answer2'),
+            document.getElementById('answer3'),
+            document.getElementById('answer4')
+        ];
+        const messageElement = document.getElementById('message');
+        const healthBarElement = document.getElementById('health-bar');
+        const healthValueElement = document.getElementById('health-value');
+        const attackEffectElement = document.getElementById('attack-effect');
+        const scoreElement = document.getElementById('score');
+        const streakElement = document.getElementById('streak');
+        const questionsAnsweredElement = document.getElementById('questions-answered');
+        const accuracyElement = document.getElementById('accuracy');
+        const gameTimeElement = document.getElementById('game-time');
+        const restartButton = document.getElementById('restart-btn');
+        const hintButton = document.getElementById('hint-btn');
+        
+        // 當前問題
+        let currentProblem = {};
+        let correctAnswerIndex = 0;
+        
+        // 初始化遊戲
+        function initGame() {
+            score = 0;
+            streak = 0;
+            questionsAnswered = 0;
+            correctAnswers = 0;
+            teacherHealth = 100;
+            gameTime = 0;
+            gameActive = true;
+            
+            updateGameStats();
+            generateMathProblem();
+            updateHealthBar();
+            
+            // 啟動計時器
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (gameActive) {
+                    gameTime++;
+                    updateGameTime();
+                }
+            }, 1000);
+            
+            messageElement.textContent = "選擇正確答案來攻擊老師！";
+            messageElement.style.color = "#2c3e50";
+        }
+        
+        // 更新遊戲時間顯示
+        function updateGameTime() {
+            const minutes = Math.floor(gameTime / 60).toString().padStart(2, '0');
+            const seconds = (gameTime % 60).toString().padStart(2, '0');
+            gameTimeElement.textContent = `${minutes}:${seconds}`;
+        }
+        
+        // 更新遊戲統計
+        function updateGameStats() {
+            scoreElement.textContent = score;
+            streakElement.textContent = streak;
+            questionsAnsweredElement.textContent = questionsAnswered;
+            const accuracy = questionsAnswered > 0 ? Math.round((correctAnswers / questionsAnswered) * 100) : 0;
+            accuracyElement.textContent = `${accuracy}%`;
+        }
+        
+        // 更新生命值條
+        function updateHealthBar() {
+            const healthPercentage = Math.max(0, Math.min(100, teacherHealth));
+            healthBarElement.style.width = `${healthPercentage}%`;
+            healthValueElement.textContent = teacherHealth;
+            
+            // 根據生命值改變顏色
+            if (teacherHealth > 70) {
+                healthBarElement.style.background = "linear-gradient(to right, #2ecc71, #f1c40f)";
+            } else if (teacherHealth > 30) {
+                healthBarElement.style.background = "linear-gradient(to right, #f1c40f, #e74c3c)";
+            } else {
+                healthBarElement.style.background = "#e74c3c";
             }
         }
-    }
-    canvasCtx.restore();
-}
-
-function updateTeacher() {
-    teacher.x += teacher.dx;
-    teacher.y += teacher.dy;
-    if (teacher.x > canvasElement.width - 100 || teacher.x < 0) teacher.dx *= -1;
-    if (teacher.y > canvasElement.height - 100 || teacher.y < 0) teacher.dy *= -1;
-}
-
-function drawTeacher() {
-    canvasCtx.font = '100px Arial';
-    // 這裡要處理鏡像後的文字翻轉問題
-    canvasCtx.save();
-    canvasCtx.translate(teacher.x + 50, teacher.y + 50);
-    canvasCtx.scale(-1, 1);
-    canvasCtx.fillText(teacher.emoji, -50, 40);
-    canvasCtx.restore();
-}
-
-function drawCrosshair(x, y) {
-    canvasCtx.fillStyle = '#ff3e3e';
-    canvasCtx.font = '30px Arial';
-    canvasCtx.fillText(formulas[Math.floor(Date.now()/500) % formulas.length], x - 20, y);
-    
-    canvasCtx.strokeStyle = 'lime';
-    canvasCtx.beginPath();
-    canvasCtx.arc(x, y, 15, 0, Math.PI * 2);
-    canvasCtx.stroke();
-}
-
-function checkHit(x, y) {
-    const dist = Math.hypot(x - (teacher.x + 50), y - (teacher.y + 50));
-    if (dist < 60) {
-        score++;
-        scoreEl.innerText = score;
-        // 被打到閃爍一下
-        teacher.x = Math.random() * (canvasElement.width - 100);
-        teacher.y = Math.random() * (canvasElement.height - 100);
-    }
-}
-
-// 初始化 MediaPipe
-const hands = new Hands({
-    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-});
-hands.setOptions({
-    maxNumHands: 1,
-    modelComplexity: 1,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5
-});
-hands.onResults(onResults);
-
-const camera = new Camera(videoElement, {
-    onFrame: async () => {
-        await hands.send({image: videoElement});
-    },
-    width: 1280,
-    height: 720
-});
-camera.start();
-
-// 計時器
-const timerInterval = setInterval(() => {
-    if (timeLeft > 0) {
-        timeLeft--;
-        timerEl.innerText = timeLeft;
-    } else {
-        gameActive = false;
-        alert("時間到！你成功阻止了實習老師的出題！總分：" + score);
-        clearInterval(timerInterval);
-    }
-}, 1000);
-</script>
+        
+        // 生成數學問題
+        function generateMathProblem() {
+            // 隨機選擇問題類型
+            const problemType = problemTypes[Math.floor(Math.random() * problemTypes.length)];
+            
+            let num1, num2, answer, problemText;
+            
+            // 根據問題類型生成數字和答案
+            switch(problemType.operator) {
+                case "+":
+                    num1 = Math.floor(Math.random() * 50) + 1;
+                    num2 = Math.floor(Math.random() * 50) + 1;
+                    answer = num1 + num2;
+                    problemText = `${num1} + ${num2} = ?`;
+                    break;
+                    
+                case "-":
+                    num1 = Math.floor(Math.random() * 50) + 20;
+                    num2 = Math.floor(Math.random() * 20) + 1;
+                    answer = num1 - num2;
+                    problemText = `${num1} - ${num2} = ?`;
+                    break;
+                    
+                case "×":
+                    num1 = Math.floor(Math.random() * 10) + 1;
+                    num2 = Math.floor(Math.random() * 10) + 1;
+                    answer = num1 * num2;
+                    problemText = `${num1} × ${num2} = ?`;
+                    break;
+                    
+                case "÷":
+                    num2 = Math.floor(Math.random() * 9) + 2;
+                    answer = Math.floor(Math.random() * 9) + 2;
+                    num1 = num2 * answer;
+                    problemText = `${num1} ÷ ${num2} = ?`;
+                    break;
+                    
+                default: // 混合運算
+                    const operators = ["+", "-", "×"];
+                    const op = operators[Math.floor(Math.random() * operators.length)];
+                    
+                    if (op === "×") {
+                        num1 = Math.floor(Math.random() * 10) + 1;
+                        num2 = Math.floor(Math.random() * 10) + 1;
+                        answer = num1 * num2;
+                        problemText = `${num1} × ${num2} = ?`;
+                    } else if (op === "+") {
+                        num1 = Math.floor(Math.random() * 50) + 1;
+                        num2 = Math.floor(Math.random() * 50) + 1;
+                        answer = num1 + num2;
+                        problemText = `${num1} + ${num2} = ?`;
+                    } else {
+                        num1 = Math.floor(Math.random() * 50) + 20;
+                        num2 = Math.floor(Math.random() * 20) + 1;
+                        answer = num1 - num2;
+                        problemText = `${num1} - ${num2} = ?`;
+                    }
+                    break;
+            }
+            
+            // 保存當前問題
+            currentProblem = {
+                text: problemText,
+                answer: answer,
+                difficulty: problemType.difficulty
+            };
+            
+            // 顯示問題
+            mathProblemElement.textContent = problemText;
+            
+            // 生成錯誤答案
+            const answers = [];
+            const correctPos = Math.floor(Math.random() * 4);
+            correctAnswerIndex = correctPos;
+            
+            for (let i = 0; i < 4; i++) {
+                if (i === correctPos) {
+                    answers.push(answer);
+                } else {
+                    // 生成接近正確答案但錯誤的數字
+                    let wrongAnswer;
+                    do {
+                        const offset = Math.floor(Math.random() * 10) + 1;
+                        const direction = Math.random() > 0.5 ? 1 : -1;
+                        wrongAnswer = answer + (offset * direction);
+                    } while (wrongAnswer === answer || answers.includes(wrongAnswer) || wrongAnswer < 0);
+                    answers.push(wrongAnswer);
+                }
+            }
+            
+            // 設置按鈕文字
+            answerButtons.forEach((button, index) => {
+                button.textContent = answers[index];
+                button.className = "answer-btn";
+                button.disabled = false;
+            });
+        }
+        
+        // 顯示攻擊效果
+        function showAttackEffect(damage, isCorrect) {
+            attackEffectElement.textContent = isCorrect ? `-${damage}` : `+5`;
+            attackEffectElement.style.color = isCorrect ? "#e74c3c" : "#2ecc71";
+            
+            // 重置動畫
+            attackEffectElement.style.opacity = "1";
+            attackEffectElement.style.transform = "translate(-50%, -50%) scale(1)";
+            
+            // 執行動畫
+            setTimeout(() => {
+                attackEffectElement.style.opacity = "0";
+                attackEffectElement.style.transform = "translate(-50%, -50%) scale(1.5)";
+            }, 100);
+        }
+        
+        // 檢查答案
+        function checkAnswer(selectedIndex) {
+            if (!gameActive) return;
+            
+            questionsAnswered++;
+            const isCorrect = selectedIndex === correctAnswerIndex;
+            
+            // 禁用所有答案按鈕
+            answerButtons.forEach(button => {
+                button.disabled = true;
+            });
+            
+            // 標記正確和錯誤答案
+            answerButtons.forEach((button, index) => {
+                if (index === correctAnswerIndex) {
+                    button.classList.add("correct");
+                } else if (index === selectedIndex && !isCorrect) {
+                    button.classList.add("wrong");
+                }
+            });
+            
+            if (isCorrect) {
+                // 正確答案 - 攻擊老師
+                correctAnswers++;
+                streak++;
+                
+                // 計算傷害 (根據難度)
+                const damage = 10 + (currentProblem.difficulty * 3);
+                teacherHealth -= damage;
+                
+                // 計算得分
+                const points = currentProblem.difficulty * 10 + streak * 5;
+                score += points;
+                
+                // 顯示訊息
+                messageElement.textContent = `正確！造成 ${damage} 點傷害！獲得 ${points} 分！`;
+                messageElement.style.color = "#27ae60";
+                
+                // 顯示攻擊效果
+                showAttackEffect(damage, true);
+                
+                // 檢查是否勝利
+                if (teacherHealth <= 0) {
+                    teacherHealth = 0;
+                    gameActive = false;
+                    messageElement.textContent = `恭喜！你擊敗了數學實習老師！最終得分: ${score}`;
+                    messageElement.style.color = "#e74c3c";
+                    clearInterval(timerInterval);
+                }
+            } else {
+                // 錯誤答案 - 老師恢復生命值
+                streak = 0;
+                teacherHealth += 5;
+                
+                // 顯示訊息
+                messageElement.textContent = `錯誤！正確答案是 ${currentProblem.answer}。老師恢復了 5 點生命值！`;
+                messageElement.style.color = "#e74c3c";
+                
+                // 顯示恢復效果
+                showAttackEffect(5, false);
+                
+                // 檢查是否失敗
+                if (teacherHealth >= 100) {
+                    teacherHealth = 100;
+                    messageElement.textContent = `老師恢復了全部生命值！遊戲結束！最終得分: ${score}`;
+                    messageElement.style.color = "#e74c3c";
+                    gameActive = false;
+                    clearInterval(timerInterval);
+                }
+            }
+            
+            // 更新遊戲狀態
+            updateGameStats();
+            updateHealthBar();
+            
+            // 1.5秒後生成新問題
+            if (gameActive) {
+                setTimeout(generateMathProblem, 1500);
+            }
+        }
+        
+        // 顯示提示
+        function showHint() {
+            if (!gameActive) return;
+            
+            // 隨機排除一個錯誤答案
+            const wrongAnswers = [];
+            answerButtons.forEach((button, index) => {
+                if (index !== correctAnswerIndex) {
+                    wrongAnswers.push(index);
+                }
+            });
+            
+            const toRemove = wrongAnswers[Math.floor(Math.random() * wrongAnswers.length)];
+            answerButtons[toRemove].style.opacity = "0.3";
+            answerButtons[toRemove].disabled = true;
+            
+            // 扣分作為提示代價
+            score = Math.max(0, score - 5);
+            updateGameStats();
+            
+            messageElement.textContent = "已排除一個錯誤答案！扣5分作為提示代價。";
+            messageElement.style.color = "#f39c12";
+            
+            // 禁用提示按鈕幾秒鐘
+            hintButton.disabled = true;
+            setTimeout(() => {
+                hintButton.disabled = false;
+            }, 3000);
+        }
+        
+        // 設置事件監聽器
+        answerButtons.forEach((button, index) => {
+            button.addEventListener('click', () => checkAnswer(index));
+        });
+        
+        restartButton.addEventListener('click', initGame);
+        hintButton.addEventListener('click', showHint);
+        
+        // 初始化遊戲
+        initGame();
+    </script>
 </body>
 </html>
