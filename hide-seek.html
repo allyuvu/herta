@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>In Memoriam (Transcription)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body { 
+            margin: 0; background: #000; 
+            font-family: 'Times New Roman', serif; 
+            overflow: hidden; display: flex; justify-content: center; align-items: center; 
+            height: 100vh; color: #fff; user-select: none; 
+        }
+        
+        #game-container {
+            position: relative; width: 100%; max-width: 650px; height: 100%;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+            border-left: 1px solid #333; border-right: 1px solid #333;
+        }
+
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* Cinematic UI */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; display: flex; flex-direction: column; align-items: center;
+        }
+
+        #lyric-line {
+            position: absolute; top: 20%; width: 100%; text-align: center;
+            font-size: 14px; color: #666; letter-spacing: 5px; text-transform: uppercase;
+            opacity: 0; transition: opacity 1s;
+        }
+
+        #combo-display {
+            position: absolute; bottom: 20%; font-size: 80px; font-weight: 100;
+            color: rgba(255,255,255,0.1); font-family: sans-serif;
+        }
+
+        /* Start Screen */
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        
+        .title-box { border: 1px solid #fff; padding: 40px; text-align: center; }
+        h1 { font-size: 24px; letter-spacing: 8px; margin: 0 0 10px 0; font-weight: normal; }
+        h2 { font-size: 12px; letter-spacing: 4px; color: #888; font-weight: normal; margin-bottom: 0;}
+
+        button {
+            margin-top: 50px; background: transparent; border: none; 
+            color: #fff; border-bottom: 1px solid #fff; padding-bottom: 5px;
+            font-size: 16px; letter-spacing: 3px; cursor: pointer; transition: 0.3s;
+        }
+        button:hover { color: #aaa; border-bottom: 1px solid #aaa; }
+
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui-layer">
+        <div id="lyric-line">In Memoriam</div>
+        <div id="combo-display">0</div>
+    </div>
+
+    <div id="start-screen">
+        <div class="title-box">
+            <h1>IN MEMORIAM</h1>
+            <h2>KIRILL RICHTER</h2>
+        </div>
+        <button id="start-btn">PLAY</button>
+    </div>
+</div>
+
+<script>
+/**
+ * AUDIO ENGINE: Custom Synthesizer
+ * Goal: Replicate the "Felt Piano" sound (soft attack, muffled tone)
+ */
+const AudioSys = {
+    ctx: null,
+    master: null,
+    
+    init() {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AC();
+        this.master = this.ctx.createGain();
+        this.master.gain.value = 0.6;
+        
+        // Dark Reverb
+        const verb = this.ctx.createConvolver();
+        this.buildImpulse(verb);
+        this.master.connect(verb);
+        verb.connect(this.ctx.destination);
+        this.master.connect(this.ctx.destination);
+    },
+
+    buildImpulse(node) {
+        const len = this.ctx.sampleRate * 3.0; // 3s tail
+        const buf = this.ctx.createBuffer(2, len, this.ctx.sampleRate);
+        for(let i=0; i<len; i++) {
+            const dec = Math.pow(1 - i/len, 2);
+            buf.getChannelData(0)[i] = (Math.random()*2-1)*dec*0.5;
+            buf.getChannelData(1)[i] = (Math.random()*2-1)*dec*0.5;
+        }
+        node.buffer = buf;
+    },
+
+    play(freq, t, type='piano') {
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        
+        // Piano Synthesis
+        if(type === 'piano') {
+            osc.type = 'triangle'; 
+            // Filter to make it "soft"
+            const f = this.ctx.createBiquadFilter();
+            f.type = 'lowpass';
+            f.frequency.value = freq * 3; // Cutoff high harmonics
+
+            osc.connect(f);
+            f.connect(g);
+            
+            // ADSR
+            g.gain.setValueAtTime(0, t);
+            g.gain.linearRampToValueAtTime(0.4, t + 0.02); // Soft attack
+            g.gain.exponentialRampToValueAtTime(0.01, t + 1.0); // Release
+        } 
+        // Violin/Cello Pad Synthesis
+        else {
+            osc.type = 'sawtooth';
+            const f = this.ctx.createBiquadFilter();
+            f.type = 'lowpass';
+            f.frequency.value = 400; // Very dark
+            osc.connect(f);
+            f.connect(g);
+            
+            g.gain.setValueAtTime(0, t);
+            g.gain.linearRampToValueAtTime(0.2, t + 1.0); // Slow swell
+            g.gain.linearRampToValueAtTime(0, t + 4.0);
+        }
+
+        g.connect(this.master);
+        osc.frequency.value = freq;
+        osc.start(t);
+        osc.stop(t + (type==='piano'?1.5:4.5));
+    }
+};
+
+/**
+ * MUSIC DATA: IN MEMORIAM (The Real Transcription)
+ * Key: G Minor. Tempo: ~135 BPM.
+ */
+const N = {
+    G2:98, Bb2:116, C3:130, D3:146, Eb3:155, F3:174,
+    G3:196, A3:220, Bb3:233, C4:261, D4:293, Eb4:311, F4:349,
+    G4:392, A4:440, Bb4:466, C5:523, D5:587, G5:783
+};
+
+function buildTrack() {
+    let notes = [];
+    let t = 2.0; // Start delay
+    const beat = 60 / 138; // 138 BPM
+    const bar = beat * 4;
+
+    // The Core Progression of In Memoriam: Gm -> F -> Eb -> Dm
+    // The "Arpeggio" function creates that rolling 16th note feel
+    const addBar = (baseNotes, octaveOffset=0) => {
+        // baseNotes should be [Low, Mid, High, Top] e.g. [G, Bb, D, G]
+        // Richter usually plays a rolling pattern: Bottom-Mid-Top-Mid or similar
+        // We will map 4 notes to 4 lanes
+        
+        const pattern = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3]; // 16th notes
+        
+        pattern.forEach((pIdx, i) => {
+            // Apply octave offset logic roughly
+            let freq = baseNotes[pIdx] * (octaveOffset ? 2 : 1);
+            
+            notes.push({
+                t: t + (i * (beat/4)),
+                lane: pIdx,
+                f: freq,
+                type: 'piano'
+            });
+        });
+        t += bar;
+    };
+
+    // Bass String Helper
+    const addBass = (freq) => {
+        notes.push({ t: t, f: freq, type: 'pad', auto: true }); // Auto-played background
+    };
+
+    // --- SECTION 1: INTRO (The Pulse) ---
+    // Just G Minor pulse
+    const Gm = [N.G3, N.Bb3, N.D4, N.G4];
+    
+    addBass(N.G2);
+    addBar(Gm); addBar(Gm); addBar(Gm); addBar(Gm);
+
+    // --- SECTION 2: THE THEME (Progression) ---
+    // The famous sequence
+    const F  = [N.F3, N.A3, N.C4, N.F4];
+    const Eb = [N.Eb3, N.G3, N.Bb3, N.Eb4];
+    const Dm = [N.D3, N.F3, N.A3, N.D4];
+
+    for(let i=0; i<2; i++) { // Play loop twice
+        addBass(N.G2);  addBar(Gm); addBar(Gm);
+        addBass(N.F3);  addBar(F);  addBar(F);
+        addBass(N.Eb3); addBar(Eb); addBar(Eb);
+        addBass(N.D3);  addBar(Dm); addBar(Dm);
+    }
+
+    // --- SECTION 3: THE STRINGS ENTRANCE (High Octave) ---
+    // Piano goes higher, strings swell
+    for(let i=0; i<2; i++) {
+        addBass(N.G2);  addBar(Gm, 1); // High octave
+        addBass(N.F3);  addBar(F, 1);
+        addBass(N.Eb3); addBar(Eb, 1);
+        addBass(N.D3);  addBar(Dm, 1);
+    }
+
+    // --- SECTION 4: THE BREAKDOWN (Minimal) ---
+    // Quiet part
+    addBar(Gm); 
+    notes.push({t: t, f: N.G2, type: 'pad', auto: true});
+    t += bar; // Wait a bar
+
+    // --- SECTION 5: FINALE (Tutti) ---
+    // Dense
+    const Gm_Full = [N.G3, N.D4, N.G4, N.Bb4];
+    addBass(N.G2); addBar(Gm_Full, 1); addBar(Gm_Full, 1);
+    addBass(N.G2); addBar(Gm_Full, 1); addBar(Gm_Full, 1);
+
+    // End Chord
+    t += beat;
+    notes.push({t: t, f: N.G2, type: 'pad', auto: true});
+    
+    return { notes, duration: t + 5 };
+}
+
+const SONG_DATA = buildTrack();
+
+/**
+ * GAME ENGINE
+ */
+const Game = {
+    canvas: document.getElementById('gameCanvas'),
+    ctx: null,
+    
+    lanes: 4,
+    laneW: 0,
+    hitY: 0,
+    
+    notes: [],
+    state: {
+        playing: false,
+        startT: 0,
+        combo: 0,
+        inputs: [0,0,0,0]
+    },
+
+    init() {
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        
+        this.bindInput();
+        
+        document.getElementById('start-screen').style.display = 'none';
+        AudioSys.init();
+        this.start();
+    },
+
+    resize() {
+        this.canvas.width = this.canvas.parentElement.clientWidth;
+        this.canvas.height = this.canvas.parentElement.clientHeight;
+        this.laneW = this.canvas.width / 4;
+        this.hitY = this.canvas.height - 100;
+    },
+
+    bindInput() {
+        const keys = ['d','f','j','k'];
+        const handler = (key, down) => {
+            const idx = keys.indexOf(key.toLowerCase());
+            if(idx > -1) {
+                this.state.inputs[idx] = down;
+                if(down) this.checkHit(idx);
+            }
+        };
+        window.addEventListener('keydown', e => !e.repeat && handler(e.key, true));
+        window.addEventListener('keyup', e => handler(e.key, false));
+        
+        this.canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            [...e.changedTouches].forEach(t => {
+                const l = Math.floor(t.clientX / this.laneW);
+                if(l>=0 && l<4) { this.state.inputs[l]=true; this.checkHit(l); }
+            });
+        }, {passive:false});
+        this.canvas.addEventListener('touchend', e => {
+             e.preventDefault(); this.state.inputs.fill(0);
+        });
+    },
+
+    start() {
+        this.state.playing = true;
+        this.state.startT = AudioSys.ctx.currentTime;
+        
+        // Deep clone notes
+        this.notes = JSON.parse(JSON.stringify(SONG_DATA.notes));
+        
+        requestAnimationFrame(() => this.loop());
+    },
+
+    checkHit(lane) {
+        if(!this.state.playing) return;
+        const now = AudioSys.ctx.currentTime - this.state.startT;
+        
+        // Find hittable note
+        const note = this.notes.find(n => 
+            !n.hit && !n.auto && n.lane === lane && 
+            Math.abs(n.t - now) < 0.2 // 200ms window
+        );
+
+        if(note) {
+            note.hit = true;
+            this.state.combo++;
+            document.getElementById('combo-display').innerText = this.state.combo;
+            
+            // Visual Pop
+            this.drawHitEffect(lane);
+            
+            // Audio is handled in loop (synced to music time, not hit time for better rhythm)
+            // But we can add a slight gain boost if hit perfectly
+            AudioSys.play(note.f, AudioSys.ctx.currentTime, 'piano');
+        }
+    },
+    
+    // Simple particle system
+    particles: [],
+    drawHitEffect(lane) {
+        const x = lane * this.laneW + this.laneW/2;
+        for(let i=0; i<5; i++) {
+            this.particles.push({
+                x: x, y: this.hitY,
+                vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
+                life: 1.0
+            });
+        }
+    },
+
+    loop() {
+        if(!this.state.playing) return;
+        const now = AudioSys.ctx.currentTime - this.state.startT;
+        const scrollSpeed = 2.0; // Seconds to traverse screen
+
+        // Auto-play background pads & cleanup
+        this.notes.forEach(n => {
+            if(n.auto && !n.hit && now >= n.t) {
+                n.hit = true;
+                AudioSys.play(n.f, AudioSys.ctx.currentTime, 'pad');
+            }
+            // Miss logic
+            if(!n.auto && !n.hit && now > n.t + 0.2) {
+                n.hit = true; // Mark as processed (missed)
+                this.state.combo = 0;
+                document.getElementById('combo-display').innerText = 0;
+                // Muted sound for miss? Or just silence.
+            }
+        });
+
+        // Drawing
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
+
+        // Grid
+        this.ctx.strokeStyle = '#222';
+        for(let i=1; i<4; i++) {
+            this.ctx.beginPath(); this.ctx.moveTo(i*this.laneW,0); this.ctx.lineTo(i*this.laneW,this.canvas.height); this.ctx.stroke();
+        }
+
+        // Hit Line
+        this.ctx.strokeStyle = '#666';
+        this.ctx.beginPath(); this.ctx.moveTo(0,this.hitY); this.ctx.lineTo(this.canvas.width,this.hitY); this.ctx.stroke();
+
+        // Notes
+        this.notes.forEach(n => {
+            if(n.hit) return;
+            // Calculate Y based on Time
+            // n.t is when it hits the line. 
+            // y = hitY - (timeDiff / speed) * height
+            const timeDiff = n.t - now;
+            const y = this.hitY - (timeDiff / scrollSpeed) * this.hitY;
+
+            if(y > -50 && y < this.canvas.height) {
+                const x = n.lane * this.laneW;
+                
+                // Richter Aesthetic: Minimalist White/Grey Blocks
+                this.ctx.fillStyle = n.auto ? 'rgba(0,0,0,0)' : '#fff'; // Don't draw auto notes
+                if(!n.auto) {
+                    this.ctx.fillRect(x + 10, y, this.laneW - 20, 15);
+                    // Trail
+                    this.ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                    this.ctx.fillRect(x + 15, y-50, this.laneW - 30, 50);
+                }
+            }
+        });
+
+        // Particles
+        this.particles.forEach((p,i) => {
+            p.x += p.vx; p.y += p.vy; p.life -= 0.05;
+            this.ctx.fillStyle = `rgba(255,255,255,${p.life})`;
+            this.ctx.fillRect(p.x, p.y, 2, 2);
+        });
+        this.particles = this.particles.filter(p => p.life > 0);
+
+        // Feedback on key press
+        this.state.inputs.forEach((down, i) => {
+            if(down) {
+                this.ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                this.ctx.fillRect(i*this.laneW, 0, this.laneW, this.canvas.height);
+            }
+        });
+        
+        // Progress text update
+        if(now > 10 && now < 15) document.getElementById('lyric-line').style.opacity = 1;
+        if(now > 35 && now < 40) document.getElementById('lyric-line').innerText = "The Memory";
+        if(now > SONG_DATA.duration) {
+            this.state.playing = false;
+            alert("Sequence Complete");
+            location.reload();
+        }
+
+        requestAnimationFrame(() => this.loop());
+    }
+};
+
+document.getElementById('start-btn').addEventListener('click', () => Game.init());
+
+</script>
+</body>
+</html>

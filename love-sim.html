@@ -2,997 +2,312 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>心動物語：夏日戀愛模擬</title>
+    <title>夏日告白：最後的 7 天 - 完整高級版</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Microsoft JhengHei', 'Segoe UI', sans-serif;
-        }
+        :root { --main: #ff85a2; --glass: rgba(255, 255, 255, 0.9); --accent: #74b9ff; }
+        body { margin: 0; background: #000; font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif; height: 100vh; display: flex; justify-content: center; align-items: center; }
         
-        body {
-            background: linear-gradient(135deg, #ffd6e7 0%, #c1f0ff 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            color: #333;
+        #game-container { 
+            width: 1024px; height: 640px; background: #222; position: relative; 
+            overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
-        
-        .game-container {
-            width: 100%;
-            max-width: 1000px;
-            background-color: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 90vh;
+
+        /* 渲染層 */
+        #bg-layer { width: 100%; height: 100%; background-size: cover; background-position: center; transition: 1.5s filter, 1s background; }
+        #char-layer { 
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); 
+            height: 95%; transition: 0.5s all cubic-bezier(0.4, 0, 0.2, 1); z-index: 5; 
+            font-size: 400px; display: flex; align-items: flex-end;
         }
-        
-        .game-header {
-            background: linear-gradient(to right, #ff7eb3, #65c7f7);
-            padding: 20px;
-            text-align: center;
-            color: white;
-            position: relative;
+        .char-hit { transform: translateX(-50%) scale(1.05); filter: brightness(1.2); }
+
+        /* 頂部資訊欄 */
+        #top-ui {
+            position: absolute; top: 0; width: 100%; height: 60px; 
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            display: flex; align-items: center; padding: 0 30px; color: #fff; z-index: 20;
         }
-        
-        .game-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 5px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        .stat { margin-right: 30px; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        .stat-val { color: var(--main); text-shadow: 0 0 10px var(--main); }
+
+        /* 對話系統 */
+        #msg-window {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 960px; height: 180px; background: var(--glass);
+            border-radius: 15px; border: 3px solid white;
+            padding: 30px; box-sizing: border-box; z-index: 100; cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        
-        .game-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+        #name-label {
+            position: absolute; top: -20px; left: 40px; background: var(--main);
+            color: white; padding: 6px 30px; border-radius: 30px; font-weight: bold; font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        
-        .game-content {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
+        #text-content { font-size: 24px; color: #333; line-height: 1.7; letter-spacing: 1px; }
+
+        /* 選項系統 */
+        #choice-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 500; backdrop-filter: blur(5px);
         }
-        
-        /* 左側角色區域 */
-        .character-section {
-            width: 40%;
-            padding: 25px;
-            background-color: #f9f9ff;
-            border-right: 2px dashed #e1e1e1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .character-title {
-            color: #ff6b9d;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .character-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .character-portrait {
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 5px solid #fff;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            background-color: #f0f8ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.3s;
-        }
-        
-        .character-portrait:hover {
-            transform: scale(1.05);
-        }
-        
-        .character-portrait img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .character-name {
-            font-size: 2rem;
-            color: #333;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        
-        .character-personality {
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 25px;
-            text-align: center;
-            padding: 0 10px;
-        }
-        
-        .affection-meter {
-            width: 100%;
-            background-color: #f0f0f0;
-            height: 30px;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-top: 10px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .affection-fill {
-            height: 100%;
-            background: linear-gradient(to right, #ffb3c6, #ff4d8d);
-            border-radius: 15px;
-            width: 0%;
-            transition: width 0.8s ease;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 10px;
-            color: white;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        
-        .affection-label {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            margin-top: 5px;
-            font-size: 0.9rem;
-            color: #777;
-        }
-        
-        /* 右側遊戲區域 */
-        .game-section {
-            width: 60%;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .story-container {
-            flex: 1;
-            background-color: #fff;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            overflow-y: auto;
-            max-height: 350px;
-            border: 1px solid #f0f0f0;
-        }
-        
-        .story-text {
-            font-size: 1.3rem;
-            line-height: 1.6;
-            color: #444;
-            margin-bottom: 20px;
-        }
-        
-        .story-text::first-letter {
-            font-size: 2rem;
-            color: #ff6b9d;
-            font-weight: bold;
-        }
-        
-        .choices-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
         .choice-btn {
-            padding: 18px 20px;
-            background-color: #fff;
-            border: 2px solid #e1e1e1;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: #555;
-            position: relative;
-            overflow: hidden;
+            width: 550px; padding: 20px; margin: 12px; background: white;
+            border-radius: 15px; border: none; color: #333;
+            font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); text-align: center;
         }
+        .choice-btn:hover { background: var(--main); color: white; transform: translateY(-3px); }
+
+        /* 背包/系統按鈕 */
+        .sys-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer; margin-left: 10px; }
         
-        .choice-btn:hover {
-            background-color: #f8f9ff;
-            border-color: #65c7f7;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(101, 199, 247, 0.2);
-        }
-        
-        .choice-btn:active {
-            transform: translateY(0);
-        }
-        
-        .choice-btn::before {
-            content: "▶";
-            position: absolute;
-            left: 15px;
-            color: #65c7f7;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .choice-btn:hover::before {
-            opacity: 1;
-        }
-        
-        .choice-text {
-            margin-left: 10px;
-        }
-        
-        .game-controls {
-            display: flex;
-            justify-content: space-between;
-            margin-top: auto;
-        }
-        
-        .control-btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        #restart-btn {
-            background-color: #f0f0f0;
-            color: #777;
-        }
-        
-        #restart-btn:hover {
-            background-color: #e0e0e0;
-        }
-        
-        #save-btn {
-            background-color: #65c7f7;
-            color: white;
-        }
-        
-        #save-btn:hover {
-            background-color: #4ab5e9;
-            box-shadow: 0 5px 15px rgba(101, 199, 247, 0.3);
-        }
-        
-        #history-btn {
-            background-color: #ffb3c6;
-            color: white;
-        }
-        
-        #history-btn:hover {
-            background-color: #ff9db6;
-            box-shadow: 0 5px 15px rgba(255, 179, 198, 0.3);
-        }
-        
-        /* 角色選擇區域 */
-        .character-selector {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .char-select-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid transparent;
-            cursor: pointer;
-            transition: all 0.3s;
-            background-color: #f0f8ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-        }
-        
-        .char-select-btn:hover {
-            transform: scale(1.1);
-        }
-        
-        .char-select-btn.active {
-            border-color: #ff6b9d;
-            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
-        }
-        
-        /* 響應式設計 */
-        @media (max-width: 900px) {
-            .game-content {
-                flex-direction: column;
-                overflow-y: auto;
-            }
-            
-            .character-section, .game-section {
-                width: 100%;
-            }
-            
-            .character-section {
-                border-right: none;
-                border-bottom: 2px dashed #e1e1e1;
-            }
-            
-            .game-container {
-                height: auto;
-                max-height: 95vh;
-            }
-            
-            .story-container {
-                max-height: 300px;
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .game-header h1 {
-                font-size: 2rem;
-            }
-            
-            .character-portrait {
-                width: 180px;
-                height: 180px;
-            }
-            
-            .character-name {
-                font-size: 1.7rem;
-            }
-            
-            .story-text {
-                font-size: 1.1rem;
-            }
-            
-            .choice-btn {
-                padding: 15px;
-                font-size: 1rem;
-            }
-            
-            .control-btn {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
-        }
-        
-        /* 對話特效 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .story-text {
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .choice-btn {
-            animation: fadeIn 0.5s ease;
-        }
-        
-        /* 愛心特效 */
-        .heart {
-            position: absolute;
-            color: #ff6b9d;
-            font-size: 1.5rem;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 10;
-        }
-        
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(0.5); opacity: 1; }
-            100% { transform: translateY(-50px) scale(1); opacity: 0; }
-        }
+        /* 動畫特效 */
+        #flash { position: absolute; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; z-index: 999; }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="game-header">
-            <h1>心動物語：夏日戀愛模擬</h1>
-            <p>這是一個關於友情、成長與初戀的夏日故事。你的選擇將決定故事的發展！</p>
-        </div>
-        
-        <div class="game-content">
-            <!-- 左側：角色資訊 -->
-            <div class="character-section">
-                <h2 class="character-title">當前角色</h2>
-                <div class="character-container">
-                    <div class="character-portrait" id="character-portrait">
-                        <!-- 角色頭像將由JS動態生成 -->
-                        <span style="font-size: 5rem;">👨‍🎓</span>
-                    </div>
-                    <div class="character-name" id="character-name">林明軒</div>
-                    <div class="character-personality" id="character-personality">陽光開朗的籃球隊隊長</div>
-                    
-                    <div class="affection-meter">
-                        <div class="affection-fill" id="affection-fill">0%</div>
-                    </div>
-                    <div class="affection-label">
-                        <span>好感度</span>
-                        <span id="affection-value">0/100</span>
-                    </div>
-                    
-                    <div style="margin-top: 30px; width: 100%;">
-                        <h3 style="color: #65c7f7; margin-bottom: 15px; text-align: center;">選擇角色</h3>
-                        <div class="character-selector">
-                            <div class="char-select-btn active" data-char="1">
-                                👨‍🎓
-                            </div>
-                            <div class="char-select-btn" data-char="2">
-                                👩‍🎨
-                            </div>
-                            <div class="char-select-btn" data-char="3">
-                                👩‍💻
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 右側：遊戲區域 -->
-            <div class="game-section">
-                <div class="story-container">
-                    <div class="story-text" id="story-text">
-                        今天是轉學後的第一天，你懷著忐忑的心情走進新學校。陽光明媚的夏日早晨，校園裡充滿了青春的氣息。在走廊上，你不小心撞到了一位同學，他手中的書本散落一地...
-                    </div>
-                </div>
-                
-                <div class="choices-container" id="choices-container">
-                    <!-- 選擇按鈕將由JS動態生成 -->
-                    <button class="choice-btn" data-choice="1">
-                        <span class="choice-text">「對不起！我幫你撿起來。」</span>
-                    </button>
-                    <button class="choice-btn" data-choice="2">
-                        <span class="choice-text">「抱歉，我沒注意看路。」</span>
-                    </button>
-                    <button class="choice-btn" data-choice="3">
-                        <span class="choice-text">「你還好嗎？有沒有受傷？」</span>
-                    </button>
-                </div>
-                
-                <div class="game-controls">
-                    <button class="control-btn" id="restart-btn">
-                        <span>🔄</span>重新開始
-                    </button>
-                    <button class="control-btn" id="history-btn">
-                        <span>📖</span>回顧故事
-                    </button>
-                    <button class="control-btn" id="save-btn">
-                        <span>💾</span>保存進度
-                    </button>
-                </div>
-            </div>
-        </div>
+
+<div id="game-container">
+    <div id="bg-layer"></div>
+    <div id="char-layer"></div>
+    <div id="flash"></div>
+
+    <div id="top-ui">
+        <div class="stat">📅 <span id="ui-day">Day 1</span></div>
+        <div class="stat">🕒 <span id="ui-time">上午</span></div>
+        <div class="stat">❤️ <span id="ui-love" class="stat-val">0</span></div>
+        <div class="stat">📚 <span id="ui-int" class="stat-val">10</span></div>
+        <div class="stat">✨ <span id="ui-cha" class="stat-val">10</span></div>
+        <div style="flex-grow: 1"></div>
+        <button class="sys-btn" onclick="sys.save()">快速存檔</button>
+        <button class="sys-btn" onclick="sys.load()">載入進度</button>
     </div>
 
-    <script>
-        // 遊戲數據
-        const gameData = {
-            currentCharacter: 1, // 1: 明軒, 2: 雅雯, 3: 小琪
-            day: 1,
-            affection: [0, 0, 0], // 三位角色的好感度
-            storyProgress: 0,
-            storyHistory: [],
-            selectedChoices: []
-        };
-        
-        // 角色資料
-        const characters = {
-            1: {
-                name: "林明軒",
-                personality: "陽光開朗的籃球隊隊長",
-                emoji: "👨‍🎓",
-                color: "#65c7f7",
-                description: "學校的風雲人物，總是充滿活力，對朋友非常講義氣。"
-            },
-            2: {
-                name: "陳雅雯",
-                personality: "文靜溫柔的美術社社員",
-                emoji: "👩‍🎨",
-                color: "#ff9ec7",
-                description: "喜歡在美術教室畫畫，話不多但觀察力敏銳，內心溫柔細膩。"
-            },
-            3: {
-                name: "張小琪",
-                personality: "聰明獨立的科學社社長",
-                emoji: "👩‍💻",
-                color: "#a78ef6",
-                description: "理科天才，邏輯清晰，對新奇事物充滿好奇心，有點傲嬌。"
+    <div id="msg-window" onclick="core.next()">
+        <div id="name-label">曉晴</div>
+        <div id="text-content">正在讀取校園記憶...</div>
+    </div>
+
+    <div id="choice-layer"></div>
+</div>
+
+<script>
+/**
+ * 核心引擎：支援分支跳轉、條件判定與屬性影響
+ */
+const core = {
+    state: {
+        love: 0, int: 10, cha: 10,
+        day: 1, timeIdx: 0, 
+        currentSlot: 'intro',
+        lineIdx: 0,
+        flags: new Set(),
+        inventory: [],
+        isTyping: false
+    },
+
+    times: ["上午", "下午", "黃昏", "深夜"],
+    
+    script: {
+        // --- 序章 ---
+        intro: [
+            { bg: 'linear-gradient(to top, #a1c4fd 0%, #c2e9fb 100%)', char: '' },
+            { name: '我', text: '那是蟬鳴最響亮的一個夏天。' },
+            { name: '我', text: '還有七天，我們就要各奔東西了。' },
+            { char: '👧', name: '？？？', text: '「學——長！你又在頂樓吹風了！」' },
+            { name: '我', text: '她是蘇曉晴，我這輩子見過最麻煩、也最放不下的女生。' },
+            { choice: [
+                { text: '「因為在等你啊。」', next: 'intro_flirt', love: 10, cha: 5 },
+                { text: '「這裡安靜，適合背公式。」', next: 'intro_study', int: 10 },
+                { text: '「只是在看雲。」', next: 'intro_normal' }
+            ]}
+        ],
+        intro_flirt: [
+            { char: '😳', name: '蘇曉晴', text: '「你、你今天吃錯藥了嗎？突然說這種讓人誤會的話...」' },
+            { name: '我', text: '她的臉紅得像熟透的蘋果。看來魅力值發揮作用了。' },
+            { call: () => core.jump('daily_map') }
+        ],
+        intro_study: [
+            { char: '😒', name: '蘇曉晴', text: '「真是個不解風情的書呆子。拿去，這是你忘在教室的參考書。」' },
+            { msg: '獲得了【曉晴的參考書】', call: () => core.state.inventory.push('參考書') },
+            { call: () => core.jump('daily_map') }
+        ],
+        intro_normal: [
+            { char: '😊', name: '蘇曉晴', text: '「雲有什麼好看的？對了，下午學校後門有祭典，要不要去？」' },
+            { call: () => core.jump('daily_map') }
+        ],
+
+        // --- 地點選擇系統 ---
+        daily_map: [
+            { bg: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%)', char: '', name: '系統', text: '現在是自由行動時間，你想去哪裡？' },
+            { choice: [
+                { text: '🏫 圖書館 (智力+10)', next: 'loc_library' },
+                { text: '🏀 體育館 (魅力+10)', next: 'loc_gym' },
+                { text: '🌳 後花園 (遇見曉晴)', next: 'loc_garden' },
+                { text: '🏠 回家 (休息/存檔)', next: 'loc_home' }
+            ]}
+        ],
+
+        loc_library: [
+            { name: '我', text: '在靜謐的書香中，我覺得大腦運轉快了不少。' },
+            { call: () => { core.state.int += 10; core.advance(); } }
+        ],
+        loc_gym: [
+            { name: '我', text: '在球場揮灑汗水，感覺自己充滿了活力。' },
+            { call: () => { core.state.cha += 10; core.advance(); } }
+        ],
+        loc_garden: [
+            { char: '👧', name: '蘇曉晴', text: '「嘿！沒想到會在這裡遇到你。既然來了，幫我個忙吧？」' },
+            { choice: [
+                { text: '幫她修剪花木 (好感+15)', next: 'garden_help', love: 15 },
+                { text: '陪她聊天 (好感+5, 魅力+5)', next: 'garden_chat', love: 5, cha: 5 }
+            ]}
+        ],
+        garden_help: [
+            { char: '✨', name: '蘇曉晴', text: '「看不出來你手還挺巧的嘛！獎勵你一顆糖果。」' },
+            { call: () => core.advance() }
+        ],
+        garden_chat: [
+            { name: '我', text: '我們聊了很久，關於未來的志願，還有那些沒說出口的約定。' },
+            { call: () => core.advance() }
+        ],
+
+        loc_home: [
+            { name: '系統', text: '休息後，體力恢復了。你要繼續戰鬥嗎？' },
+            { call: () => core.advance() }
+        ],
+
+        // --- 結局判定 ---
+        ending_check: [
+            { bg: '#000', char: '', name: '旁白', text: '七天過去了。蟬鳴聲漸漸消失，畢業的鐘聲響起。' },
+            { call: () => {
+                if(core.state.love >= 80) core.jump('ending_true');
+                else if(core.state.love >= 40) core.jump('ending_normal');
+                else core.jump('ending_bad');
+            }}
+        ],
+        ending_true: [
+            { bg: 'pink', char: '👩‍❤️‍👨', name: '蘇曉晴', text: '「學長，其實我一直...都喜歡著你。我們一起去東京讀大學吧！」' },
+            { name: '結局', text: '【真結局：夏日的永恆告白】' }
+        ],
+        ending_bad: [
+            { bg: 'gray', char: '🚶', name: '我', text: '最後，我們只是在畢業典禮上點了點頭。青春就像這場夏日，終究會結束。' },
+            { name: '結局', text: '【壞結局：遺憾的平行線】' }
+        ]
+    },
+
+    init() {
+        this.render();
+    },
+
+    render() {
+        const line = this.script[this.state.currentSlot][this.state.lineIdx];
+        if (!line) return;
+
+        // 處理背景與立繪
+        if (line.bg) document.getElementById('bg-layer').style.background = line.bg;
+        if (line.char !== undefined) {
+            const c = document.getElementById('char-layer');
+            c.innerText = line.char;
+            c.classList.add('char-hit');
+            setTimeout(() => c.classList.remove('char-hit'), 300);
+        }
+
+        // 處理特殊呼叫
+        if (line.call) line.call();
+        if (line.msg) alert(line.msg);
+
+        // 處理分支
+        if (line.choice) {
+            this.showChoices(line.choice);
+        } else {
+            document.getElementById('name-label').innerText = line.name || "";
+            this.type(line.text || "");
+        }
+        this.updateUI();
+    },
+
+    type(txt) {
+        this.state.isTyping = true;
+        let i = 0;
+        const el = document.getElementById('text-content');
+        el.innerText = "";
+        const timer = setInterval(() => {
+            el.innerText += txt[i] || "";
+            i++;
+            if (i >= txt.length) {
+                clearInterval(timer);
+                this.state.isTyping = false;
             }
-        };
-        
-        // 故事腳本
-        const storyScript = [
-            // 第0天 - 共通開場
-            {
-                id: 0,
-                text: "今天是轉學後的第一天，你懷著忐忑的心情走進新學校。陽光明媚的夏日早晨，校園裡充滿了青春的氣息。在走廊上，你不小心撞到了一位同學，他手中的書本散落一地...",
-                choices: [
-                    { text: "「對不起！我幫你撿起來。」", next: 1, affection: [5, 0, 0] },
-                    { text: "「抱歉，我沒注意看路。」", next: 1, affection: [3, 0, 0] },
-                    { text: "「你還好嗎？有沒有受傷？」", next: 1, affection: [8, 0, 0] }
-                ],
-                character: 1
-            },
-            // 第1天 - 明軒路線
-            {
-                id: 1,
-                text: "對方抬起頭，露出一張陽光帥氣的臉龐。「沒關係啦！是我走路太快沒看前面。」他笑著說，並自我介紹：「我叫林明軒，三年二班，籃球隊的。你是新來的轉學生吧？」",
-                choices: [
-                    { text: "「是的，我今天剛轉來。我叫[玩家名]，請多指教！」", next: 2, affection: [10, 0, 0] },
-                    { text: "「對，我是轉學生。你怎麼知道？」", next: 2, affection: [5, 0, 0] },
-                    { text: "「嗯...抱歉，我得趕去教室了。」", next: 3, affection: [-5, 0, 0] }
-                ],
-                character: 1
-            },
-            {
-                id: 2,
-                text: "「歡迎來到我們學校！放學後有籃球練習，要不要來看看？」明軒熱情地邀請你，眼睛閃閃發亮。",
-                choices: [
-                    { text: "「好啊！我很喜歡籃球。」", next: 4, affection: [10, 0, 0] },
-                    { text: "「抱歉，我今天有點事...」", next: 3, affection: [-3, 0, 0] },
-                    { text: "「我不太懂籃球，但去看看應該不錯。」", next: 4, affection: [5, 0, 0] }
-                ],
-                character: 1
-            },
-            {
-                id: 3,
-                text: "明軒的表情有點失望，但還是笑著說：「沒關係，下次有機會再說吧！我先去練習了，學校見！」",
-                choices: [
-                    { text: "繼續故事", next: 10, affection: [0, 0, 0] }
-                ],
-                character: 1
-            },
-            {
-                id: 4,
-                text: "放學後，你來到籃球場。明軒正在練習投籃，看到你來了，他開心地揮手。「來得正好！要不要試試看投籃？」",
-                choices: [
-                    { text: "「好啊！讓我試試看。」", next: 5, affection: [8, 0, 0] },
-                    { text: "「我看看就好，不太會打籃球。」", next: 6, affection: [3, 0, 0] }
-                ],
-                character: 1
-            },
-            // 第1天 - 雅雯路線
-            {
-                id: 10,
-                text: "第二天午休時間，你獨自在校園裡散步，發現美術教室的門虛掩著。透過門縫，你看到一個女生正在專注地畫畫。",
-                choices: [
-                    { text: "輕輕敲門後進入", next: 11, affection: [0, 5, 0] },
-                    { text: "在門外靜靜觀察", next: 11, affection: [0, 3, 0] },
-                    { text: "直接離開", next: 0, affection: [0, 0, 0] }
-                ],
-                character: 2
-            },
-            {
-                id: 11,
-                text: "女生注意到你，有些害羞地放下畫筆。「啊...你好。我是美術社的陳雅雯。請問有什麼事嗎？」",
-                choices: [
-                    { text: "「你的畫好美！我可以看看嗎？」", next: 12, affection: [0, 8, 0] },
-                    { text: "「抱歉打擾了，我只是路過。」", next: 13, affection: [0, 2, 0] }
-                ],
-                character: 2
-            },
-            // 第1天 - 小琪路線
-            {
-                id: 20,
-                text: "放學後，你在圖書館尋找參考書時，聽到科學社教室傳來爆炸聲。你好奇地走過去查看。",
-                choices: [
-                    { text: "趕緊跑過去看看情況", next: 21, affection: [0, 0, 5] },
-                    { text: "去找老師報告", next: 22, affection: [0, 0, 3] }
-                ],
-                character: 3
-            },
-            {
-                id: 21,
-                text: "科學社教室裡煙霧瀰漫，一個戴著護目鏡的女生正在咳嗽。「咳咳...又失敗了...」她注意到你，挑眉問道：「你是誰？有什麼事嗎？」",
-                choices: [
-                    { text: "「我聽到爆炸聲，來看看有沒有需要幫忙的。」", next: 23, affection: [0, 0, 8] },
-                    { text: "「這裡發生什麼事了？需要叫老師嗎？」", next: 22, affection: [0, 0, 3] }
-                ],
-                character: 3
-            },
-            // 其他故事節點...
-            {
-                id: 50,
-                text: "一週後，你和選擇的角色關係更進一步。某天放學後，他/她突然約你到學校天台...",
-                choices: [
-                    { text: "準時赴約", next: 51, affection: [15, 15, 15] },
-                    { text: "找理由婉拒", next: 52, affection: [-10, -10, -10] }
-                ],
-                character: 0 // 0表示使用當前角色
-            },
-            {
-                id: 51,
-                text: "天台上，夕陽的餘暉將天空染成橘紅色。他/她看著遠方，輕聲說：「其實...我一直想告訴你...」",
-                choices: [
-                    { text: "靜靜等待他/她說完", next: 53, affection: [20, 20, 20] },
-                    { text: "「你想說什麼？」", next: 53, affection: [15, 15, 15] }
-                ],
-                character: 0
-            },
-            {
-                id: 53,
-                text: "「和你在一起的這些日子，我很開心。你願意...以後也一起放學回家嗎？」他/她的臉微微泛紅。",
-                choices: [
-                    { text: "「當然願意！」（好感結局）", next: 100, affection: [30, 30, 30] },
-                    { text: "「我們還是做朋友比較好...」（朋友結局）", next: 101, affection: [-10, -10, -10] }
-                ],
-                character: 0
-            }
-        ];
-        
-        // 結局腳本
-        const endings = {
-            100: {
-                title: "心動結局",
-                text: "從那天起，你們開始一起上學、放學。夏天的風輕輕吹過，帶著青春的甜蜜氣息。這是一個美好的開始，你們的故事將繼續下去...",
-                character: 0
-            },
-            101: {
-                title: "朋友結局",
-                text: "雖然有點失望，但他/她還是尊重你的決定。你們成為了很好的朋友，一起度過了豐富多彩的高中生活。",
-                character: 0
-            },
-            102: {
-                title: "單戀結局",
-                text: "因為缺乏勇氣表達心意，你們的關係始終停留在朋友階段。畢業後各奔東西，這段青澀的感情成為回憶中的淡淡遺憾。",
-                character: 0
-            }
-        };
-        
-        // DOM元素
-        const storyTextElement = document.getElementById('story-text');
-        const choicesContainer = document.getElementById('choices-container');
-        const characterPortraitElement = document.getElementById('character-portrait');
-        const characterNameElement = document.getElementById('character-name');
-        const characterPersonalityElement = document.getElementById('character-personality');
-        const affectionFillElement = document.getElementById('affection-fill');
-        const affectionValueElement = document.getElementById('affection-value');
-        const charSelectButtons = document.querySelectorAll('.char-select-btn');
-        const restartButton = document.getElementById('restart-btn');
-        const saveButton = document.getElementById('save-btn');
-        const historyButton = document.getElementById('history-btn');
-        
-        // 初始化遊戲
-        function initGame() {
-            gameData.currentCharacter = 1;
-            gameData.day = 1;
-            gameData.affection = [0, 0, 0];
-            gameData.storyProgress = 0;
-            gameData.storyHistory = [];
-            gameData.selectedChoices = [];
-            
-            updateCharacterDisplay();
-            loadStory(0);
-            updateAffectionDisplay();
-            
-            // 初始化角色選擇按鈕
-            charSelectButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const charId = parseInt(this.getAttribute('data-char'));
-                    switchCharacter(charId);
-                });
-            });
+        }, 40);
+    },
+
+    next() {
+        if (this.state.isTyping) return;
+        const slot = this.script[this.state.currentSlot];
+        if (this.state.lineIdx < slot.length - 1) {
+            this.state.lineIdx++;
+            this.render();
         }
-        
-        // 切換角色
-        function switchCharacter(charId) {
-            gameData.currentCharacter = charId;
-            
-            // 更新選擇按鈕狀態
-            charSelectButtons.forEach(btn => {
-                if (parseInt(btn.getAttribute('data-char')) === charId) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            
-            updateCharacterDisplay();
-            updateAffectionDisplay();
-        }
-        
-        // 更新角色顯示
-        function updateCharacterDisplay() {
-            const char = characters[gameData.currentCharacter];
-            
-            characterPortraitElement.innerHTML = `<span style="font-size: 5rem;">${char.emoji}</span>`;
-            characterNameElement.textContent = char.name;
-            characterPersonalityElement.textContent = char.personality;
-            
-            // 更新顏色主題
-            document.documentElement.style.setProperty('--char-color', char.color);
-        }
-        
-        // 更新好感度顯示
-        function updateAffectionDisplay() {
-            const affection = gameData.affection[gameData.currentCharacter - 1];
-            const percentage = Math.min(100, Math.max(0, affection));
-            
-            affectionFillElement.style.width = `${percentage}%`;
-            affectionFillElement.textContent = `${percentage}%`;
-            affectionValueElement.textContent = `${affection}/100`;
-            
-            // 如果好感度高，顯示愛心特效
-            if (affection >= 70 && gameData.storyProgress > 5) {
-                showHearts();
-            }
-        }
-        
-        // 顯示愛心特效
-        function showHearts() {
-            const container = characterPortraitElement;
-            for (let i = 0; i < 5; i++) {
-                setTimeout(() => {
-                    const heart = document.createElement('div');
-                    heart.className = 'heart';
-                    heart.textContent = '❤';
-                    heart.style.left = `${Math.random() * 100}%`;
-                    heart.style.top = `${Math.random() * 100}%`;
-                    
-                    container.appendChild(heart);
-                    
-                    // 動畫
-                    heart.style.animation = 'floatUp 1.5s ease forwards';
-                    
-                    // 移除元素
-                    setTimeout(() => {
-                        heart.remove();
-                    }, 1500);
-                }, i * 200);
-            }
-        }
-        
-        // 載入故事
-        function loadStory(storyId) {
-            const story = storyScript.find(s => s.id === storyId);
-            if (!story) {
-                // 如果是結局ID
-                if (endings[storyId]) {
-                    showEnding(storyId);
-                    return;
-                }
-                // 默認載入第一個故事
-                loadStory(0);
-                return;
-            }
-            
-            gameData.storyProgress = storyId;
-            gameData.storyHistory.push(story.text);
-            
-            // 顯示故事文本
-            storyTextElement.textContent = story.text;
-            
-            // 清除舊的選擇按鈕
-            choicesContainer.innerHTML = '';
-            
-            // 取得當前角色
-            const currentChar = story.character === 0 ? gameData.currentCharacter : story.character;
-            
-            // 創建新的選擇按鈕
-            story.choices.forEach((choice, index) => {
-                const button = document.createElement('button');
-                button.className = 'choice-btn';
-                button.setAttribute('data-choice', index);
-                
-                const choiceText = document.createElement('span');
-                choiceText.className = 'choice-text';
-                choiceText.textContent = choice.text;
-                
-                button.appendChild(choiceText);
-                
-                button.addEventListener('click', () => {
-                    makeChoice(choice, currentChar);
-                });
-                
-                choicesContainer.appendChild(button);
-            });
-            
-            // 如果有角色變化，更新顯示
-            if (story.character !== 0 && story.character !== gameData.currentCharacter) {
-                switchCharacter(story.character);
-            }
-        }
-        
-        // 做出選擇
-        function makeChoice(choice, characterId) {
-            // 記錄選擇
-            gameData.selectedChoices.push({
-                storyId: gameData.storyProgress,
-                choice: choice.text,
-                character: characterId
-            });
-            
-            // 更新好感度
-            if (choice.affection && choice.affection[characterId - 1]) {
-                gameData.affection[characterId - 1] += choice.affection[characterId - 1];
-                gameData.affection[characterId - 1] = Math.max(0, Math.min(100, gameData.affection[characterId - 1]));
-                
-                // 顯示好感度變化
-                showAffectionChange(choice.affection[characterId - 1]);
-            }
-            
-            // 更新顯示
-            updateAffectionDisplay();
-            
-            // 檢查是否達到結局條件
-            if (gameData.affection[characterId - 1] >= 80 && gameData.storyProgress >= 5) {
-                // 進入結局路線
-                loadStory(50);
-            } else if (gameData.affection[characterId - 1] <= 20 && gameData.storyProgress >= 5) {
-                // 低好感度結局
-                loadStory(102);
-            } else {
-                // 載入下一個故事
-                loadStory(choice.next);
-            }
-        }
-        
-        // 顯示好感度變化
-        function showAffectionChange(change) {
-            const charSection = document.querySelector('.character-section');
-            const changeElement = document.createElement('div');
-            changeElement.textContent = change > 0 ? `+${change}` : `${change}`;
-            changeElement.style.position = 'absolute';
-            changeElement.style.color = change > 0 ? '#ff4d8d' : '#777';
-            changeElement.style.fontWeight = 'bold';
-            changeElement.style.fontSize = '1.5rem';
-            changeElement.style.zIndex = '100';
-            changeElement.style.left = '50%';
-            changeElement.style.top = '50%';
-            changeElement.style.transform = 'translate(-50%, -50%)';
-            
-            charSection.appendChild(changeElement);
-            
-            // 動畫
-            changeElement.style.transition = 'all 0.8s ease';
-            setTimeout(() => {
-                changeElement.style.opacity = '0';
-                changeElement.style.transform = 'translate(-50%, -100px)';
-            }, 100);
-            
-            // 移除元素
-            setTimeout(() => {
-                changeElement.remove();
-            }, 1000);
-        }
-        
-        // 顯示結局
-        function showEnding(endingId) {
-            const ending = endings[endingId];
-            
-            storyTextElement.innerHTML = `
-                <h2 style="color: #ff6b9d; margin-bottom: 20px; text-align: center;">${ending.title}</h2>
-                <p style="font-size: 1.4rem; line-height: 1.6; margin-bottom: 30px;">${ending.text}</p>
-                <div style="text-align: center; margin-top: 30px;">
-                    <p style="font-size: 1.2rem; color: #666;">最終好感度: ${gameData.affection[gameData.currentCharacter - 1]}/100</p>
-                    <p style="font-size: 1.2rem; color: #666; margin-top: 10px;">故事長度: ${gameData.day}天</p>
-                </div>
-            `;
-            
-            // 顯示結局選項
-            choicesContainer.innerHTML = '';
-            
-            const restartBtn = document.createElement('button');
-            restartBtn.className = 'choice-btn';
-            restartBtn.innerHTML = '<span class="choice-text">重新開始遊戲</span>';
-            restartBtn.addEventListener('click', initGame);
-            
-            const reviewBtn = document.createElement('button');
-            reviewBtn.className = 'choice-btn';
-            reviewBtn.innerHTML = '<span class="choice-text">回顧故事歷程</span>';
-            reviewBtn.addEventListener('click', showStoryHistory);
-            
-            choicesContainer.appendChild(restartBtn);
-            choicesContainer.appendChild(reviewBtn);
-        }
-        
-        // 顯示故事歷史
-        function showStoryHistory() {
-            let historyHTML = '<h3 style="color: #65c7f7; margin-bottom: 15px;">故事歷程</h3>';
-            
-            gameData.storyHistory.forEach((text, index) => {
-                historyHTML += `<p style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #eee;">${text}</p>`;
-            });
-            
-            storyTextElement.innerHTML = historyHTML;
-            
-            // 返回按鈕
-            choicesContainer.innerHTML = '';
-            const backBtn = document.createElement('button');
-            backBtn.className = 'choice-btn';
-            backBtn.innerHTML = '<span class="choice-text">返回遊戲</span>';
-            backBtn.addEventListener('click', () => {
-                if (gameData.storyProgress >= 100) {
-                    // 如果是結局後，顯示結局
-                    showEnding(gameData.storyProgress);
-                } else {
-                    // 否則重新載入當前故事
-                    loadStory(gameData.storyProgress);
-                }
-            });
-            
-            choicesContainer.appendChild(backBtn);
-        }
-        
-        // 保存遊戲進度
-        function saveGame() {
-            const saveData = {
-                ...gameData,
-                saveDate: new Date().toLocaleString()
+    },
+
+    jump(slot) {
+        this.state.currentSlot = slot;
+        this.state.lineIdx = 0;
+        this.render();
+    },
+
+    showChoices(choices) {
+        const layer = document.getElementById('choice-layer');
+        layer.innerHTML = "";
+        layer.style.display = "flex";
+        choices.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = c.text;
+            btn.onclick = () => {
+                if (c.love) this.state.love += c.love;
+                if (c.int) this.state.int += c.int;
+                if (c.cha) this.state.cha += c.cha;
+                layer.style.display = "none";
+                this.jump(c.next);
             };
-            
-            localStorage.setItem('summerLoveGameSave', JSON.stringify(saveData));
-            
-            // 顯示保存成功訊息
-            const originalText = storyTextElement.textContent;
-            storyTextElement.textContent = "遊戲進度已保存！";
-            storyTextElement.style.color = "#27ae60";
-            
-            setTimeout(() => {
-                storyTextElement.textContent = originalText;
-                storyTextElement.style.color = "";
-            }, 1500);
-        }
-        
-        // 載入遊戲進度
-        function loadGame() {
-            const savedData = localStorage.getItem('summerLoveGameSave');
-            if (savedData) {
-                const parsedData = JSON.parse(savedData);
-                Object.assign(gameData, parsedData);
-                
-                updateCharacterDisplay();
-                loadStory(gameData.storyProgress);
-                updateAffectionDisplay();
-                
-                // 顯示載入成功訊息
-                storyTextElement.textContent = `遊戲進度已載入！（保存時間：${parsedData.saveDate}）`;
-                setTimeout(() => {
-                    loadStory(gameData.storyProgress);
-                }, 2000);
-            } else {
-                storyTextElement.textContent = "沒有找到保存的遊戲進度。";
-                setTimeout(() => {
-                    loadStory(gameData.storyProgress);
-                }, 1500);
-            }
-        }
-        
-        // 事件監聽器
-        restartButton.addEventListener('click', initGame);
-        saveButton.addEventListener('click', saveGame);
-        historyButton.addEventListener('click', showStoryHistory);
-        
-        // 初始化遊戲
-        initGame();
-        
-        // 嘗試載入保存的進度
-        window.addEventListener('load', () => {
-            setTimeout(loadGame, 500);
+            layer.appendChild(btn);
         });
-    </script>
+    },
+
+    advance() {
+        this.state.timeIdx++;
+        if (this.state.timeIdx >= 4) {
+            this.state.timeIdx = 0;
+            this.state.day++;
+        }
+        if (this.state.day > 7) {
+            this.jump('ending_check');
+        } else {
+            this.jump('daily_map');
+        }
+    },
+
+    updateUI() {
+        document.getElementById('ui-day').innerText = `Day ${this.state.day}`;
+        document.getElementById('ui-time').innerText = this.times[this.state.timeIdx];
+        document.getElementById('ui-love').innerText = this.state.love;
+        document.getElementById('ui-int').innerText = this.state.int;
+        document.getElementById('ui-cha').innerText = this.state.cha;
+    }
+};
+
+const sys = {
+    save() { localStorage.setItem('summer_save', JSON.stringify(core.state)); alert('進度已記錄在瀏覽器中！'); },
+    load() {
+        const d = localStorage.getItem('summer_save');
+        if (d) { core.state = JSON.parse(d); core.render(); }
+    }
+};
+
+core.init();
+</script>
 </body>
 </html>

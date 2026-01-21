@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>In Memoriam - Technical Ver.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body { 
+            margin: 0; background: #000; 
+            font-family: 'Courier New', monospace; 
+            overflow: hidden; display: flex; justify-content: center; align-items: center; 
+            height: 100vh; color: #fff; user-select: none; 
+        }
+        
+        #game-container {
+            position: relative; width: 100%; max-width: 600px; height: 100%;
+            background: linear-gradient(180deg, #1a1a1a 0%, #000 100%);
+            border-left: 1px solid #444; border-right: 1px solid #444;
+        }
+
+        canvas { display: block; width: 100%; height: 100%; }
+
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; display: flex; flex-direction: column; align-items: center;
+        }
+
+        #score {
+            margin-top: 20px; font-size: 24px; font-weight: bold; letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        #combo-container {
+            position: absolute; bottom: 30%; text-align: center;
+        }
+        #combo-val { font-size: 70px; font-weight: 800; color: rgba(255,255,255,0.2); }
+        #combo-label { font-size: 14px; color: #888; letter-spacing: 5px; text-transform: uppercase; }
+
+        /* Cinematic Bars */
+        .cinema-bar {
+            position: absolute; left: 0; width: 100%; height: 0; background: #000; z-index: 10; transition: height 1s;
+        }
+        #top-bar { top: 0; }
+        #bottom-bar { bottom: 0; }
+
+        /* Start Screen */
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        
+        h1 { font-size: 28px; letter-spacing: 6px; margin-bottom: 5px; text-transform: uppercase; }
+        .sub { font-size: 12px; color: #666; margin-bottom: 40px; letter-spacing: 2px; }
+        
+        .key-guide { display: flex; gap: 20px; margin-bottom: 40px; }
+        .k { width: 40px; height: 40px; border: 1px solid #444; display: flex; justify-content: center; align-items: center; color: #888; border-radius: 5px; }
+
+        button {
+            padding: 15px 50px; background: #fff; color: #000; border: none;
+            font-size: 16px; font-weight: bold; letter-spacing: 2px; cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { transform: scale(1.1); box-shadow: 0 0 20px #fff; }
+
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="top-bar" class="cinema-bar"></div>
+    <div id="bottom-bar" class="cinema-bar"></div>
+
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui-layer">
+        <div id="score">000000</div>
+        <div id="combo-container">
+            <div id="combo-val"></div>
+            <div id="combo-label"></div>
+        </div>
+    </div>
+
+    <div id="start-screen">
+        <h1>In Memoriam</h1>
+        <div class="sub">Technical Mapping Edition</div>
+        
+        <div class="key-guide">
+            <div class="k">D</div><div class="k">F</div>
+            <div class="k">J</div><div class="k">K</div>
+        </div>
+
+        <button id="start-btn">ENGAGE</button>
+    </div>
+</div>
+
+<script>
+// --- AUDIO ENGINE ---
+const Audio = {
+    ctx: null,
+    out: null,
+    
+    init() {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AC();
+        this.out = this.ctx.createGain();
+        this.out.gain.value = 0.6;
+        
+        // Reverb for atmosphere
+        const verb = this.ctx.createConvolver();
+        this.makeImpulse(verb);
+        this.out.connect(verb);
+        verb.connect(this.ctx.destination);
+        this.out.connect(this.ctx.destination);
+    },
+
+    makeImpulse(node) {
+        const len = this.ctx.sampleRate * 2.5;
+        const b = this.ctx.createBuffer(2, len, this.ctx.sampleRate);
+        for(let i=0;i<len;i++) {
+            const d = Math.pow(1-i/len, 3);
+            b.getChannelData(0)[i] = (Math.random()*2-1)*d*0.4;
+            b.getChannelData(1)[i] = (Math.random()*2-1)*d*0.4;
+        }
+        node.buffer = b;
+    },
+
+    playTone(freq, t) {
+        const o = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        o.type = 'triangle';
+        o.frequency.value = freq;
+        
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.3, t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.001, t+0.6);
+        
+        o.connect(g); g.connect(this.out);
+        o.start(t); o.stop(t+0.6);
+    },
+
+    // Triggered on key press: Plays a rapid arpeggio burst
+    playBurst(rootFreq) {
+        const now = this.ctx.currentTime;
+        // Play root + 5th + octave rapid
+        [1, 1.5, 2].forEach((m, i) => {
+            this.playTone(rootFreq * m, now + (i*0.05));
+        });
+    }
+};
+
+// --- MAPPING LOGIC (The Fix) ---
+const N = { G:196, F:174, Eb:155, D:146 };
+
+function generateMap() {
+    let notes = [];
+    let t = 2.0;
+    const beat = 60 / 135; 
+
+    // Helper: Push note
+    const n = (lane, freq, timeOffset=0, type='normal') => {
+        notes.push({ lane, f: freq, t: t + timeOffset, type, hit:false });
+    };
+
+    // Helper: Patterns
+    // 1. Alternating (Trill)
+    const trill = (f) => {
+        n(1, f); n(2, f, beat*0.5); n(1, f, beat*1.0); n(2, f, beat*1.5);
+        t += beat * 2;
+    };
+    
+    // 2. Stairs Down (Gm -> Dm feel)
+    const stairDown = (f) => {
+        n(3, f); n(2, f, beat*0.5); n(1, f, beat*1.0); n(0, f, beat*1.5);
+        t += beat * 2;
+    };
+
+    // 3. Wide Jumps (Harder)
+    const jump = (f) => {
+        n(0, f); n(3, f, beat*0.5); n(1, f, beat*1.0); n(2, f, beat*1.5);
+        t += beat * 2;
+    };
+
+    // 4. Double (Impact)
+    const double = (f) => {
+        n(0, f); n(3, f); // Boom
+        t += beat * 2; // Give some rest or continue
+    };
+
+    // --- SONG STRUCTURE ---
+
+    // PART 1: INTRO (Center lanes focus)
+    // 4 Bars
+    for(let i=0; i<4; i++) trill(N.G);
+
+    // PART 2: MAIN THEME (Movement)
+    // Gm -> F -> Eb -> Dm
+    for(let i=0; i<2; i++) {
+        stairDown(N.G); // 3-2-1-0
+        stairDown(N.F); 
+        stairDown(N.Eb);
+        stairDown(N.D);
+    }
+
+    // PART 3: TENSION (Jumps)
+    // Randomize feel
+    for(let i=0; i<2; i++) {
+        jump(N.G); jump(N.F);
+        jump(N.Eb); jump(N.D);
+    }
+
+    // PART 4: CLIMAX (Doubles & Density)
+    // Heavy hits
+    for(let i=0; i<2; i++) {
+        // Gm
+        double(N.G); n(1, N.G, beat*1.0); n(2, N.G, beat*1.5);
+        // F
+        double(N.F); n(1, N.F, beat*1.0); n(2, N.F, beat*1.5);
+        // Eb
+        double(N.Eb); n(1, N.Eb, beat*1.0); n(2, N.Eb, beat*1.5);
+        // Dm
+        double(N.D); n(1, N.D, beat*1.0); n(2, N.D, beat*1.5);
+        
+        t += beat * 2; // Fix timing accumulation from the manual 'double' function adds
+    }
+
+    // OUTRO
+    n(0, N.G); n(3, N.G);
+
+    return notes;
+}
+
+const LEVEL = generateMap();
+
+// --- GAME ENGINE ---
+const Game = {
+    c: document.getElementById('gameCanvas'),
+    ctx: null,
+    w:0, h:0, lw:0, hitY:0,
+    
+    notes: [],
+    inputs: [0,0,0,0],
+    state: { playing: false, t0: 0, score: 0, combo: 0 },
+    fx: [],
+
+    init() {
+        this.ctx = this.c.getContext('2d');
+        this.resize();
+        window.onresize = () => this.resize();
+        this.bind();
+        
+        document.getElementById('start-screen').style.display = 'none';
+        
+        // Cinema Effect
+        setTimeout(() => {
+            document.getElementById('top-bar').style.height = '10%';
+            document.getElementById('bottom-bar').style.height = '10%';
+        }, 500);
+
+        Audio.init();
+        this.start();
+    },
+
+    resize() {
+        this.w = this.c.parentElement.clientWidth;
+        this.h = this.c.parentElement.clientHeight;
+        this.c.width = this.w; this.c.height = this.h;
+        this.lw = this.w / 4;
+        this.hitY = this.h * 0.8;
+    },
+
+    bind() {
+        const k = ['d','f','j','k'];
+        const press = (i) => {
+            if(this.inputs[i]) return;
+            this.inputs[i] = 1;
+            this.check(i);
+            // Visual feedback on lane
+            this.fx.push({type:'lane', lane:i, life:1});
+        };
+        const release = (i) => this.inputs[i] = 0;
+
+        document.onkeydown = e => { const i=k.indexOf(e.key); if(i>-1) press(i); };
+        document.onkeyup = e => { const i=k.indexOf(e.key); if(i>-1) release(i); };
+        
+        this.c.ontouchstart = e => {
+            e.preventDefault();
+            [...e.changedTouches].forEach(t => {
+                const l = Math.floor(t.clientX/this.lw);
+                if(l>=0&&l<4) press(l);
+            });
+        };
+        this.c.ontouchend = e => { e.preventDefault(); this.inputs.fill(0); };
+    },
+
+    start() {
+        this.state.playing = true;
+        this.state.t0 = Audio.ctx.currentTime;
+        this.notes = JSON.parse(JSON.stringify(LEVEL));
+        this.loop();
+    },
+
+    check(lane) {
+        const now = Audio.ctx.currentTime - this.state.t0;
+        // Find hit within window (0.15s = standard rhythm game tight window)
+        const note = this.notes.find(n => !n.hit && n.lane === lane && Math.abs(n.t - now) < 0.2);
+        
+        if(note) {
+            note.hit = true;
+            this.state.combo++;
+            this.state.score += 100 + (this.state.combo * 10);
+            
+            Audio.playBurst(note.f);
+            
+            // FX
+            this.fx.push({type:'hit', x: (lane+0.5)*this.lw, y: this.hitY, life:1});
+            this.updateUI();
+        } else {
+            // Ghost tap handling (optional: reset combo?)
+            // For now, let's keep it forgiving but no score
+        }
+    },
+
+    updateUI() {
+        document.getElementById('score').innerText = this.state.score.toString().padStart(6,'0');
+        const c = document.getElementById('combo-container');
+        document.getElementById('combo-val').innerText = this.state.combo;
+        document.getElementById('combo-label').innerText = this.state.combo > 5 ? "COMBO" : "";
+        
+        // Pulse effect
+        c.style.transform = "scale(1.2)";
+        setTimeout(() => c.style.transform = "scale(1)", 100);
+    },
+
+    loop() {
+        if(!this.state.playing) return;
+        const now = Audio.ctx.currentTime - this.state.t0;
+        const spd = 1.3; // Speed (Lower is faster visually)
+
+        // Clear
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0,0,this.w,this.h);
+
+        // Grid
+        this.ctx.strokeStyle = '#333';
+        this.ctx.lineWidth = 2;
+        for(let i=1;i<4;i++) {
+            this.ctx.beginPath(); this.ctx.moveTo(i*this.lw, 0); this.ctx.lineTo(i*this.lw, this.h); this.ctx.stroke();
+        }
+
+        // Hit Line
+        this.ctx.strokeStyle = '#fff';
+        this.ctx.beginPath(); this.ctx.moveTo(0, this.hitY); this.ctx.lineTo(this.w, this.hitY); this.ctx.stroke();
+
+        // Logic & Draw Notes
+        this.notes.forEach(n => {
+            if(n.hit) return;
+            
+            // Miss check
+            if(now > n.t + 0.25) {
+                n.hit = true; // Gone
+                this.state.combo = 0;
+                this.updateUI();
+                return;
+            }
+
+            const y = this.hitY - (n.t - now) * (this.hitY/spd);
+            
+            if(y > -50 && y < this.h) {
+                // Different color for double hits visual cue?
+                this.ctx.fillStyle = '#fff';
+                // Note body
+                this.ctx.fillRect(n.lane*this.lw + 5, y-10, this.lw-10, 20);
+                
+                // Trail
+                const grad = this.ctx.createLinearGradient(0, y, 0, y-100);
+                grad.addColorStop(0, 'rgba(255,255,255,0.3)');
+                grad.addColorStop(1, 'rgba(255,255,255,0)');
+                this.ctx.fillStyle = grad;
+                this.ctx.fillRect(n.lane*this.lw + 5, y-100, this.lw-10, 100);
+            }
+        });
+
+        // Draw FX
+        this.fx.forEach((f, i) => {
+            if(f.type === 'hit') {
+                this.ctx.strokeStyle = `rgba(255,255,255,${f.life})`;
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.arc(f.x, f.y, (1-f.life)*50, 0, Math.PI*2);
+                this.ctx.stroke();
+            } else if (f.type === 'lane') {
+                this.ctx.fillStyle = `rgba(255,255,255,${f.life * 0.2})`;
+                this.ctx.fillRect(f.lane*this.lw, 0, this.lw, this.h);
+            }
+            f.life -= 0.1;
+        });
+        this.fx = this.fx.filter(f => f.life > 0);
+
+        if(now > 35) { // End of snippet
+             this.state.playing = false;
+             alert("Section Complete. Score: " + this.state.score);
+             location.reload();
+        }
+
+        requestAnimationFrame(() => this.loop());
+    }
+};
+
+document.getElementById('start-btn').onclick = () => Game.init();
+</script>
+</body>
+</html>

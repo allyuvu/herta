@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>完整音階鍵盤小提琴</title>
+    <style>
+        :root {
+            --wood-color: #8b4513;
+            --wood-light: #a0522d;
+            --gold-color: #ffd700;
+            --bg-color: #222;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #game-stage {
+            position: relative;
+            width: 900px;
+            height: 550px;
+            background: #1a1a1a;
+            border: 5px solid #333;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* UI 蓋層 */
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .note-indicator {
+            font-size: 64px;
+            font-weight: bold;
+            color: var(--gold-color);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            pointer-events: none;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 0;
+        }
+
+        .key {
+            display: inline-block;
+            background: #444;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 2px;
+            font-family: monospace;
+            border-bottom: 2px solid #222;
+        }
+
+        /* 開始遮罩 */
+        #start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        h1 { color: var(--gold-color); margin-bottom: 20px; font-size: 42px; text-shadow: 0 0 10px var(--gold-color); }
+        
+        button {
+            background: var(--gold-color);
+            color: #000;
+            border: none;
+            padding: 18px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+        button:hover { transform: scale(1.05); }
+
+        /* 琴弦視覺化標籤 */
+        .string-labels {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .note-key {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0.5;
+            transition: all 0.1s;
+        }
+
+        .note-key.active {
+            opacity: 1;
+            transform: translateY(-5px);
+        }
+
+        .note-key .key-num {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--gold-color);
+            background: #333;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            margin-bottom: 5px;
+        }
+
+        .note-key .note-name {
+            font-size: 14px;
+            color: #fff;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-stage">
+        <canvas id="gameCanvas" width="900" height="550"></canvas>
+
+        <div id="ui-layer">
+            <div class="note-indicator" id="current-note">Ready</div>
+        </div>
+
+        <!-- 音階提示 (視覺對應) -->
+        <div class="string-labels" id="string-container">
+            <!-- 由 JS 生成 -->
+        </div>
+
+        <div class="controls-hint">
+            <span class="key">←</span> <span class="key">→</span> 拉弓 &nbsp;|&nbsp; 
+            數字鍵 <span class="key">1</span> ~ <span class="key">8</span> 換音 &nbsp;|&nbsp; 
+            <span class="key">Space</span> 強音
+        </div>
+
+        <div id="start-overlay">
+            <h1>完整音階小提琴</h1>
+            <p style="color:#aaa; margin-bottom: 30px; font-size: 18px;">Do Re Mi Fa Sol La Ti Do</p>
+            <button onclick="startGame()">開始演奏</button>
+        </div>
+    </div>
+
+<script>
+    // --- 音頻系統 ---
+    let audioCtx;
+    let masterGain;
+    let violinOsc;
+    let violinGain;
+    let filterNode;
+    let isPlaying = false;
+
+    // 完整 C 大調音階頻率表 (C4 ~ C5)
+    const notesData = [
+        { name: 'Do', freq: 261.63 },
+        { name: 'Re', freq: 293.66 },
+        { name: 'Mi', freq: 329.63 },
+        { name: 'Fa', freq: 349.23 },
+        { name: 'Sol', freq: 392.00 },
+        { name: 'La', freq: 440.00 },
+        { name: 'Ti', freq: 493.88 },
+        { name: 'Do', freq: 523.25 } // High C
+    ];
+    
+    let currentNoteIndex = 0; // 預設 C4 (Index 0)
+
+    function initAudio() {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+        
+        masterGain = audioCtx.createGain();
+        masterGain.connect(audioCtx.destination);
+        masterGain.gain.value = 0.8; 
+    }
+
+    function startNote() {
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        if (!isPlaying) {
+            violinOsc = audioCtx.createOscillator();
+            violinGain = audioCtx.createGain();
+            filterNode = audioCtx.createBiquadFilter();
+
+            violinOsc.type = 'sawtooth'; // 弦樂波形
+            violinOsc.frequency.value = notesData[currentNoteIndex].freq;
+
+            filterNode.type = 'lowpass';
+            filterNode.frequency.value = 1500; 
+            filterNode.Q.value = 1;
+
+            violinOsc.connect(filterNode);
+            filterNode.connect(violinGain);
+            violinGain.connect(masterGain);
+
+            // Attack
+            violinGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            violinGain.gain.linearRampToValueAtTime(getCurrentVolume(), audioCtx.currentTime + 0.1);
+
+            violinOsc.start();
+            isPlaying = true;
+        } else {
+            // Portamento (平滑滑音)
+            violinOsc.frequency.setTargetAtTime(notesData[currentNoteIndex].freq, audioCtx.currentTime, 0.05);
+            violinGain.gain.setTargetAtTime(getCurrentVolume(), audioCtx.currentTime, 0.1);
+        }
+    }
+
+    function stopNote() {
+        if (isPlaying && violinGain) {
+            // Release
+            violinGain.gain.cancelScheduledValues(audioCtx.currentTime);
+            violinGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
+            
+            const oscToStop = violinOsc;
+            setTimeout(() => {
+                oscToStop.stop();
+                oscToStop.disconnect();
+            }, 250);
+            
+            isPlaying = false;
+        }
+    }
+
+    function updateNotePitch(index) {
+        if (index >= 0 && index < notesData.length) {
+            currentNoteIndex = index;
+            if (isPlaying && violinOsc) {
+                violinOsc.frequency.setTargetAtTime(notesData[currentNoteIndex].freq, audioCtx.currentTime, 0.05);
+            }
+            updateUI();
+        }
+    }
+
+    function getCurrentVolume() {
+        return keysPressed['Space'] ? 0.7 : 0.4;
+    }
+
+    function updateTimbre() {
+        if (isPlaying && filterNode) {
+            filterNode.frequency.setTargetAtTime(keysPressed['Space'] ? 3000 : 1500, audioCtx.currentTime, 0.1);
+        }
+    }
+
+    // --- 遊戲渲染與邏輯 ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const noteDisplay = document.getElementById('current-note');
+    const stringContainer = document.getElementById('string-container');
+
+    const keysPressed = {};
+    
+    // 小提琴參數
+    const violin = {
+        x: 450, // 畫面中心
+        y: 280,
+        width: 200,
+        height: 300
+    };
+
+    // 琴弓參數
+    const bow = {
+        x: 450,
+        y: 280,
+        width: 350,
+        height: 12,
+        speed: 0
+    };
+
+    // 粒子軌跡
+    let trail = [];
+
+    // 初始化琴弦 UI
+    function initStringUI() {
+        stringContainer.innerHTML = '';
+        notesData.forEach((note, index) => {
+            const div = document.createElement('div');
+            div.className = 'note-key';
+            div.id = `note-key-${index}`;
+            div.innerHTML = `
+                <div class="key-num">${index + 1}</div>
+                <div class="note-name">${note.name}</div>
+            `;
+            stringContainer.appendChild(div);
+        });
+    }
+
+    // 鍵盤監聽
+    window.addEventListener('keydown', (e) => {
+        const code = e.code;
+        keysPressed[code] = true;
+        
+        // 處理 1-8 數字鍵
+        if (code.startsWith('Digit')) {
+            const num = parseInt(code.replace('Digit', ''));
+            if (num >= 1 && num <= 8) {
+                updateNotePitch(num - 1);
+            }
+        }
+        
+        // 處理小鍵盤數字鍵 (Numpad)
+        if (code.startsWith('Numpad')) {
+            const num = parseInt(code.replace('Numpad', ''));
+            if (num >= 1 && num <= 8) {
+                updateNotePitch(num - 1);
+            }
+        }
+
+        if (code === 'Space') {
+            updateTimbre();
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        keysPressed[e.code] = false;
+        if (e.code === 'Space') {
+            updateTimbre();
+        }
+    });
+
+    function updateUI() {
+        const noteInfo = notesData[currentNoteIndex];
+        noteDisplay.textContent = `${noteInfo.name} (${Math.round(noteInfo.freq)}Hz)`;
+        
+        // 更新下方按鍵高亮
+        for(let i=0; i<notesData.length; i++) {
+            const el = document.getElementById(`note-key-${i}`);
+            if (i === currentNoteIndex) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        }
+    }
+
+    function startGame() {
+        initAudio();
+        initStringUI();
+        document.getElementById('start-overlay').style.display = 'none';
+        updateUI();
+        gameLoop();
+    }
+
+    // --- 繪圖函數 ---
+    
+    function drawViolin() {
+        ctx.save();
+        ctx.translate(violin.x, violin.y);
+        
+        // 陰影
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 20;
+
+        // 琴身 - 下半部
+        ctx.fillStyle = '#8b4513'; // SaddleBrown
+        ctx.beginPath();
+        ctx.ellipse(0, 20, 70, 100, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 琴身 - 上半部 (琴頸連接處)
+        ctx.fillStyle = '#a0522d'; // Sienna
+        ctx.beginPath();
+        ctx.ellipse(0, -100, 55, 80, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 腰部修飾 (C型彎曲)
+        ctx.fillStyle = '#1a1a1a'; // 背景色，模擬挖空
+        ctx.beginPath();
+        ctx.arc(-50, -40, 20, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(50, -40, 20, 0, Math.PI*2);
+        ctx.fill();
+        
+        // 補回中間
+        ctx.fillStyle = '#8b4513';
+        ctx.beginPath();
+        ctx.rect(-40, -60, 80, 40);
+        ctx.fill();
+
+        // 琴頸
+        ctx.fillStyle = '#3e2723'; // 深木色
+        ctx.fillRect(-18, -180, 36, 120);
+        
+        // 琴頭
+        ctx.beginPath();
+        ctx.arc(0, -195, 28, 0, Math.PI*2);
+        ctx.fill();
+        // 弦軸盒
+        ctx.fillRect(-15, -215, 30, 20);
+        // 弦軸
+        ctx.fillStyle = '#2d1e18';
+        ctx.fillRect(-25, -210, 10, 30); // 左上
+        ctx.fillRect(15, -210, 10, 30);  // 右上
+
+        // 指板 - 黑色
+        ctx.fillStyle = '#111';
+        ctx.fillRect(-12, -180, 24, 160);
+
+        // 琴橋
+        ctx.fillStyle = '#daa520'; // 金色木頭
+        ctx.beginPath();
+        ctx.moveTo(-40, 30);
+        ctx.quadraticCurveTo(0, 40, 40, 30);
+        ctx.quadraticCurveTo(0, 20, -40, 30);
+        ctx.fill();
+
+        // F孔 - 左
+        ctx.strokeStyle = '#2d1e18';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-25, 0); 
+        ctx.bezierCurveTo(-35, 30, -15, 60, -25, 90);
+        ctx.stroke();
+        // F孔 - 右
+        ctx.beginPath();
+        ctx.moveTo(25, 0); 
+        ctx.bezierCurveTo(35, 30, 15, 60, 25, 90);
+        ctx.stroke();
+
+        // 琴弦 (4根視覺上的弦)
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 1;
+        const stringX = [-10, -3, 3, 10];
+        stringX.forEach(x => {
+            ctx.beginPath();
+            ctx.moveTo(x, -180);
+            ctx.lineTo(x, 100);
+            ctx.stroke();
+        });
+
+        // 尾栓
+        ctx.fillStyle = '#111';
+        ctx.beginPath();
+        ctx.arc(0, 110, 8, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    function drawBow() {
+        // 更新物理位置
+        const moveSpeed = 10;
+        let moving = false;
+
+        if (keysPressed['ArrowLeft'] || keysPressed['KeyA']) {
+            bow.x -= moveSpeed;
+            moving = true;
+        } else if (keysPressed['ArrowRight'] || keysPressed['KeyD']) {
+            bow.x += moveSpeed;
+            moving = true;
+        }
+
+        // 邊界
+        if (bow.x < 100) bow.x = 100;
+        if (bow.x > 800) bow.x = 800;
+
+        // 聲音觸發
+        if (moving) {
+            startNote();
+        } else {
+            stopNote();
+        }
+
+        // 軌跡粒子系統
+        if (moving) {
+            // 根據按鍵壓力改變粒子大小
+            const pressure = keysPressed['Space'] ? 1.5 : 1;
+            trail.push({
+                x: bow.x, 
+                y: violin.y, 
+                life: 1.0, 
+                width: pressure * (Math.random() * 4 + 2),
+                color: `rgba(255, ${220 + Math.random()*35}, 0,`
+            });
+        }
+
+        // 繪製軌跡
+        for (let i = 0; i < trail.length; i++) {
+            const p = trail[i];
+            ctx.fillStyle = p.color + (p.life * 0.5) + ')';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.width * (2 - p.life), 0, Math.PI*2);
+            ctx.fill();
+            p.life -= 0.03;
+        }
+        trail = trail.filter(p => p.life > 0);
+
+        // 繪製琴弓
+        ctx.save();
+        ctx.translate(bow.x, bow.y);
+        
+        // 陰影
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 5;
+
+        // 弓毛 (白色) - 這是接觸弦的地方
+        ctx.fillStyle = '#eee';
+        ctx.fillRect(-bow.width/2, -2, bow.width, 4);
+
+        // 弓桿 (深褐色) - 在弓毛上方
+        ctx.fillStyle = '#5d4037';
+        ctx.fillRect(-bow.width/2, -10, bow.width, 8);
+
+        ctx.restore();
+    }
+
+    function gameLoop() {
+        // 背景清空
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 背景光暈
+        const gradient = ctx.createRadialGradient(violin.x, violin.y, 50, violin.x, violin.y, 500);
+        gradient.addColorStop(0, 'rgba(139, 69, 19, 0.1)');
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0,0,canvas.width, canvas.height);
+
+        drawViolin();
+        drawBow();
+
+        requestAnimationFrame(gameLoop);
+    }
+
+</script>
+</body>
+</html>
