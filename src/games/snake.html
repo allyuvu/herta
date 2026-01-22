@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>貪吃蛇遊戲</title>
+    <link rel="stylesheet" href="/styles/snake.css">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <h1>🐍 貪吃蛇</h1>
+            <p class="subtitle">經典遊戲重現，挑戰最高分！</p>
+        </header>
+
+        <main class="game-main">
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="600" height="400"></canvas>
+                <div class="game-overlay" id="gameOverlay">
+                    <div class="overlay-content">
+                        <h2 id="overlayTitle">遊戲準備</h2>
+                        <p id="overlayMessage">按開始按鈕開始遊戲</p>
+                        <button id="overlayButton" class="primary-btn">開始遊戲</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-controls">
+                <div class="score-panel">
+                    <div class="score-item">
+                        <span class="score-label">分數</span>
+                        <span class="score-value" id="score">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">最高分</span>
+                        <span class="score-value" id="highScore">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">等級</span>
+                        <span class="score-value" id="level">1</span>
+                    </div>
+                </div>
+
+                <div class="control-buttons">
+                    <button id="startBtn" class="control-btn start-btn">開始</button>
+                    <button id="pauseBtn" class="control-btn pause-btn">暫停</button>
+                    <button id="resetBtn" class="control-btn reset-btn">重置</button>
+                </div>
+
+                <div class="mobile-controls" id="mobileControls">
+                    <div class="control-grid">
+                        <button class="mobile-control-btn" data-direction="up">↑</button>
+                        <button class="mobile-control-btn" data-direction="left">←</button>
+                        <button class="mobile-control-btn" data-direction="down">↓</button>
+                        <button class="mobile-control-btn" data-direction="right">→</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="game-footer">
+            <div class="instructions">
+                <h3>遊戲說明</h3>
+                <ul>
+                    <li>使用方向鍵控制蛇的移動</li>
+                    <li>吃到紅色蘋果增加分數</li>
+                    <li>避免撞到牆壁或自己的身體</li>
+                    <li>每50分提升一個等級，速度會增加</li>
+                </ul>
+            </div>
+        </footer>
+    </div>
+
+    <script type="module" src="/games/SnakeGame.js"></script>
+</body>
+</html>

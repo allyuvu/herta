@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Easy Piano: Fur Elise</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body { 
+            margin: 0; background: #1e1e24; 
+            font-family: 'Arial', sans-serif; 
+            overflow: hidden; display: flex; justify-content: center; align-items: center; 
+            height: 100vh; color: #fff; user-select: none; 
+        }
+        
+        #game-container {
+            position: relative; width: 100%; max-width: 500px; height: 100%;
+            background: #2b2d42;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border-left: 5px solid #8d99ae; border-right: 5px solid #8d99ae;
+        }
+
+        canvas { display: block; width: 100%; height: 100%; }
+
+        #ui {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; display: flex; flex-direction: column; align-items: center;
+        }
+
+        .header { margin-top: 40px; text-align: center; }
+        h1 { margin: 0; font-size: 28px; color: #edf2f4; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        p { color: #8d99ae; margin-top: 5px; font-size: 14px; }
+
+        #start-btn {
+            pointer-events: auto; margin-top: 50%;
+            padding: 20px 60px; font-size: 22px; 
+            background: #ef233c; color: #fff; border: none; border-radius: 50px;
+            box-shadow: 0 10px 20px rgba(239, 35, 60, 0.4);
+            cursor: pointer; transition: transform 0.1s;
+        }
+        #start-btn:active { transform: scale(0.95); }
+
+        .hint {
+            position: absolute; bottom: 20%; width: 100%; text-align: center;
+            color: #8d99ae; font-size: 14px; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%{opacity:0.5;} 50%{opacity:1;} 100%{opacity:0.5;} }
+        
+        /* Piano Keys Visual at bottom */
+        .keys-area {
+            position: absolute; bottom: 0; width: 100%; height: 15%;
+            display: flex;
+        }
+        .key {
+            flex: 1; border-right: 1px solid #1e1e24; background: rgba(255,255,255,0.1);
+            display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.3);
+        }
+        .key:last-child { border: none; }
+        .key.active { background: linear-gradient(to top, #ef233c, transparent); }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="c"></canvas>
+    <div class="keys-area" id="keys-area">
+        <div class="key">D</div><div class="key">F</div><div class="key">J</div><div class="key">K</div>
+    </div>
+    
+    <div id="ui">
+        <div class="header">
+            <h1>Fur Elise</h1>
+            <p>Beethoven • Easy Mode</p>
+        </div>
+        <button id="start-btn" onclick="Game.init()">PLAY MUSIC</button>
+        <div class="hint" id="hint-msg" style="display:none">Tap correct column (or any key!)</div>
+    </div>
+</div>
+
+<script>
+/**
+ * --- PIANO ENGINE (Soft & Slow) ---
+ */
+const AudioEngine = {
+    ctx: null,
+    init() {
+        if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    },
+    play(freq) {
+        if(!this.ctx) return;
+        const t = this.ctx.currentTime;
+        
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        // Sine wave for smooth piano-like tone
+        osc.type = 'sine'; 
+        osc.frequency.value = freq;
+        
+        // Piano Envelope
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.5, t + 0.02); // Attack
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 2.0); // Long Sustain
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.start(t);
+        osc.stop(t + 2.0);
+    }
+};
+
+/**
+ * --- BEETHOVEN DATA (Correct Melody) ---
+ */
+const N = { 
+    E4:329.6, A4:440, B4:493.9, 
+    C5:523.3, D5:587.3, Ds5:622.3, E5:659.3 
+};
+
+// The Main Theme Sequence
+// Logic: { note: Frequency, lane: 0-3 (Visual only) }
+const Song = [
+    // E D# E D# E B D C A
+    {f:N.E5, l:3}, {f:N.Ds5, l:2}, {f:N.E5, l:3}, {f:N.Ds5, l:2}, {f:N.E5, l:3}, {f:N.B4, l:1}, {f:N.D5, l:2}, {f:N.C5, l:1}, {f:N.A4, l:0},
+    // Rest... C E A B
+    {f:N.C5, l:1}, {f:N.E4, l:0}, {f:N.A4, l:0}, {f:N.B4, l:1},
+    // Rest... E G# B C
+    {f:N.E4, l:0}, {f:N.Ds5, l:2}, {f:N.B4, l:1}, {f:N.C5, l:1},
+    // Repeat Start
+    {f:N.E4, l:0}, {f:N.E5, l:3}, {f:N.Ds5, l:2}, {f:N.E5, l:3}, {f:N.Ds5, l:2}, {f:N.E5, l:3}, {f:N.B4, l:1}, {f:N.D5, l:2}, {f:N.C5, l:1}, {f:N.A4, l:0},
+    // Ending phrase
+    {f:N.C5, l:1}, {f:N.E4, l:0}, {f:N.A4, l:0}, {f:N.B4, l:1},
+    {f:N.E4, l:0}, {f:N.C5, l:1}, {f:N.B4, l:1}, {f:N.A4, l:0}
+];
+
+// Double length for longer play
+const FullSong = [...Song, ...Song];
+
+/**
+ * --- GAME ENGINE ---
+ */
+const Game = {
+    c: document.getElementById('c'),
+    ctx: null, w:0, h:0, lw:0, hitY:0,
+    
+    notes: [], // Active falling notes
+    songIndex: 0,
+    nextSpawnTime: 0,
+    startTime: 0,
+    playing: false,
+    speed: 150, // SLOW SPEED (Pixels per second)
+    
+    // Fail-safe logic
+    lastHitIndex: -1,
+
+    init() {
+        AudioEngine.init();
+        this.ctx = this.c.getContext('2d');
+        this.resize();
+        window.onresize = () => this.resize();
+        
+        document.getElementById('start-btn').style.display = 'none';
+        document.getElementById('hint-msg').style.display = 'block';
+        
+        // Prepare notes
+        // Spacing notes out nicely (Fixed Rhythm for visuals)
+        let time = 1.0; 
+        const gap = 0.6; // 0.6 seconds between notes (Slow tempo)
+        
+        this.notes = FullSong.map((n, i) => {
+            const obj = {
+                t: time,
+                l: n.l,
+                f: n.f,
+                hit: false,
+                id: i
+            };
+            time += gap;
+            return obj;
+        });
+
+        this.startTime = AudioEngine.ctx.currentTime;
+        this.playing = true;
+        this.bind();
+        this.loop();
+    },
+
+    resize() {
+        this.w = this.c.parentElement.clientWidth;
+        this.h = this.c.parentElement.clientHeight;
+        this.c.width = this.w; this.c.height = this.h;
+        this.lw = this.w / 4;
+        this.hitY = this.h * 0.8; // Hit line at 80% height
+    },
+
+    bind() {
+        const k = ['d','f','j','k'];
+        const act = (i) => {
+            if(!this.playing) return;
+            this.visualClick(i);
+            this.checkHit(i);
+        };
+
+        document.onkeydown = e => { const i=k.indexOf(e.key); if(i>-1 && !e.repeat) act(i); };
+        
+        this.c.ontouchstart = e => { 
+            e.preventDefault();
+            [...e.changedTouches].forEach(t => act(Math.floor(t.clientX/this.lw)));
+        };
+    },
+    
+    visualClick(i) {
+        if(i<0 || i>3) return;
+        const k = document.querySelectorAll('.key')[i];
+        k.classList.add('active');
+        setTimeout(() => k.classList.remove('active'), 100);
+    },
+
+    checkHit(lane) {
+        const now = AudioEngine.ctx.currentTime - this.startTime;
+        
+        // LOGIC: Find the closest note that hasn't been played
+        // We look for the FIRST unhit note.
+        const target = this.notes.find(n => !n.hit);
+        
+        if(target) {
+            // FAIL-SAFE MAGIC:
+            // Even if you press the WRONG lane, if the timing is somewhat close,
+            // we play the CORRECT sound.
+            // But we only mark it "visually hit" if lane matches OR if it's "close enough" 
+            // to avoid frustration.
+            
+            // Actually, let's make it strict on visual, but generous on sound.
+            
+            // Distance check
+            const dist = Math.abs(target.t - now);
+            
+            if(dist < 0.5) { // Very generous window (0.5s)
+                target.hit = true;
+                AudioEngine.play(target.f); // Play the CORRECT frequency from data
+                
+                // Visual Effect
+                this.createSparkle(target.l);
+            }
+        }
+    },
+    
+    createSparkle(lane) {
+        // Simple visual feedback
+        this.ctx.fillStyle = '#fff';
+        this.ctx.fillRect(lane*this.lw, this.hitY, this.lw, 10);
+    },
+
+    loop() {
+        if(!this.playing) return;
+        requestAnimationFrame(() => this.loop());
+        
+        // Background
+        this.ctx.fillStyle = '#2b2d42';
+        this.ctx.fillRect(0,0,this.w,this.h);
+        
+        const now = AudioEngine.ctx.currentTime - this.startTime;
+
+        // Draw Lanes
+        this.ctx.strokeStyle = '#3d405b';
+        for(let i=0; i<4; i++) {
+            this.ctx.beginPath(); this.ctx.moveTo(i*this.lw, 0); this.ctx.lineTo(i*this.lw, this.h); this.ctx.stroke();
+        }
+        
+        // Hit Line
+        this.ctx.strokeStyle = '#ef233c';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath(); this.ctx.moveTo(0, this.hitY); this.ctx.lineTo(this.w, this.hitY); this.ctx.stroke();
+
+        // Draw Notes
+        this.notes.forEach(n => {
+            if(n.hit) return;
+            
+            const y = this.hitY - (n.t - now) * this.speed;
+            
+            if(y > -50 && y < this.h + 20) {
+                // Color based on lane
+                const colors = ['#8d99ae', '#edf2f4', '#edf2f4', '#8d99ae'];
+                this.ctx.fillStyle = colors[n.l];
+                
+                // Draw rounded rect
+                this.ctx.fillRect(n.l*this.lw + 5, y - 30, this.lw - 10, 30);
+                
+                // Auto-play / Miss logic
+                // If the note goes WAY past the line (user fell asleep), we can either play it automatically 
+                // or just let it pass. To prevent "Wrong Song" feeling, let's just let it fade.
+            }
+        });
+        
+        // End condition
+        const last = this.notes[this.notes.length-1];
+        if(now > last.t + 2) {
+            this.playing = false;
+            document.querySelector('.header h1').innerText = "FINISH";
+            document.getElementById('start-btn').style.display = 'block';
+            document.getElementById('start-btn').innerText = "REPLAY";
+        }
+    }
+};
+</script>
+</body>
+</html>

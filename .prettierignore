@@ -1,0 +1,115 @@
+# Ignore build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Ignore dependencies
+node_modules/
+
+# Ignore environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Ignore runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Ignore coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Ignore nyc test coverage
+.nyc_output
+
+# Ignore dependency directories
+jspm_packages/
+
+# Ignore TypeScript cache
+*.tsbuildinfo
+
+# Ignore optional npm cache directory
+.npm
+
+# Ignore optional eslint cache
+.eslintcache
+
+# Ignore stylelint cache
+.stylelintcache
+
+# Ignore Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Ignore optional REPL history
+.node_repl_history
+
+# Ignore output of 'npm pack'
+*.tgz
+
+# Ignore Yarn Integrity file
+.yarn-integrity
+
+# Ignore parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Ignore Next.js build output
+.next
+
+# Ignore Nuxt.js build / generate output
+.nuxt
+
+# Ignore Gatsby files
+.cache/
+public
+
+# Ignore Storybook build outputs
+.out
+.storybook-out
+
+# Ignore Temporary folders
+tmp/
+temp/
+
+# Ignore Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Ignore legacy game files (they'll be moved to public/legacy)
+legacy/
+*.html.bak
+
+# Ignore test artifacts
+test-results/
+playwright-report/
+test-results.xml
+
+# Ignore local development files
+.local/
+local/
