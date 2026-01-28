@@ -1,267 +1,172 @@
 # AGENTS.md - Herta Game Collection
 
-This file contains guidelines and commands for agentic coding agents working on this HTML5 game collection repository.
+Guidelines and commands for agentic coding agents working on this HTML5 game collection repository.
 
 ## Project Overview
 
-This is a modern HTML5 game collection featuring 11 interactive games built with TypeScript, Vite, and modern web technologies. The project uses a modular architecture with shared game engine components.
+Collection of HTML5 games with vanilla JavaScript and CSS. Self-contained HTML files with embedded styles and scripts. Uses Vitest for testing with mocked browser APIs.
 
 ## Build Commands
 
 ### Development
 ```bash
-npm run dev          # Start development server (http://localhost:3000)
-npm run preview      # Preview production build
-```
-
-### Building
-```bash
-npm run build        # Build for production
+# Games run directly in browser - no build required
+# Open HTML files directly in browser for testing
 ```
 
 ### Testing
 ```bash
-npm run test         # Run all tests
-npm run test:ui      # Run tests with UI interface
-npm run test:coverage # Run tests with coverage report
-```
-
-### Code Quality
-```bash
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint issues automatically
-npm run format       # Format code with Prettier
-npm run format:check # Check code formatting
-npm run typecheck    # Run TypeScript type checking
+npm test              # Run all tests using Vitest
+npm run test:coverage # Run tests with coverage report (≥80% required)
 ```
 
 ### Single Test Commands
 ```bash
-# Run specific test file
-npm run test -- tests/engine/BaseGame.test.ts
-
-# Run tests matching pattern
-npm run test -- --grep "BaseGame"
-
-# Run tests in watch mode
-npm run test -- --watch
+npm test tests/engine/BaseGame.test.ts  # Run specific test file
+npm test -- --grep "BaseGame"           # Run tests matching pattern
+npm test -- --watch                     # Watch mode
+npm test tests/engine/                   # Run directory tests
 ```
 
-## Project Structure
+### Code Quality
+```bash
+npm run lint          # ESLint code quality checks
+npm run format        # Format code with Prettier
+npm run format:check  # Check formatting without changes
+npm run typecheck     # TypeScript type checking
+npm audit             # Security audit
+```
 
-```
-src/
-├── engine/           # Shared game engine components
-│   ├── BaseGame.ts   # Base game class with common functionality
-│   ├── InputManager.ts # Input handling (keyboard, mouse, touch)
-│   ├── AudioManager.ts # Sound effects and music management
-│   └── AnimationManager.ts # Sprite animations and particle effects
-├── games/            # Individual game implementations
-│   ├── SnakeGame.ts  # Snake game implementation
-│   ├── snake.html    # Snake game HTML template
-│   └── SnakeGame.js  # Snake game entry point
-├── utils/            # Utility functions and helpers
-│   ├── helpers.ts    # Math, collision, formatting utilities
-│   └── storage.ts    # Local storage management
-└── styles/           # CSS stylesheets
-    └── snake.css     # Snake game styles
-```
+### CI/CD Requirements
+- Tests must pass on Node.js 18.x and 20.x
+- Code coverage ≥80%
+- ESLint, Prettier, and TypeScript checks must pass
+- Security audit must pass (moderate level or higher)
 
 ## Code Style Guidelines
 
+### File Organization
+- Each game is self-contained in a single HTML file
+- Use embedded `<style>` and `<script>` tags
+- Structure: HTML → CSS → JavaScript
+- Test files mirror source structure in `/tests`
+
 ### Naming Conventions
-- **Files**: PascalCase for classes (e.g., `SnakeGame.ts`), kebab-case for styles (e.g., `snake.css`)
-- **Classes**: PascalCase (e.g., `BaseGame`, `InputManager`)
-- **Methods/Functions**: camelCase (e.g., `updateHighScore`, `generateFood`)
-- **Variables**: camelCase (e.g., `gameSpeed`, `currentFrame`)
-- **Constants**: UPPER_SNAKE_CASE (e.g., `GRID_SIZE`, `MAX_SCORE`)
-- **Private members**: Prefix with underscore (e.g., `_animationId`, `_moveTimer`)
+- **HTML Files**: kebab-case (`snake.html`, `music-game.html`)
+- **CSS Classes**: kebab-case (`game-container`, `score-display`)
+- **Functions/Variables**: camelCase (`updateScore`, `gameSpeed`)
+- **Constants**: UPPER_SNAKE_CASE (`GRID_SIZE`, `MAX_LIVES`)
+- **HTML IDs**: kebab-case (`game-canvas`, `score-display`)
 
 ### TypeScript Guidelines
-- Use strict TypeScript configuration
-- Prefer interfaces over types for object shapes
-- Use generic types where appropriate
-- Always specify return types for public methods
-- Use `readonly` for immutable properties
-- Prefer `const` over `let` when possible
+- Use explicit type annotations for parameters and returns
+- Define interfaces for game state and configuration
+- Import types with `import type` when only using types
+- Use generics for reusable components
+- Prefer `const` over `let`
+- Use enum for game states and directions
 
 ### Import/Export Patterns
 ```typescript
-// Named exports preferred
-export class BaseGame { }
-export interface GameState { }
+// Type-only imports
+import type { GameConfig, GameState } from './types';
 
-// Import with aliases
-import { BaseGame, GameState } from '@engine/BaseGame.js';
-import { randomInt, rectCollision } from '@utils/helpers.js';
+// Named imports
+import { describe, it, expect } from 'vitest';
+import { BaseGame } from '@engine/BaseGame.js';
 
-// Default export for main entry points
-export default SnakeGame;
+// Default exports for main classes
+export default class Game extends BaseGame { }
+
+// Named exports for utilities
+export { calculateScore, validateInput };
 ```
 
+### HTML/CSS Structure
+```html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Title</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft JhengHei', Arial, sans-serif; }
+    </style>
+</head>
+<body>
+    <!-- HTML structure -->
+    <script>
+        // JavaScript game logic
+    </script>
+</body>
+</html>
+```
+
+### JavaScript Guidelines
+- Use modern ES6+ features appropriately
+- Implement game loop with `requestAnimationFrame`
+- Handle keyboard/mouse/touch inputs for cross-device compatibility
+- Use `localStorage` for persistent data (high scores, settings)
+- Implement proper event listeners and cleanup
+
 ### Error Handling
-- Use try-catch blocks for async operations
-- Log warnings for non-critical failures
-- Throw errors for critical issues
-- Always handle promise rejections
-- Use proper error types and messages
+- Wrap critical operations in try-catch blocks
+- Provide user-friendly error messages
+- Log errors for debugging
+- Implement graceful degradation for unsupported features
+- Handle offline scenarios appropriately
 
-### Code Organization
-- Keep classes focused on single responsibility
-- Use composition over inheritance when possible
-- Extract common functionality into utility functions
-- Group related methods together
-- Use JSDoc comments for public APIs
+### Testing Patterns
+- Use Vitest with jsdom for DOM testing
+- Mock browser APIs in `tests/setup.ts`
+- Test game logic independently from DOM manipulation
+- Use descriptive test names: "should [expected behavior]"
+- Structure tests with describe/it blocks
 
-## Game Development Patterns
-
-### Base Game Class
-All games should extend `BaseGame`:
-```typescript
-export class MyGame extends BaseGame {
-  constructor(canvas: HTMLCanvasElement) {
-    super(canvas, config);
-  }
-
-  public init(): void { /* Initialize game state */ }
-  public update(deltaTime: number): void { /* Update game logic */ }
-  public render(): void { /* Render game */ }
-  public handleInput(event: Event): void { /* Handle input */ }
+### Game Development Patterns
+#### Base Game Structure
+```javascript
+class Game {
+    constructor() {
+        this.canvas = document.getElementById('game-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.score = 0;
+        this.isRunning = false;
+        this.init();
+    }
+    
+    init() { /* Initialize game */ }
+    update(deltaTime) { /* Update game logic */ }
+    render() { /* Render game */ }
+    handleInput(event) { /* Handle user input */ }
+    gameLoop() { /* Main game loop */ }
 }
 ```
 
-### State Management
-- Use the base game state for common properties (score, level, etc.)
-- Store game-specific state in private properties
-- Use localStorage for persistent data via StorageManager
-- Update high scores automatically through base class
-
-### Input Handling
-- Use InputManager for all input events
+#### Performance & Input
 - Support keyboard, mouse, and touch inputs
-- Provide mobile controls for touch devices
-- Prevent default behaviors for game controls
-
-### Performance Guidelines
-- Use requestAnimationFrame for smooth animations
+- Use event delegation for dynamic elements
 - Implement object pooling for frequently created objects
-- Optimize rendering with dirty rectangle techniques
-- Use efficient collision detection algorithms
-- Monitor memory usage and clean up resources
+- Use `requestAnimationFrame` for smooth animations
+- Optimize canvas rendering with dirty rectangles
 
-## Testing Guidelines
-
-### Unit Tests
-- Test all public methods and properties
-- Mock external dependencies (canvas, localStorage, etc.)
-- Use descriptive test names and organize tests logically
-- Test both success and failure scenarios
-- Maintain high test coverage (>80%)
-
-### Test Structure
-```typescript
-describe('ClassName', () => {
-  beforeEach(() => {
-    // Setup test fixtures
-  });
-
-  it('should do expected behavior', () => {
-    // Arrange, Act, Assert
-  });
-});
-```
-
-### Game Testing
-- Test game state transitions (start, pause, game over)
-- Verify collision detection accuracy
-- Test input handling and response
-- Validate score calculations and high score updates
-- Test edge cases and boundary conditions
-
-## Development Workflow
-
-### Before Making Changes
-1. Run existing tests to ensure they pass
-2. Check code formatting with `npm run format:check`
-3. Run linting with `npm run lint`
-4. Create a new branch for feature development
-
-### After Making Changes
-1. Run all tests and ensure they pass
-2. Add or update tests for new functionality
-3. Check code formatting and fix any issues
-4. Run type checking to ensure no TypeScript errors
-5. Test games manually in browser
-
-### Commit Guidelines
-- Use conventional commit messages (feat:, fix:, docs:, etc.)
-- Include scope in commit messages (e.g., `feat(game): add snake game`)
-- Keep commits focused and atomic
-- Reference issues in commit messages when applicable
-
-## Browser Compatibility
+## Browser Compatibility & Workflow
 
 ### Target Browsers
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
+- Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+- Mobile responsive design with viewport meta tag
 
-### Polyfills
-- Use Vite legacy plugin for older browser support
-- Test in multiple browsers during development
-- Provide fallbacks for unsupported features
+### Development Workflow
+1. Run tests: `npm test` (coverage ≥80% required)
+2. Run linting: `npm run lint` and `npm run format:check`
+3. Type checking: `npm run typecheck`
+4. Test games manually in multiple browsers
+5. Include game name in commits: `feat(snake): add power-up system`
 
-## Security Considerations
-
+### Security & Deployment
+- Validate all user inputs and sanitize content
+- Use HTTPS for production, implement CSP headers
 - Never expose sensitive data in client-side code
-- Validate all user inputs
-- Use HTTPS for production deployments
-- Sanitize user-generated content
-- Implement proper CSP headers
-
-## Deployment
-
-### Build Process
-- Run `npm run build` to create production assets
-- Test built application locally with `npm run preview`
-- Ensure all assets are properly optimized
-- Verify game functionality in production build
-
-### Environment Variables
-- Use `.env` files for environment-specific configuration
-- Never commit sensitive environment variables
-- Provide default values for optional variables
-
-## Troubleshooting
-
-### Common Issues
-- **Module resolution errors**: Check import paths and file extensions
-- **TypeScript errors**: Verify types and interfaces are properly defined
-- **Test failures**: Check mock implementations and test setup
-- **Build failures**: Ensure all dependencies are properly installed
-
-### Debug Tips
-- Use browser dev tools for runtime debugging
-- Enable source maps for easier debugging
-- Use console logging sparingly and remove before production
-- Test games on different devices and screen sizes
-
-## Resources
-
-### Documentation
-- [Vite Documentation](https://vitejs.dev/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Vitest Documentation](https://vitest.dev/)
-
-### Tools
-- ESLint for code linting
-- Prettier for code formatting
-- Vitest for testing
-- TypeScript for type safety
-
-### Best Practices
-- Follow modern JavaScript/TypeScript patterns
-- Use semantic HTML5 elements
-- Implement responsive design principles
-- Optimize for performance and accessibility
+- Games are static files ready for deployment

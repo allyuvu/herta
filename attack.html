@@ -372,7 +372,7 @@
             }
         }
         
-        @media (max-width: 600px) {
+@media (max-width: 600px) {
             .answers {
                 grid-template-columns: 1fr;
             }
@@ -385,9 +385,155 @@
                 font-size: 1.8rem;
             }
         }
+        
+        /* Audio Control Styles */
+        .audio-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #4a6fa5;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .audio-control:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
+        
+        .audio-control.muted {
+            background: rgba(211, 47, 47, 0.9);
+            border-color: #d32f2f;
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            .game-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .game-header p {
+                font-size: 0.9rem;
+            }
+            
+            .panel-title {
+                font-size: 1.2rem;
+            }
+            
+            #math-problem {
+                font-size: 1.6rem;
+                padding: 15px;
+            }
+            
+            .answer-btn {
+                padding: 15px;
+                font-size: 1.1rem;
+            }
+            
+            .teacher {
+                width: 120px;
+                height: 200px;
+            }
+            
+            .teacher-body {
+                width: 110px;
+                height: 150px;
+            }
+            
+            .control-btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            
+            .audio-control {
+                width: 45px;
+                height: 45px;
+                top: 15px;
+                right: 15px;
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .game-content {
+                gap: 15px;
+            }
+            
+            .teacher {
+                width: 100px;
+                height: 160px;
+            }
+            
+            .teacher-body {
+                width: 90px;
+                height: 120px;
+            }
+            
+            .answer-btn {
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .stat-item {
+                padding: 8px;
+            }
+            
+            .stat-label {
+                font-size: 0.8rem;
+            }
+            
+            .stat-value {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        .answer-btn {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .answer-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Performance optimizations */
+        .attack-effect {
+            will-change: transform, opacity;
+        }
+        
+        .teacher {
+            will-change: transform;
+        }
     </style>
 </head>
 <body>
+    <!-- Audio Control -->
+    <div class="audio-control" id="audioControl" title="切換音效">
+        🔊
+    </div>
+    
     <div class="game-container">
         <div class="game-header">
             <h1>攻擊數學實習老師</h1>
@@ -487,7 +633,188 @@
         </div>
     </div>
 
-    <script>
+<script>
+        // Audio System
+        class AudioManager {
+            constructor() {
+                this.audioContext = null;
+                this.sounds = {};
+                this.volume = 0.5;
+                this.enabled = true;
+                this.init();
+            }
+            
+            init() {
+                try {
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.audioContext = new AudioContext();
+                    this.generateSounds();
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                    this.enabled = false;
+                }
+            }
+            
+            generateSounds() {
+                // Correct answer sound - upbeat success
+                this.sounds.correct = () => {
+                    if (!this.enabled) return;
+                    const now = this.audioContext.currentTime;
+                    
+                    // Create a happy chord
+                    [261.63, 329.63, 392.00].forEach((freq, index) => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(freq, now + index * 0.1);
+                        oscillator.type = 'sine';
+                        
+                        gainNode.gain.setValueAtTime(0, now + index * 0.1);
+                        gainNode.gain.linearRampToValueAtTime(this.volume * 0.3, now + index * 0.1 + 0.1);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + index * 0.1 + 0.4);
+                        
+                        oscillator.start(now + index * 0.1);
+                        oscillator.stop(now + index * 0.1 + 0.4);
+                    });
+                };
+                
+                // Wrong answer sound - gentle error
+                this.sounds.wrong = () => {
+                    if (!this.enabled) return;
+                    const now = this.audioContext.currentTime;
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(200, now);
+                    oscillator.frequency.exponentialRampToValueAtTime(150, now + 0.3);
+                    oscillator.type = 'triangle';
+                    
+                    gainNode.gain.setValueAtTime(this.volume * 0.2, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.3);
+                };
+                
+                // Attack sound - impact
+                this.sounds.attack = () => {
+                    if (!this.enabled) return;
+                    const now = this.audioContext.currentTime;
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(100, now);
+                    oscillator.type = 'sawtooth';
+                    
+                    gainNode.gain.setValueAtTime(this.volume * 0.4, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.2);
+                };
+                
+                // Button click sound
+                this.sounds.button = () => {
+                    if (!this.enabled) return;
+                    const now = this.audioContext.currentTime;
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(800, now);
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(this.volume * 0.1, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.05);
+                };
+                
+                // Victory sound
+                this.sounds.victory = () => {
+                    if (!this.enabled) return;
+                    const now = this.audioContext.currentTime;
+                    
+                    // Victory fanfare
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, index) => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(freq, now + index * 0.15);
+                        oscillator.type = index % 2 === 0 ? 'sine' : 'square';
+                        
+                        gainNode.gain.setValueAtTime(0, now + index * 0.15);
+                        gainNode.gain.linearRampToValueAtTime(this.volume * 0.3, now + index * 0.15 + 0.1);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + index * 0.15 + 0.5);
+                        
+                        oscillator.start(now + index * 0.15);
+                        oscillator.stop(now + index * 0.15 + 0.5);
+                    });
+                };
+                
+                // Defeat sound
+                this.sounds.defeat = () => {
+                    if (!this.enabled) return;
+                    const now = this.audioContext.currentTime;
+                    
+                    // Descending tones for defeat
+                    for (let i = 0; i < 4; i++) {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        const freq = 400 - (i * 50);
+                        oscillator.frequency.setValueAtTime(freq, now + i * 0.2);
+                        oscillator.type = 'triangle';
+                        
+                        gainNode.gain.setValueAtTime(this.volume * 0.3, now + i * 0.2);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + i * 0.2 + 0.5);
+                        
+                        oscillator.start(now + i * 0.2);
+                        oscillator.stop(now + i * 0.2 + 0.5);
+                    }
+                };
+            }
+            
+            play(soundName) {
+                if (this.sounds[soundName]) {
+                    if (this.audioContext.state === 'suspended') {
+                        this.audioContext.resume();
+                    }
+                    this.sounds[soundName]();
+                }
+            }
+            
+            setVolume(level) {
+                this.volume = Math.max(0, Math.min(1, level));
+            }
+            
+            toggle() {
+                this.enabled = !this.enabled;
+                return this.enabled;
+            }
+        }
+        
+        // Initialize audio system
+        const audioManager = new AudioManager();
+        
         // 遊戲變數
         let score = 0;
         let streak = 0;
@@ -497,6 +824,10 @@
         let gameTime = 0;
         let gameActive = true;
         let timerInterval;
+        
+        // Mobile detection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                           (window.innerWidth <= 768 && 'ontouchstart' in window);
         
         // 數學問題類型
         const problemTypes = [
@@ -531,8 +862,13 @@
         let currentProblem = {};
         let correctAnswerIndex = 0;
         
-        // 初始化遊戲
+// 初始化遊戲
         function initGame() {
+            // Resume audio context if needed
+            if (audioManager.audioContext && audioManager.audioContext.state === 'suspended') {
+                audioManager.audioContext.resume();
+            }
+            
             score = 0;
             streak = 0;
             questionsAnswered = 0;
@@ -541,17 +877,35 @@
             gameTime = 0;
             gameActive = true;
             
+            // 清除計時器
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            // 重置UI
+            messageElement.textContent = "開始攻擊！解決數學問題來傷害老師！";
+            messageElement.style.color = "#2c3e50";
+            
+            // 重置答案按鈕
+            answerButtons.forEach(button => {
+                button.disabled = false;
+                button.classList.remove("correct", "wrong");
+                button.style.opacity = "1";
+            });
+            
+            // 重置提示按鈕
+            hintButton.disabled = false;
+            
+            // 生成新問題
+            generateProblem();
+            
+            // 更新統計
             updateGameStats();
-            generateMathProblem();
             updateHealthBar();
             
-            // 啟動計時器
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (gameActive) {
-                    gameTime++;
-                    updateGameTime();
-                }
+            // 開始計時器
+            timerInterval = setInterval(updateTimer, 1000);
+        }
             }, 1000);
             
             messageElement.textContent = "選擇正確答案來攻擊老師！";
@@ -688,8 +1042,13 @@
             });
         }
         
-        // 顯示攻擊效果
+// 顯示攻擊效果
         function showAttackEffect(damage, isCorrect) {
+            // 播放攻擊音效
+            if (isCorrect) {
+                audioManager.play('attack');
+            }
+            
             attackEffectElement.textContent = isCorrect ? `-${damage}` : `+5`;
             attackEffectElement.style.color = isCorrect ? "#e74c3c" : "#2ecc71";
             
@@ -725,10 +1084,13 @@
                 }
             });
             
-            if (isCorrect) {
+if (isCorrect) {
                 // 正確答案 - 攻擊老師
                 correctAnswers++;
                 streak++;
+                
+                // 播放正確音效
+                audioManager.play('correct');
                 
                 // 計算傷害 (根據難度)
                 const damage = 10 + (currentProblem.difficulty * 3);
@@ -752,10 +1114,16 @@
                     messageElement.textContent = `恭喜！你擊敗了數學實習老師！最終得分: ${score}`;
                     messageElement.style.color = "#e74c3c";
                     clearInterval(timerInterval);
+                    audioManager.play('victory');
                 }
-            } else {
+            }
+} else {
                 // 錯誤答案 - 老師恢復生命值
                 streak = 0;
+                
+                // 播放錯誤音效
+                audioManager.play('wrong');
+                
                 teacherHealth += 5;
                 
                 // 顯示訊息
@@ -765,13 +1133,14 @@
                 // 顯示恢復效果
                 showAttackEffect(5, false);
                 
-                // 檢查是否失敗
+// 檢查是否失敗
                 if (teacherHealth >= 100) {
                     teacherHealth = 100;
                     messageElement.textContent = `老師恢復了全部生命值！遊戲結束！最終得分: ${score}`;
                     messageElement.style.color = "#e74c3c";
                     gameActive = false;
                     clearInterval(timerInterval);
+                    audioManager.play('defeat');
                 }
             }
             
@@ -820,8 +1189,73 @@
             button.addEventListener('click', () => checkAnswer(index));
         });
         
-        restartButton.addEventListener('click', initGame);
-        hintButton.addEventListener('click', showHint);
+restartButton.addEventListener('click', () => {
+            audioManager.play('button');
+            initGame();
+        });
+        hintButton.addEventListener('click', () => {
+            audioManager.play('button');
+            showHint();
+        });
+        
+        // Audio control
+        const audioControl = document.getElementById('audioControl');
+        audioControl.addEventListener('click', () => {
+            const enabled = audioManager.toggle();
+            audioControl.classList.toggle('muted', !enabled);
+            audioControl.textContent = enabled ? '🔊' : '🔇';
+            audioManager.play('button');
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Audio toggle with M key
+            if (e.key === 'm' || e.key === 'M') {
+                audioControl.click();
+                e.preventDefault();
+            }
+            
+            // Restart with R key
+            if (e.key === 'r' || e.key === 'R') {
+                if (gameActive) {
+                    audioManager.play('button');
+                    initGame();
+                    e.preventDefault();
+                }
+            }
+            
+            // Number keys for answers
+            if (gameActive && (e.key >= '1' && e.key <= '4')) {
+                const answerIndex = parseInt(e.key) - 1;
+                if (answerIndex < answerButtons.length && !answerButtons[answerIndex].disabled) {
+                    checkAnswer(answerIndex);
+                    e.preventDefault();
+                }
+            }
+        });
+        
+        // Mobile touch optimizations
+        if (isMobile) {
+            // Prevent zoom on double tap
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', (e) => {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Add haptic feedback support
+            answerButtons.forEach((button, index) => {
+                button.addEventListener('touchstart', (e) => {
+                    // Vibrate if available
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                }, { passive: true });
+            });
+        }
         
         // 初始化遊戲
         initGame();

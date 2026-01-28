@@ -119,8 +119,327 @@
             background-color: #ff4444;
         }
         
-        #restartBtn:hover {
+#restartBtn:hover {
             background-color: #ff3333;
+        }
+        
+        .audio-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #333;
+            border: 2px solid #555;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .audio-control:hover {
+            background-color: #444;
+            transform: scale(1.1);
+        }
+        
+        .audio-control.muted {
+            background-color: #ff4444;
+            border-color: #ff6666;
+        }
+        
+        .audio-control .speaker-icon {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+        
+        .audio-control .speaker-muted {
+            display: none;
+        }
+        
+        .audio-control.muted .speaker-normal {
+            display: none;
+        }
+        
+        .audio-control.muted .speaker-muted {
+            display: block;
+        }
+        
+        /* 控制提示覆層 */
+        .controls-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            border-radius: 8px;
+        }
+        
+        .controls-overlay.show {
+            display: flex;
+        }
+        
+        .controls-content {
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .controls-content h3 {
+            color: #ff4444;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .control-key {
+            background: #333;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #4CAF50;
+            border: 1px solid #555;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .control-desc {
+            margin-left: 20px;
+            color: #ccc;
+            font-size: 1rem;
+        }
+        
+        .close-controls {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .close-controls:hover {
+            background: #ff3333;
+            transform: translateY(-2px);
+        }
+        
+        /* 鍵盤快捷鍵提示 */
+        .keyboard-hint {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .keyboard-hint.show {
+            opacity: 1;
+        }
+        
+        /* 成就系統樣式 */
+        .achievement-popup {
+            position: fixed;
+            top: 80px;
+            right: -400px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.95), rgba(255, 140, 0, 0.95));
+            color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 2000;
+            transition: right 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 350px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .achievement-popup.show {
+            right: 20px;
+        }
+        
+        .achievement-icon {
+            font-size: 2.5rem;
+            animation: bounce 0.6s ease infinite alternate;
+        }
+        
+        .achievement-content h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .achievement-content p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+        
+        /* 成就面板 */
+        .achievements-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 3000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .achievements-panel.show {
+            right: 0;
+        }
+        
+        .achievements-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333;
+        }
+        
+        .achievements-header h3 {
+            color: #ff4444;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .close-achievements {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .close-achievements:hover {
+            background: #555;
+        }
+        
+        .achievement-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+        
+        .achievement-item.unlocked {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        
+        .achievement-item.locked {
+            opacity: 0.5;
+        }
+        
+        .achievement-item-icon {
+            font-size: 2rem;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .achievement-item-info h4 {
+            margin: 0 0 5px 0;
+            color: white;
+            font-size: 1.1rem;
+        }
+        
+        .achievement-item-info p {
+            margin: 0;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .achievement-progress {
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 6px;
+            overflow: hidden;
+        }
+        
+        .achievement-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s ease;
+        }
+        
+        /* 成就按鈕 */
+        .achievements-btn {
+            position: fixed;
+            top: 140px;
+            right: 20px;
+            background: rgba(255, 215, 0, 0.9);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 1.5rem;
+        }
+        
+        .achievements-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .achievements-btn.has-new {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
         }
         
         .instructions {
@@ -225,41 +544,313 @@
             margin-bottom: 30px;
         }
         
-        @media (max-width: 650px) {
+/* 移动端控制按钮样式 */
+        .mobile-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .mobile-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .mobile-btn:active {
+            background: rgba(255, 68, 68, 0.8);
+            border-color: #ff4444;
+            transform: scale(0.95);
+        }
+        
+        .mobile-btn.up { grid-column: 2; grid-row: 1; }
+        .mobile-btn.left { grid-column: 1; grid-row: 2; }
+        .mobile-btn.right { grid-column: 3; grid-row: 2; }
+        .mobile-btn.down { grid-column: 2; grid-row: 3; }
+        
+        /* 移动端手势支持 */
+        .gesture-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            z-index: 50;
+            touch-action: none;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
             h1 {
                 font-size: 2.2rem;
+                margin-bottom: 8px;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+                margin-bottom: 15px;
+            }
+            
+            .game-container {
+                max-width: 100%;
+                margin-bottom: 15px;
             }
             
             #gameCanvas {
                 width: 100%;
+                max-width: 500px;
                 height: auto;
+                border-width: 1px;
+            }
+            
+            .game-info {
+                font-size: 1.1rem;
+                padding: 8px 0;
+            }
+            
+            .score-value, .high-score-value {
+                font-size: 1.5rem;
+            }
+            
+            .controls {
+                gap: 10px;
+                margin-top: 15px;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                min-width: 120px;
             }
             
             .mobile-controls {
                 display: grid;
             }
+            
+            .audio-control {
+                width: 45px;
+                height: 45px;
+                top: 15px;
+                right: 15px;
+            }
+            
+            .achievements-btn {
+                width: 45px;
+                height: 45px;
+                top: 70px;
+                right: 15px;
+                font-size: 1.3rem;
+            }
+            
+            .keyboard-hint {
+                display: none; /* 移动端隐藏键盘提示 */
+            }
+            
+            .controls-overlay {
+                padding: 20px;
+            }
+            
+            .controls-overlay h3 {
+                font-size: 1.5rem;
+            }
+            
+            .control-item {
+                margin: 10px 0;
+                padding: 8px;
+            }
+            
+            .control-key {
+                font-size: 0.9rem;
+                min-width: 60px;
+            }
+            
+            .control-desc {
+                font-size: 0.9rem;
+            }
         }
         
         @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .controls {
+                flex-direction: row;
+                justify-content: space-between;
+                flex-wrap: nowrap;
+                gap: 8px;
+            }
+            
+            button {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+                min-width: 100px;
+                flex: 1;
+            }
+            
+            .mobile-controls {
+                bottom: 10px;
+                gap: 8px;
+            }
+            
+            .mobile-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+            
+            .game-container {
+                margin-bottom: 120px; /* 为控制按钮留出空间 */
+            }
+            
+            .gesture-area {
+                height: 150px;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .mobile-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+            
             .controls {
                 flex-direction: column;
-                align-items: center;
+                gap: 8px;
             }
             
             button {
                 width: 100%;
+                min-width: auto;
             }
+        }
+        
+        /* 防止缩放 */
+        input, textarea, select {
+            font-size: 16px;
+        }
+        
+        /* 优化触摸体验 */
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        input, textarea {
+            -webkit-user-select: auto;
+            user-select: auto;
+        }
+        
+        /* 视口优化 */
+        @viewport {
+            width: device-width;
+            zoom: 1.0;
         }
     </style>
 </head>
 <body>
+    <!-- 鍵盤快捷鍵提示（桌面端） -->
+    <div class="keyboard-hint" id="keyboardHint">按 H 查看控制说明</div>
+    
+    <!-- 移动端提示 -->
+    <div class="mobile-hint" id="mobileHint" style="display: none; position: fixed; bottom: 220px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; z-index: 100;">滑动控制方向</div>
+    
+    <!-- 成就按鈕 -->
+    <div class="achievements-btn" id="achievementsBtn" title="查看成就 (A)">🏆</div>
+    
+    <!-- 成就面板 -->
+    <div class="achievements-panel" id="achievementsPanel">
+        <div class="achievements-header">
+            <h3>🏆 成就系统</h3>
+            <button class="close-achievements" id="closeAchievements">关闭</button>
+        </div>
+        <div id="achievementsList"></div>
+    </div>
+    
+    <!-- 成就弹窗 -->
+    <div class="achievement-popup" id="achievementPopup">
+        <div class="achievement-icon">🏆</div>
+        <div class="achievement-content">
+            <h4 id="achievementTitle">成就解锁！</h4>
+            <p id="achievementDesc">描述</p>
+        </div>
+    </div>
+    
+    <!-- 音效控制按鈕 -->
+    <div class="audio-control" id="audioControl" title="切换音效 (M)">
+        <svg class="speaker-icon speaker-normal" viewBox="0 0 24 24">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+        <svg class="speaker-icon speaker-muted" viewBox="0 0 24 24">
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+        </svg>
+    </div>
+    
     <header>
         <h1>黑色贪吃蛇</h1>
         <p class="subtitle">吃到红色苹果会变长，避开墙壁和自己！</p>
     </header>
     
-    <div class="game-container">
+<div class="game-container">
         <canvas id="gameCanvas" width="600" height="400"></canvas>
+        
+        <div class="controls-overlay" id="controlsOverlay">
+            <div class="controls-content">
+                <h3>🎮 控制说明</h3>
+                <div class="control-item">
+                    <span class="control-key">↑ ↓ ← →</span>
+                    <span class="control-desc">控制蛇的移动方向</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">SPACE</span>
+                    <span class="control-desc">暂停/继续游戏</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">R</span>
+                    <span class="control-desc">重新开始游戏</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">H</span>
+                    <span class="control-desc">显示/隐藏控制说明</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">M</span>
+                    <span class="control-desc">静音/开启音效</span>
+                </div>
+                <button class="close-controls" id="closeControls">开始游戏</button>
+            </div>
+        </div>
         
         <div class="game-over" id="gameOverScreen">
             <h2>游戏结束！</h2>
@@ -285,6 +876,9 @@
         <button id="restartBtn">重新开始</button>
     </div>
     
+    <!-- 移动端手势区域 -->
+    <div class="gesture-area" id="gestureArea"></div>
+    
     <div class="mobile-controls">
         <button class="mobile-btn up" id="upBtn">↑</button>
         <button class="mobile-btn down" id="downBtn">↓</button>
@@ -304,24 +898,294 @@
     </div>
 
     <script>
+        // 音效管理器
+        class AudioManager {
+            constructor() {
+                this.audioContext = null;
+                this.sounds = {};
+                this.volume = 0.3;
+                this.enabled = true;
+                this.init();
+            }
+            
+            init() {
+                try {
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.audioContext = new AudioContext();
+                    this.generateSounds();
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                    this.enabled = false;
+                }
+            }
+            
+            generateSounds() {
+                // 生成吃食物音效（上升音調）
+                this.sounds.eat = () => {
+                    if (!this.enabled) return;
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(400, this.audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(800, this.audioContext.currentTime + 0.1);
+                    
+                    gainNode.gain.setValueAtTime(this.volume, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.1);
+                };
+                
+                // 生成遊戲結束音效（下降音調）
+                this.sounds.gameOver = () => {
+                    if (!this.enabled) return;
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.type = 'square';
+                    oscillator.frequency.setValueAtTime(300, this.audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.5);
+                    
+                    gainNode.gain.setValueAtTime(this.volume, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.5);
+                };
+                
+                // 生成移動音效（輕微點擊聲）
+                this.sounds.move = () => {
+                    if (!this.enabled) return;
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(150, this.audioContext.currentTime);
+                    
+                    gainNode.gain.setValueAtTime(this.volume * 0.1, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.02);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.02);
+                };
+                
+                // 生成按鈕音效
+                this.sounds.button = () => {
+                    if (!this.enabled) return;
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(600, this.audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(400, this.audioContext.currentTime + 0.05);
+                    
+                    gainNode.gain.setValueAtTime(this.volume * 0.2, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.05);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.05);
+                };
+                
+                // 生成暫停音效
+                this.sounds.pause = () => {
+                    if (!this.enabled) return;
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.type = 'triangle';
+                    oscillator.frequency.setValueAtTime(200, this.audioContext.currentTime);
+                    
+                    gainNode.gain.setValueAtTime(this.volume * 0.3, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.2);
+                };
+                
+                // 生成成就解鎖音效
+                this.sounds.achievement = () => {
+                    if (!this.enabled) return;
+                    const now = this.audioContext.currentTime;
+                    
+                    // 创建和声
+                    const frequencies = [523.25, 659.25, 783.99]; // C, E, G
+                    
+                    frequencies.forEach((freq, index) => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(freq, now + index * 0.1);
+                        oscillator.type = 'sine';
+                        
+                        gainNode.gain.setValueAtTime(0, now + index * 0.1);
+                        gainNode.gain.linearRampToValueAtTime(this.volume * 0.3, now + index * 0.1 + 0.05);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + index * 0.1 + 0.5);
+                        
+                        oscillator.start(now + index * 0.1);
+                        oscillator.stop(now + index * 0.1 + 0.5);
+                    });
+                };
+            }
+            
+            play(soundName) {
+                if (this.sounds[soundName]) {
+                    // 確保音頻上下文已啟動
+                    if (this.audioContext.state === 'suspended') {
+                        this.audioContext.resume();
+                    }
+                    this.sounds[soundName]();
+                }
+            }
+            
+            setVolume(level) {
+                this.volume = Math.max(0, Math.min(1, level));
+            }
+            
+            toggle() {
+                this.enabled = !this.enabled;
+                return this.enabled;
+            }
+        }
+        
+        // 初始化音效管理器
+        const audioManager = new AudioManager();
+        
         // 获取Canvas元素和上下文
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // 游戏变量
+// 游戏变量
         let snake = [];
         let food = {};
         let gridSize = 20;
         let direction = 'right';
         let nextDirection = 'right';
         let gameSpeed = 120; // 毫秒
-        let gameLoop;
+        let lastUpdate = 0;
+        let animationId = null;
         let score = 0;
         let highScore = localStorage.getItem('snakeHighScore') || 0;
         let gameRunning = false;
         let gamePaused = false;
         
-        // DOM元素
+        // 性能优化相关
+        let frameCount = 0;
+        let lastFpsUpdate = 0;
+        let fps = 0;
+        let particles = [];
+        let needsRedraw = true;
+        
+        // 成就系统相关
+        let achievements = {
+            firstScore: {
+                id: 'firstScore',
+                name: '初次得分',
+                description: '获得你的第一个10分',
+                icon: '🎯',
+                unlocked: false,
+                check: (stats) => stats.totalScore >= 10
+            },
+            score50: {
+                id: 'score50',
+                name: '小有成就',
+                description: '单局游戏获得50分',
+                icon: '🌟',
+                unlocked: false,
+                check: (stats) => stats.maxScore >= 50
+            },
+            score100: {
+                id: 'score100',
+                name: '游戏高手',
+                description: '单局游戏获得100分',
+                icon: '⭐',
+                unlocked: false,
+                check: (stats) => stats.maxScore >= 100
+            },
+            score500: {
+                id: 'score500',
+                name: '蛇王传说',
+                description: '单局游戏获得500分',
+                icon: '👑',
+                unlocked: false,
+                check: (stats) => stats.maxScore >= 500
+            },
+            speedDemon: {
+                id: 'speedDemon',
+                name: '极速挑战',
+                description: '游戏速度达到最大',
+                icon: '⚡',
+                unlocked: false,
+                check: (stats) => stats.maxSpeed >= 180
+            },
+            survivor: {
+                id: 'survivor',
+                name: '生存大师',
+                description: '游戏时长超过5分钟',
+                icon: '⏱️',
+                unlocked: false,
+                check: (stats) => stats.maxPlayTime >= 300
+            },
+            collector: {
+                id: 'collector',
+                name: '收集家',
+                description: '累计吃到100个食物',
+                icon: '🍎',
+                unlocked: false,
+                check: (stats) => stats.totalFood >= 100
+            },
+            perfectionist: {
+                id: 'perfectionist',
+                name: '完美主义者',
+                description: '在不失误的情况下连续获得50分',
+                icon: '💎',
+                unlocked: false,
+                check: (stats) => stats.perfectScore >= 50
+            },
+            veteran: {
+                id: 'veteran',
+                name: '资深玩家',
+                description: '游戏总次数达到50次',
+                icon: '🎖️',
+                unlocked: false,
+                check: (stats) => stats.totalGames >= 50
+            },
+        };
+        
+        // 游戏统计数据
+        let gameStats = {
+            totalScore: 0,
+            maxScore: 0,
+            totalFood: 0,
+            totalGames: 0,
+            maxSpeed: 120,
+            maxPlayTime: 0,
+            perfectScore: 0,
+            currentStreak: 0,
+            gameStartTime: 0
+        };
+        
+        // 新成就计数器
+        let newAchievementsCount = 0;
+        
+// DOM元素
         const scoreElement = document.getElementById('score');
         const highScoreElement = document.getElementById('highScore');
         const startBtn = document.getElementById('startBtn');
@@ -330,12 +1194,39 @@
         const restartBtn2 = document.getElementById('restartBtn2');
         const gameOverScreen = document.getElementById('gameOverScreen');
         const finalScoreElement = document.getElementById('finalScore');
+        const controlsOverlay = document.getElementById('controlsOverlay');
+        const closeControls = document.getElementById('closeControls');
+        const keyboardHint = document.getElementById('keyboardHint');
+        const achievementsBtn = document.getElementById('achievementsBtn');
+        const achievementsPanel = document.getElementById('achievementsPanel');
+        const closeAchievements = document.getElementById('closeAchievements');
+        const achievementPopup = document.getElementById('achievementPopup');
+        const achievementTitle = document.getElementById('achievementTitle');
+        const achievementDesc = document.getElementById('achievementDesc');
+        const achievementsList = document.getElementById('achievementsList');
         
-        // 移动控制按钮
+// 移动控制按钮
         const upBtn = document.getElementById('upBtn');
         const downBtn = document.getElementById('downBtn');
         const leftBtn = document.getElementById('leftBtn');
         const rightBtn = document.getElementById('rightBtn');
+        const gestureArea = document.getElementById('gestureArea');
+        
+        // 手势控制相关
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        let minSwipeDistance = 30;
+        
+// 显示/隐藏控制说明
+        function toggleControlsOverlay() {
+            controlsOverlay.classList.toggle('show');
+            if (!controlsOverlay.classList.contains('show')) {
+                keyboardHint.classList.add('show');
+                setTimeout(() => keyboardHint.classList.remove('show'), 2000);
+            }
+        }
         
         // 初始化游戏
         function initGame() {
@@ -361,6 +1252,18 @@
             
             // 绘制初始状态
             draw();
+            
+            // 首次加载时显示控制说明
+            if (!localStorage.getItem('snakeControlsShown')) {
+                setTimeout(() => {
+                    controlsOverlay.classList.add('show');
+                    localStorage.setItem('snakeControlsShown', 'true');
+                }, 500);
+            } else {
+                // 显示快捷键提示
+                keyboardHint.classList.add('show');
+                setTimeout(() => keyboardHint.classList.remove('show'), 3000);
+            }
         }
         
         // 生成食物
@@ -384,14 +1287,16 @@
             } while (foodOnSnake);
         }
         
-        // 绘制游戏元素
+// 绘制游戏元素
         function draw() {
             // 清除画布
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制网格线
-            drawGrid();
+            // 绘制网格线（每隔几帧绘制一次以提高性能）
+            if (frameCount % 3 === 0) {
+                drawGrid();
+            }
             
             // 绘制蛇
             for (let i = 0; i < snake.length; i++) {
@@ -454,7 +1359,7 @@
                 }
             }
             
-            // 绘制食物（红色苹果）
+// 绘制食物（红色苹果）
             ctx.fillStyle = '#ff4444';
             ctx.beginPath();
             ctx.arc(
@@ -479,6 +1384,10 @@
                 3, 2, 0, 0, Math.PI * 2
             );
             ctx.fill();
+            
+            // 绘制粒子效果
+            updateParticles();
+            particles.forEach(particle => particle.draw(ctx));
         }
         
         // 绘制网格线
@@ -548,8 +1457,23 @@
             // 将新头部添加到蛇
             snake.unshift(head);
             
-            // 检查是否吃到食物
+// 检查是否吃到食物
             if (head.x === food.x && head.y === food.y) {
+                // 播放吃食物音效
+                audioManager.play('eat');
+                
+                // 创建粒子效果
+                createParticles(
+                    food.x + gridSize/2, 
+                    food.y + gridSize/2, 
+                    '#4CAF50', 
+                    15
+                );
+                
+                // 更新统计
+                gameStats.totalFood++;
+                gameStats.perfectScore = Math.max(gameStats.perfectScore, score);
+                
                 // 增加分数
                 score += 10;
                 scoreElement.textContent = score;
@@ -572,17 +1496,40 @@
             draw();
         }
         
-        // 游戏主循环步骤
-        function gameStep() {
-            if (!gamePaused && gameRunning) {
-                update();
+// 更新粒子
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const particle = particles[i];
+                particle.update();
+                
+                if (particle.life <= 0) {
+                    particles.splice(i, 1);
+                }
             }
         }
         
-        // 游戏结束
+// 游戏结束
         function gameOver() {
             gameRunning = false;
-            clearInterval(gameLoop);
+            
+            // 播放遊戲結束音效
+            audioManager.play('gameOver');
+            
+            // 创建爆炸粒子效果
+            if (snake.length > 0) {
+                const head = snake[0];
+                createParticles(head.x + gridSize/2, head.y + gridSize/2, '#ff4444', 20);
+                draw(); // 最后绘制一次以显示效果
+            }
+            
+            // 清理动画
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            // 更新游戏统计
+            updateGameStats();
             
             // 更新最高分
             if (score > highScore) {
@@ -591,111 +1538,573 @@
                 highScoreElement.textContent = highScore;
             }
             
+            // 检查成就
+            checkAchievements();
+            saveAchievements();
+            
             // 显示游戏结束屏幕
             finalScoreElement.textContent = score;
             gameOverScreen.style.display = 'flex';
         }
         
+// 粒子系统
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4;
+                this.life = 1.0;
+                this.decay = 0.02;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+            }
+            
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, 4, 4);
+                ctx.restore();
+            }
+        }
+        
+        // 创建粒子效果
+        function createParticles(x, y, color, count = 10) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+        
+        // 优化的游戏循环
+        function gameLoop(currentTime) {
+            if (!gameRunning) return;
+            
+            // FPS计算
+            frameCount++;
+            if (currentTime - lastFpsUpdate >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsUpdate = currentTime;
+            }
+            
+            if (!gamePaused) {
+                if (currentTime - lastUpdate >= gameSpeed) {
+                    update();
+                    lastUpdate = currentTime;
+                    needsRedraw = true;
+                }
+            }
+            
+            // 只在需要时重绘
+            if (needsRedraw || particles.length > 0) {
+                draw();
+                needsRedraw = false;
+            }
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
         // 开始游戏
         function startGame() {
+            audioManager.play('button');
             if (!gameRunning) {
                 gameRunning = true;
                 gamePaused = false;
                 pauseBtn.textContent = '暂停游戏';
+                
+                // 记录游戏开始时间
+                gameStats.gameStartTime = Date.now();
                 
                 // 如果蛇为空，初始化游戏
                 if (snake.length === 0) {
                     initGame();
                 }
                 
-                // 开始游戏循环
-                clearInterval(gameLoop);
-                gameLoop = setInterval(gameStep, gameSpeed);
+                // 启动优化的游戏循环
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                lastUpdate = performance.now();
+                animationId = requestAnimationFrame(gameLoop);
             }
         }
         
-        // 暂停/继续游戏
+// 暂停/继续游戏
         function togglePause() {
             if (!gameRunning) return;
             
+            audioManager.play('pause');
             gamePaused = !gamePaused;
             pauseBtn.textContent = gamePaused ? '继续游戏' : '暂停游戏';
+            needsRedraw = true;
         }
         
-        // 重新开始游戏
+// 重新开始游戏
         function restartGame() {
-            clearInterval(gameLoop);
+            audioManager.play('button');
+            
+            // 清理现有动画
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            // 清理粒子
+            particles = [];
+            
             initGame();
             gameRunning = true;
             gamePaused = false;
             pauseBtn.textContent = '暂停游戏';
-            gameLoop = setInterval(gameStep, gameSpeed);
+            
+            // 启动新的游戏循环
+            lastUpdate = performance.now();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+// 检测移动设备
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   (window.innerWidth <= 768 && 'ontouchstart' in window);
+        }
+        
+        // 移动端优化
+        if (isMobileDevice()) {
+            // 设置视口
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+            }
+            
+            // 添加移动端样式类
+            document.body.classList.add('mobile-device');
+            
+            // 隐藏键盘提示
+            keyboardHint.style.display = 'none';
+            
+            // 显示移动端提示
+            const mobileHint = document.getElementById('mobileHint');
+            if (mobileHint) {
+                mobileHint.style.display = 'block';
+                setTimeout(() => {
+                    mobileHint.style.display = 'none';
+                }, 3000);
+            }
+            
+            // 调整游戏速度（移动端通常响应较慢）
+            gameSpeed = 150;
         }
         
         // 键盘控制
         document.addEventListener('keydown', (e) => {
             switch(e.key) {
                 case 'ArrowUp':
-                    if (direction !== 'down') nextDirection = 'up';
+                    if (direction !== 'down') {
+                        nextDirection = 'up';
+                        audioManager.play('move');
+                    }
                     e.preventDefault();
                     break;
                 case 'ArrowDown':
-                    if (direction !== 'up') nextDirection = 'down';
+                    if (direction !== 'up') {
+                        nextDirection = 'down';
+                        audioManager.play('move');
+                    }
                     e.preventDefault();
                     break;
                 case 'ArrowLeft':
-                    if (direction !== 'right') nextDirection = 'left';
+                    if (direction !== 'right') {
+                        nextDirection = 'left';
+                        audioManager.play('move');
+                    }
                     e.preventDefault();
                     break;
                 case 'ArrowRight':
-                    if (direction !== 'left') nextDirection = 'right';
+                    if (direction !== 'left') {
+                        nextDirection = 'right';
+                        audioManager.play('move');
+                    }
                     e.preventDefault();
                     break;
                 case ' ':
-                    // 空格键暂停/继续
+                case 'Space':
                     togglePause();
                     e.preventDefault();
                     break;
-                case 'Enter':
-                    // Enter键重新开始
+                case 'r':
+                case 'R':
                     restartGame();
+                    e.preventDefault();
+                    break;
+                case 'h':
+                case 'H':
+                    toggleControlsOverlay();
+                    e.preventDefault();
+                    break;
+                case 'm':
+                case 'M':
+                    audioControl.click();
+                    e.preventDefault();
+                    break;
+                case 'a':
+                case 'A':
+                    achievementsBtn.click();
                     e.preventDefault();
                     break;
             }
         });
         
-        // 按钮事件监听
+// 按钮事件监听
         startBtn.addEventListener('click', startGame);
         pauseBtn.addEventListener('click', togglePause);
         restartBtn.addEventListener('click', restartGame);
         restartBtn2.addEventListener('click', restartGame);
         
-        // 移动控制按钮事件
-        upBtn.addEventListener('click', () => { if (direction !== 'down') nextDirection = 'up'; });
-        downBtn.addEventListener('click', () => { if (direction !== 'up') nextDirection = 'down'; });
-        leftBtn.addEventListener('click', () => { if (direction !== 'right') nextDirection = 'left'; });
-        rightBtn.addEventListener('click', () => { if (direction !== 'left') nextDirection = 'right'; });
+        // 控制覆層事件
+        closeControls.addEventListener('click', () => {
+            controlsOverlay.classList.remove('show');
+            audioManager.play('button');
+            startGame();
+        });
+        
+        // 成就面板事件
+        achievementsBtn.addEventListener('click', () => {
+            achievementsPanel.classList.add('show');
+            newAchievementsCount = 0;
+            updateAchievementsButton();
+            audioManager.play('button');
+        });
+        
+        closeAchievements.addEventListener('click', () => {
+            achievementsPanel.classList.remove('show');
+            audioManager.play('button');
+        });
+        
+// 移动控制按钮事件
+        upBtn.addEventListener('click', () => { 
+            if (direction !== 'down') {
+                nextDirection = 'up';
+                audioManager.play('move');
+            }
+        });
+        downBtn.addEventListener('click', () => { 
+            if (direction !== 'up') {
+                nextDirection = 'down';
+                audioManager.play('move');
+            }
+        });
+        leftBtn.addEventListener('click', () => { 
+            if (direction !== 'right') {
+                nextDirection = 'left';
+                audioManager.play('move');
+            }
+        });
+        rightBtn.addEventListener('click', () => { 
+            if (direction !== 'left') {
+                nextDirection = 'right';
+                audioManager.play('move');
+            }
+        });
         
         // 触摸控制（防止滑动页面）
         upBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            if (direction !== 'down') nextDirection = 'up';
+            if (direction !== 'down') {
+                nextDirection = 'up';
+                audioManager.play('move');
+            }
         });
         
         downBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            if (direction !== 'up') nextDirection = 'down';
+            if (direction !== 'up') {
+                nextDirection = 'down';
+                audioManager.play('move');
+            }
         });
         
         leftBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            if (direction !== 'right') nextDirection = 'left';
+            if (direction !== 'right') {
+                nextDirection = 'left';
+                audioManager.play('move');
+            }
         });
         
         rightBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            if (direction !== 'left') nextDirection = 'right';
+            if (direction !== 'left') {
+                nextDirection = 'right';
+                audioManager.play('move');
+            }
         });
+        
+        // 手势控制事件处理
+        function handleGestureStart(e) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }
+        
+        function handleGestureEnd(e) {
+            touchEndX = e.changedTouches[0].clientX;
+            touchEndY = e.changedTouches[0].clientY;
+            handleSwipeGesture();
+        }
+        
+        function handleSwipeGesture() {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            const absDeltaX = Math.abs(deltaX);
+            const absDeltaY = Math.abs(deltaY);
+            
+            // 确定滑动方向
+            if (Math.max(absDeltaX, absDeltaY) > minSwipeDistance) {
+                if (absDeltaX > absDeltaY) {
+                    // 水平滑动
+                    if (deltaX > 0) {
+                        // 向右滑动
+                        if (direction !== 'left') {
+                            nextDirection = 'right';
+                            audioManager.play('move');
+                        }
+                    } else {
+                        // 向左滑动
+                        if (direction !== 'right') {
+                            nextDirection = 'left';
+                            audioManager.play('move');
+                        }
+                    }
+                } else {
+                    // 垂直滑动
+                    if (deltaY > 0) {
+                        // 向下滑动
+                        if (direction !== 'up') {
+                            nextDirection = 'down';
+                            audioManager.play('move');
+                        }
+                    } else {
+                        // 向上滑动
+                        if (direction !== 'down') {
+                            nextDirection = 'up';
+                            audioManager.play('move');
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 添加手势事件监听器
+        gestureArea.addEventListener('touchstart', handleGestureStart, { passive: true });
+        gestureArea.addEventListener('touchend', handleGestureEnd, { passive: true });
+        
+        // 为整个游戏区域添加手势支持（移动端）
+        if ('ontouchstart' in window) {
+            canvas.addEventListener('touchstart', handleGestureStart, { passive: true });
+            canvas.addEventListener('touchend', handleGestureEnd, { passive: true });
+        }
+        
+        // 防止移动端双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+        // 防止移动端滚动
+        document.body.addEventListener('touchmove', (e) => {
+            if (e.target === canvas || e.target === gestureArea) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+// 音效控制按钮功能
+        const audioControl = document.getElementById('audioControl');
+        
+        // 初始化音效控制状态
+        const savedAudioState = localStorage.getItem('snakeAudioEnabled');
+        if (savedAudioState !== null) {
+            audioManager.enabled = savedAudioState === 'true';
+        }
+        
+        // 更新音效控制UI
+        function updateAudioControlUI() {
+            if (audioManager.enabled) {
+                audioControl.classList.remove('muted');
+            } else {
+                audioControl.classList.add('muted');
+            }
+        }
+        
+        // 音效控制按钮点击事件
+        audioControl.addEventListener('click', () => {
+            audioManager.toggle();
+            localStorage.setItem('snakeAudioEnabled', audioManager.enabled);
+            updateAudioControlUI();
+            audioManager.play('button'); // 播放按钮音效来测试
+        });
+        
+        // 初始化音效控制UI
+        updateAudioControlUI();
+        
+        // 成就系统核心功能
+        function loadAchievements() {
+            const saved = localStorage.getItem('snakeAchievements');
+            if (saved) {
+                const savedAchievements = JSON.parse(saved);
+                Object.keys(savedAchievements).forEach(id => {
+                    if (achievements[id]) {
+                        achievements[id].unlocked = savedAchievements[id].unlocked;
+                    }
+                });
+            }
+            
+            const savedStats = localStorage.getItem('snakeGameStats');
+            if (savedStats) {
+                gameStats = { ...gameStats, ...JSON.parse(savedStats) };
+            }
+            
+            updateAchievementsUI();
+        }
+        
+        function saveAchievements() {
+            const toSave = {};
+            Object.keys(achievements).forEach(id => {
+                toSave[id] = {
+                    unlocked: achievements[id].unlocked
+                };
+            });
+            localStorage.setItem('snakeAchievements', JSON.stringify(toSave));
+            localStorage.setItem('snakeGameStats', JSON.stringify(gameStats));
+        }
+        
+        function checkAchievements() {
+            let newUnlock = false;
+            
+            Object.values(achievements).forEach(achievement => {
+                if (!achievement.unlocked && achievement.check(gameStats)) {
+                    achievement.unlocked = true;
+                    showAchievementPopup(achievement);
+                    newUnlock = true;
+                    newAchievementsCount++;
+                }
+            });
+            
+            if (newUnlock) {
+                updateAchievementsUI();
+                saveAchievements();
+                updateAchievementsButton();
+            }
+        }
+        
+        function showAchievementPopup(achievement) {
+            audioManager.play('achievement');
+            
+            const popup = document.getElementById('achievementPopup');
+            document.getElementById('achievementTitle').textContent = achievement.name;
+            document.getElementById('achievementDesc').textContent = achievement.description;
+            
+            popup.classList.add('show');
+            
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+        
+        function updateAchievementsUI() {
+            const list = document.getElementById('achievementsList');
+            list.innerHTML = '';
+            
+            Object.values(achievements).forEach(achievement => {
+                const item = document.createElement('div');
+                item.className = `achievement-item ${achievement.unlocked ? 'unlocked' : 'locked'}`;
+                
+                const progress = getAchievementProgress(achievement);
+                
+                item.innerHTML = `
+                    <div class="achievement-item-icon">${achievement.icon}</div>
+                    <div class="achievement-item-info">
+                        <h4>${achievement.name}</h4>
+                        <p>${achievement.description}</p>
+                        ${progress.current < progress.total ? `
+                            <div class="achievement-progress">
+                                <div class="achievement-progress-bar" style="width: ${(progress.current / progress.total) * 100}%"></div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+        
+        function getAchievementProgress(achievement) {
+            // 计算成就进度
+            switch(achievement.id) {
+                case 'firstScore': return { current: gameStats.totalScore, total: 10 };
+                case 'score50': return { current: gameStats.maxScore, total: 50 };
+                case 'score100': return { current: gameStats.maxScore, total: 100 };
+                case 'score500': return { current: gameStats.maxScore, total: 500 };
+                case 'speedDemon': return { current: gameStats.maxSpeed, total: 180 };
+                case 'survivor': return { current: gameStats.maxPlayTime, total: 300 };
+                case 'collector': return { current: gameStats.totalFood, total: 100 };
+                case 'perfectionist': return { current: gameStats.perfectScore, total: 50 };
+                case 'veteran': return { current: gameStats.totalGames, total: 50 };
+                default: return { current: 0, total: 1 };
+            }
+        }
+        
+        function updateAchievementsButton() {
+            const btn = document.getElementById('achievementsBtn');
+            if (newAchievementsCount > 0) {
+                btn.classList.add('has-new');
+            } else {
+                btn.classList.remove('has-new');
+            }
+        }
+        
+        function updateGameStats() {
+            // 更新游戏统计
+            gameStats.totalScore += score;
+            gameStats.maxScore = Math.max(gameStats.maxScore, score);
+            gameStats.totalGames++;
+            gameStats.maxSpeed = Math.max(gameStats.maxSpeed, 210 - gameSpeed); // 速度越高，数值越大
+            
+            // 更新游戏时长
+            if (gameStats.gameStartTime > 0) {
+                const playTime = Math.floor((Date.now() - gameStats.gameStartTime) / 1000);
+                gameStats.maxPlayTime = Math.max(gameStats.maxPlayTime, playTime);
+            }
+        }
+        
+        // 错误处理
+        window.addEventListener('error', (e) => {
+            console.error('游戏错误:', e.error);
+            audioManager.enabled = false; // 发生错误时禁用音效
+        });
+        
+        // 页面卸载时清理资源
+        window.addEventListener('beforeunload', () => {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            if (audioManager.audioContext) {
+                audioManager.audioContext.close();
+            }
+        });
+        
+        // 初始化成就系统
+        loadAchievements();
         
         // 初始化游戏（但不开始）
         initGame();
@@ -704,6 +2113,8 @@
         // 显示初始说明
         console.log("游戏已加载！使用方向键控制蛇的移动。");
         console.log("吃到红色苹果可以增加分数并使蛇变长。");
+        console.log("性能优化：使用 requestAnimationFrame 和粒子系统");
+        console.log("成就系统：按 A 查看成就，努力解锁所有成就！");
     </script>
 </body>
 </html>
