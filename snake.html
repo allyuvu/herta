@@ -168,6 +168,91 @@
             display: block;
         }
         
+        /* 開始畫面覆層 */
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            border-radius: 8px;
+        }
+        
+        .start-screen.show {
+            display: flex;
+        }
+        
+        .start-content {
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .start-content h2 {
+            color: #ff4444;
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+        }
+        
+        .start-content h3 {
+            color: #4CAF50;
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        
+        .start-message {
+            color: #ccc;
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .start-controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+        }
+        
+        .control-key {
+            background: #333;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #4CAF50;
+            border: 1px solid #555;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .control-desc {
+            margin-left: 20px;
+            color: #ccc;
+            font-size: 1rem;
+        }
+        
         /* 控制提示覆層 */
         .controls-overlay {
             position: absolute;
@@ -197,34 +282,6 @@
             color: #ff4444;
             font-size: 2rem;
             margin-bottom: 20px;
-        }
-        
-        .control-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 15px 0;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-        }
-        
-        .control-key {
-            background: #333;
-            padding: 5px 15px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 1.1rem;
-            color: #4CAF50;
-            border: 1px solid #555;
-            min-width: 80px;
-            text-align: center;
-        }
-        
-        .control-desc {
-            margin-left: 20px;
-            color: #ccc;
-            font-size: 1rem;
         }
         
         .close-controls {
@@ -818,16 +875,18 @@
     </div>
     
     <header>
-        <h1>黑色贪吃蛇</h1>
+        <h1>黑色貪吃蛇</h1>
         <p class="subtitle">吃到红色苹果会变长，避开墙壁和自己！</p>
     </header>
     
 <div class="game-container">
-        <canvas id="gameCanvas" width="600" height="400"></canvas>
-        
-        <div class="controls-overlay" id="controlsOverlay">
-            <div class="controls-content">
-                <h3>🎮 控制说明</h3>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    
+    <!-- 開始畫面 -->
+    <div class="start-screen" id="startScreen">
+        <div class="start-content">
+            <div class="start-message">按任意鍵開始遊戲</div>
+            <div class="start-controls">
                 <div class="control-item">
                     <span class="control-key">↑ ↓ ← →</span>
                     <span class="control-desc">控制蛇的移动方向</span>
@@ -848,16 +907,45 @@
                     <span class="control-key">M</span>
                     <span class="control-desc">静音/开启音效</span>
                 </div>
-                <button class="close-controls" id="closeControls">开始游戏</button>
             </div>
         </div>
-        
-        <div class="game-over" id="gameOverScreen">
-            <h2>游戏结束！</h2>
-            <p>你的分数: <span id="finalScore">0</span></p>
-            <button id="restartBtn2">重新开始</button>
+    </div>
+    
+    <!-- 控制說明覆層 -->
+    <div class="controls-overlay" id="controlsOverlay">
+        <div class="controls-content">
+            <h3>🎮 控制说明</h3>
+            <div class="control-item">
+                <span class="control-key">↑ ↓ ← →</span>
+                <span class="control-desc">控制蛇的移动方向</span>
+            </div>
+            <div class="control-item">
+                <span class="control-key">SPACE</span>
+                <span class="control-desc">暂停/继续游戏</span>
+            </div>
+            <div class="control-item">
+                <span class="control-key">R</span>
+                <span class="control-desc">重新开始游戏</span>
+            </div>
+            <div class="control-item">
+                <span class="control-key">H</span>
+                <span class="control-desc">显示/隐藏控制说明</span>
+            </div>
+            <div class="control-item">
+                <span class="control-key">M</span>
+                <span class="control-desc">静音/开启音效</span>
+            </div>
+            <button class="close-controls" id="closeControls">返回游戏</button>
         </div>
     </div>
+    
+    <!-- 遊戲結束畫面 -->
+    <div class="game-over" id="gameOverScreen">
+        <h2>遊戲結束！</h2>
+        <p>你的分數: <span id="finalScore">0</span></p>
+        <button id="restartBtn2">重新開始</button>
+    </div>
+</div>
     
     <div class="game-info">
         <div class="score-container">
@@ -1194,6 +1282,7 @@
         const restartBtn2 = document.getElementById('restartBtn2');
         const gameOverScreen = document.getElementById('gameOverScreen');
         const finalScoreElement = document.getElementById('finalScore');
+        const startScreen = document.getElementById('startScreen');
         const controlsOverlay = document.getElementById('controlsOverlay');
         const closeControls = document.getElementById('closeControls');
         const keyboardHint = document.getElementById('keyboardHint');
@@ -1253,16 +1342,16 @@
             // 绘制初始状态
             draw();
             
+            // 显示开始画面
+            startScreen.style.display = 'flex';
+            
             // 首次加载时显示控制说明
             if (!localStorage.getItem('snakeControlsShown')) {
                 setTimeout(() => {
-                    controlsOverlay.classList.add('show');
+                    keyboardHint.classList.add('show');
+                    setTimeout(() => keyboardHint.classList.remove('show'), 3000);
                     localStorage.setItem('snakeControlsShown', 'true');
                 }, 500);
-            } else {
-                // 显示快捷键提示
-                keyboardHint.classList.add('show');
-                setTimeout(() => keyboardHint.classList.remove('show'), 3000);
             }
         }
         
@@ -1620,6 +1709,9 @@
                 gamePaused = false;
                 pauseBtn.textContent = '暂停游戏';
                 
+                // 隐藏开始画面
+                startScreen.style.display = 'none';
+                
                 // 记录游戏开始时间
                 gameStats.gameStartTime = Date.now();
                 
@@ -1661,13 +1753,12 @@
             particles = [];
             
             initGame();
-            gameRunning = true;
+            gameRunning = false;
             gamePaused = false;
             pauseBtn.textContent = '暂停游戏';
             
-            // 启动新的游戏循环
-            lastUpdate = performance.now();
-            animationId = requestAnimationFrame(gameLoop);
+            // 显示开始画面
+            startScreen.style.display = 'flex';
         }
         
 // 检测移动设备
@@ -1705,6 +1796,13 @@
         
         // 键盘控制
         document.addEventListener('keydown', (e) => {
+            // 如果游戏未运行且显示开始画面，按任意键开始游戏
+            if (!gameRunning && startScreen.style.display === 'flex') {
+                startGame();
+                e.preventDefault();
+                return;
+            }
+            
             switch(e.key) {
                 case 'ArrowUp':
                     if (direction !== 'down') {
@@ -1772,7 +1870,6 @@
         closeControls.addEventListener('click', () => {
             controlsOverlay.classList.remove('show');
             audioManager.play('button');
-            startGame();
         });
         
         // 成就面板事件
@@ -2110,8 +2207,16 @@
         initGame();
         draw();
         
+        // 添加开始画面点击事件（移动端支持）
+        startScreen.addEventListener('click', () => {
+            if (!gameRunning) {
+                startGame();
+            }
+        });
+        
         // 显示初始说明
-        console.log("游戏已加载！使用方向键控制蛇的移动。");
+        console.log("游戏已加载！按任意键开始游戏。");
+        console.log("使用方向键控制蛇的移动。");
         console.log("吃到红色苹果可以增加分数并使蛇变长。");
         console.log("性能优化：使用 requestAnimationFrame 和粒子系统");
         console.log("成就系统：按 A 查看成就，努力解锁所有成就！");
