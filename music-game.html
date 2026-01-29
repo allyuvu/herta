@@ -51,18 +51,86 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         
-        h1 { font-size: 28px; letter-spacing: 6px; margin-bottom: 5px; text-transform: uppercase; }
-        .sub { font-size: 12px; color: #666; margin-bottom: 40px; letter-spacing: 2px; }
+        .game-title {
+            font-size: 48px;
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
         
-        .key-guide { display: flex; gap: 20px; margin-bottom: 40px; }
-        .k { width: 40px; height: 40px; border: 1px solid #444; display: flex; justify-content: center; align-items: center; color: #888; border-radius: 5px; }
+        @keyframes titleGlow {
+            from { text-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
+            to { text-shadow: 0 0 30px rgba(255, 255, 255, 0.6), 0 0 40px rgba(255, 255, 255, 0.3); }
+        }
+        
+        .sub {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .start-instruction {
+            font-size: 18px;
+            color: #4ecdc4;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        
+        .key-guide {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .k {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #444;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #888;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .k:hover {
+            border-color: #4ecdc4;
+            color: #4ecdc4;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
 
         button {
-            padding: 15px 50px; background: #fff; color: #000; border: none;
-            font-size: 16px; font-weight: bold; letter-spacing: 2px; cursor: pointer;
-            transition: 0.2s;
+            padding: 15px 50px;
+            background: linear-gradient(90deg, #4ecdc4, #45b7d1);
+            color: #000;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
         }
-button:hover { transform: scale(1.1); box-shadow: 0 0 20px #fff; }
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(78, 205, 196, 0.6);
+            background: linear-gradient(90deg, #45b7d1, #4ecdc4);
+        }
         
         /* Audio Control Styles */
         .audio-control {
@@ -224,24 +292,26 @@ button:hover { transform: scale(1.1); box-shadow: 0 0 20px #fff; }
     </div>
 
     <div id="start-screen">
-        <h1>In Memoriam</h1>
-        <div class="sub">Technical Mapping Edition</div>
+        <h1 class="game-title">節奏大師</h1>
+        <div class="sub">Rhythm Master</div>
+        
+        <div class="start-instruction">按任意鍵開始遊戲</div>
         
         <div class="key-guide">
             <div class="k">D</div><div class="k">F</div>
             <div class="k">J</div><div class="k">K</div>
         </div>
 
-<button id="start-btn">ENGAGE</button>
+<button id="start-btn">開始遊戲</button>
     </div>
-    
-    <!-- Mobile Touch Controls -->
-    <div class="mobile-controls">
-        <div class="mobile-btn" data-lane="0">D</div>
-        <div class="mobile-btn" data-lane="1">F</div>
-        <div class="mobile-btn" data-lane="2">J</div>
-        <div class="mobile-btn" data-lane="3">K</div>
-    </div>
+</div>
+
+<!-- Mobile Touch Controls -->
+<div class="mobile-controls">
+    <div class="mobile-btn" data-lane="0">D</div>
+    <div class="mobile-btn" data-lane="1">F</div>
+    <div class="mobile-btn" data-lane="2">J</div>
+    <div class="mobile-btn" data-lane="3">K</div>
 </div>
 
 <script>
@@ -508,8 +578,6 @@ function generateMap() {
     return notes;
 }
 
-const LEVEL = generateMap();
-
 // --- ENHANCED GAME ENGINE ---
 const Game = {
     canvas: null,
@@ -546,7 +614,10 @@ const Game = {
         this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                       (window.innerWidth <= 768 && 'ontouchstart' in window);
         
-        Audio.init();
+        // Only initialize audio if not already initialized
+        if (!Audio.ctx) {
+            Audio.init();
+        }
         this.notes = generateMap();
         this.state.playing = true;
         this.state.t0 = Audio.ctx.currentTime;
@@ -561,6 +632,12 @@ const Game = {
         }
         
         this.lastFpsUpdate = performance.now();
+        
+        // Hide start screen
+        document.getElementById('start-screen').style.display = 'none';
+        
+        // Start game loop
+        this.loop();
     },
     
     initUI() {
@@ -601,36 +678,84 @@ const Game = {
             if (this.showFps) {
                 document.getElementById('fpsCounter').textContent = `FPS: ${this.fps}`;
             }
-        }
-    },
-        this.notes = JSON.parse(JSON.stringify(LEVEL));
-        this.loop();
+}
     },
 
     check(lane) {
         const now = Audio.ctx.currentTime - this.state.t0;
-        // Find hit within window (0.15s = standard rhythm game tight window)
-        const note = this.notes.find(n => !n.hit && n.lane === lane && Math.abs(n.t - now) < 0.2);
+        // Find the closest note within hit window
+        const notesInWindow = this.notes.filter(n => !n.hit && n.lane === lane && Math.abs(n.t - now) < 0.3);
         
-        if(note) {
-            note.hit = true;
-            this.state.combo++;
-            this.state.score += 100 + (this.state.combo * 10);
-             
-            Audio.playBurst(note.f);
-            Audio.playHit();
+        if (notesInWindow.length > 0) {
+            // Find the closest note
+            const note = notesInWindow.reduce((closest, current) => {
+                return Math.abs(current.t - now) < Math.abs(closest.t - now) ? current : closest;
+            });
             
-            // Combo sound effects every 5 combo
-            if (this.state.combo % 5 === 0) {
-                Audio.playCombo(Math.floor(this.state.combo / 5));
+            const timeDiff = Math.abs(note.t - now);
+            let judgment = 'miss';
+            let score = 0;
+            
+            // Judgment system
+            if (timeDiff < 0.05) {
+                judgment = 'perfect';
+                score = 300;
+                Audio.playBurst(note.f);
+                Audio.playHit();
+            } else if (timeDiff < 0.15) {
+                judgment = 'good';
+                score = 100;
+                Audio.playBurst(note.f * 0.8); // Slightly lower pitch for good
+                Audio.playHit();
+            } else {
+                judgment = 'miss';
+                Audio.playMiss();
             }
-             
-            // FX
+            
+            note.hit = true;
+            note.judgment = judgment;
+            
+            if (judgment !== 'miss') {
+                this.state.combo++;
+                this.state.score += score + (this.state.combo * 5);
+                
+                // Combo sound effects every 5 combo
+                if (this.state.combo % 5 === 0) {
+                    Audio.playCombo(Math.floor(this.state.combo / 5));
+                }
+            } else {
+                this.state.combo = 0;
+            }
+            
+            // FX with judgment color
+            const colors = {
+                perfect: '#4ecdc4',
+                good: '#45b7d1',
+                miss: '#ff6b6b'
+            };
+            this.fx.push({
+                type: 'judgment',
+                text: judgment.toUpperCase(),
+                color: colors[judgment],
+                x: (lane+0.5)*this.lw,
+                y: this.hitY - 50,
+                life: 1
+            });
             this.fx.push({type:'hit', x: (lane+0.5)*this.lw, y: this.hitY, life:1});
             this.updateUI();
         } else {
-            // Ghost tap handling - play miss sound but don't reset combo for forgiving gameplay
+            // Ghost tap - miss
             Audio.playMiss();
+            this.state.combo = 0;
+            this.fx.push({
+                type: 'judgment',
+                text: 'MISS',
+                color: '#ff6b6b',
+                x: (lane+0.5)*this.lw,
+                y: this.hitY - 50,
+                life: 1
+            });
+            this.updateUI();
         }
     },
 
@@ -705,19 +830,73 @@ const Game = {
                 this.ctx.beginPath();
                 this.ctx.arc(f.x, f.y, (1-f.life)*50, 0, Math.PI*2);
                 this.ctx.stroke();
+            } else if (f.type === 'judgment') {
+                this.ctx.save();
+                this.ctx.font = `bold ${24 + (1-f.life)*20}px 'Courier New', monospace`;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillStyle = f.color;
+                this.ctx.globalAlpha = f.life;
+                this.ctx.fillText(f.text, f.x, f.y - (1-f.life)*30);
+                this.ctx.restore();
             } else if (f.type === 'lane') {
                 this.ctx.fillStyle = `rgba(255,255,255,${f.life * 0.2})`;
                 this.ctx.fillRect(f.lane*this.lw, 0, this.lw, this.h);
             }
-            f.life -= 0.1;
+            f.life -= 0.05;
         });
         this.fx = this.fx.filter(f => f.life > 0);
 
-        if(now > 35) { // End of snippet
+if(now > 35) { // End of snippet
              this.state.playing = false;
-             alert("Section Complete. Score: " + this.state.score);
-             location.reload();
-        }
+             
+             // Show game over screen
+             const gameOverScreen = document.createElement('div');
+             gameOverScreen.className = 'game-over-screen';
+             
+             const title = document.createElement('h1');
+             title.className = 'game-over-title';
+             title.textContent = '🎵 遊戲結束 🎵';
+             
+             const score = document.createElement('div');
+             score.className = 'game-over-score';
+             score.textContent = `最終分數: ${this.state.score}`;
+             
+             const combo = document.createElement('div');
+             combo.className = 'game-over-score';
+             combo.textContent = `最高連擊: ${this.state.combo}`;
+             combo.style.fontSize = '1.5rem';
+             combo.style.color = '#ff6b6b';
+             
+             const buttonsContainer = document.createElement('div');
+             buttonsContainer.className = 'game-over-buttons';
+             
+             const restartBtn = document.createElement('button');
+             restartBtn.className = 'game-over-btn restart';
+             restartBtn.textContent = '再玩一次';
+             restartBtn.onclick = () => location.reload();
+             
+             const menuBtn = document.createElement('button');
+             menuBtn.className = 'game-over-btn menu';
+             menuBtn.textContent = '返回主選單';
+             menuBtn.onclick = () => {
+                 // Remove game over screen
+                 document.body.removeChild(gameOverScreen);
+                 // Show start screen again
+                 document.getElementById('start-screen').style.display = 'flex';
+                 gameStarted = false;
+             };
+             
+             buttonsContainer.appendChild(restartBtn);
+             buttonsContainer.appendChild(menuBtn);
+             
+             gameOverScreen.appendChild(title);
+             gameOverScreen.appendChild(score);
+             gameOverScreen.appendChild(combo);
+             gameOverScreen.appendChild(buttonsContainer);
+             
+             document.body.appendChild(gameOverScreen);
+         }
 
                 // Update performance monitoring
         this.updateFPS(performance.now());
@@ -726,11 +905,41 @@ const Game = {
     }
 };
 
-// Enhanced input binding
+// Global variable to track if game has started
+let gameStarted = false;
+
+// Function to start the game
+function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+    
+    // Initialize audio if not already initialized
+    if (!Audio.ctx) {
+        Audio.init();
+    }
+    
+    // Resume audio context
+    Audio.resumeContext();
+    
+    // Play button sound
+    Audio.playButton();
+    
+    // Start the game
+    Game.init();
+}
+
+// Enhanced input binding for game controls
 window.addEventListener('keydown', (e) => {
     // Resume audio context on first interaction
     Audio.resumeContext();
     
+    // Start game on any key press if not started yet
+    if (!gameStarted) {
+        startGame();
+        return;
+    }
+    
+    // Game controls
     const keyMap = { 'd':0, 'f':1, 'j':2, 'k':3 };
     const lane = keyMap[e.key.toLowerCase()];
     if(lane !== undefined) Game.check(lane);
@@ -743,10 +952,20 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-document.getElementById('start-btn').onclick = () => {
-    Audio.playButton();
-    Game.init();
+// Start button click handler
+document.getElementById('start-btn').onclick = function(e) {
+    console.log('Start button clicked');
+    startGame();
 };
+
+// Add click/touch handler for start screen (for mobile)
+document.getElementById('start-screen').addEventListener('click', (e) => {
+    console.log('Start screen clicked, target:', e.target.id);
+    // Only start if clicking on the start screen itself, not on buttons
+    if (e.target === document.getElementById('start-screen')) {
+        startGame();
+    }
+});
 
 // Prevent zoom on mobile
 document.addEventListener('touchmove', (e) => {
@@ -764,6 +983,75 @@ document.addEventListener('touchend', (e) => {
     }
     lastTouchEnd = now;
 }, false);
+
+// Add game over screen CSS to head
+const style = document.createElement('style');
+style.textContent = `
+    .game-over-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.95);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        color: white;
+        font-family: 'Courier New', monospace;
+        text-align: center;
+    }
+    
+    .game-over-title {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .game-over-score {
+        font-size: 2rem;
+        margin-bottom: 30px;
+        color: #4ecdc4;
+    }
+    
+    .game-over-buttons {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .game-over-btn {
+        padding: 15px 30px;
+        background: linear-gradient(90deg, #4ecdc4, #45b7d1);
+        color: #000;
+        border: none;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-width: 150px;
+    }
+    
+    .game-over-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(78, 205, 196, 0.6);
+    }
+    
+    .game-over-btn.restart {
+        background: linear-gradient(90deg, #4CAF50, #45a049);
+    }
+    
+    .game-over-btn.menu {
+        background: linear-gradient(90deg, #ff6b6b, #ff4757);
+    }
+`;
+document.head.appendChild(style);
 </script>
 </body>
 </html>
