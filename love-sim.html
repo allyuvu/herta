@@ -143,10 +143,120 @@
             line-height: 1.6;
             margin-bottom: 40px;
         }
+        
+        /* Start Screen Styles */
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .start-title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ff6b8b;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        .start-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            max-width: 600px;
+            line-height: 1.5;
+            color: #ffffff;
+        }
+        
+        .start-instruction {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: #ffcc00;
+            font-weight: bold;
+        }
+        
+        .start-button {
+            padding: 15px 35px;
+            font-size: 1.5rem;
+            background: linear-gradient(to right, #ff6b8b, #ff8fab);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 0 #e0557e;
+            transition: all 0.2s;
+            margin: 10px;
+            min-width: 180px;
+        }
+        
+        .start-button:hover {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #e0557e;
+            background: linear-gradient(to right, #ff8fab, #ff6b8b);
+        }
+        
+        .start-button:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0 #e0557e;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .start-title {
+                font-size: 2.5rem;
+            }
+            
+            .start-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .start-instruction {
+                font-size: 1.1rem;
+            }
+            
+            .start-button {
+                padding: 12px 25px;
+                font-size: 1.3rem;
+                min-width: 160px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="game-box">
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+        <h1 class="start-title">夏日告白 - 7天戀愛遊戲</h1>
+        <p class="start-subtitle">在畢業前的最後7天，向暗戀的學妹蘇曉晴告白吧！<br>你的每個選擇都會影響好感度、智力和魅力，決定最終的結局。</p>
+        <p class="start-instruction">按任意鍵或點擊按鈕開始遊戲</p>
+        <button class="start-button" id="startGameBtn">開始遊戲</button>
+    </div>
+    
+    <div id="game-box" style="display: none;">
         <div id="screen">
             <div id="stats">
                 <div class="stat">📅 第 <span id="day" class="stat-value">1</span> 天</div>
@@ -316,6 +426,13 @@
             // 結局
             { speaker: "系統", text: "畢業典禮結束，夏天也結束了...", action: "showEnding" }
         ];
+        
+        // 隱藏開始畫面
+        function hideStartScreen() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('game-box').style.display = 'block';
+            initGame();
+        }
         
         // 初始化遊戲
         function initGame() {
@@ -523,12 +640,18 @@
         }
         
         // 開始遊戲
-        window.onload = initGame;
+        window.onload = function() {
+            // 添加事件監聽器
+            document.getElementById('startGameBtn').addEventListener('click', hideStartScreen);
+            
+            // 按任意鍵開始遊戲
+            document.addEventListener('keydown', function(e) {
+                if (document.getElementById('startScreen').style.display !== 'none') {
+                    hideStartScreen();
+                    e.preventDefault();
+                }
+            });
+        };
     </script>
-</body>
-</html>
-
-core.init();
-</script>
 </body>
 </html>

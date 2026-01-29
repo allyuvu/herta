@@ -572,28 +572,28 @@ const N = {
 
 function generateMap(difficulty = 'normal') {
     let notes = [];
-    let t = 1.5; // Start earlier
+    let t = 2.0; // Start with a bit more delay
     
-    // Adjust tempo based on difficulty
-    let tempo = 150; // BPM
-    let noteDensity = 1.0;
+    // Adjust tempo and density based on difficulty
+    let tempo = 140; // BPM - slightly slower
+    let noteDensity = 0.7; // Reduced density for normal
     
     switch(difficulty) {
         case 'easy':
-            tempo = 120;
-            noteDensity = 0.6;
+            tempo = 110;
+            noteDensity = 0.4;
             break;
         case 'normal':
-            tempo = 150;
-            noteDensity = 1.0;
+            tempo = 140;
+            noteDensity = 0.7;
             break;
         case 'hard':
-            tempo = 180;
-            noteDensity = 1.4;
+            tempo = 170;
+            noteDensity = 1.0;
             break;
         case 'expert':
-            tempo = 210;
-            noteDensity = 1.8;
+            tempo = 200;
+            noteDensity = 1.3;
             break;
     }
     
@@ -609,94 +609,110 @@ function generateMap(difficulty = 'normal') {
         lanes.forEach(lane => n(lane, freq, timeOffset, 'chord'));
     };
     
-    // Helper: Roll (rapid sequence)
-    const roll = (startLane, endLane, freq, steps=4) => {
-        const actualSteps = Math.max(2, Math.floor(steps * noteDensity));
-        for(let i=0; i<actualSteps; i++) {
-            const lane = startLane + (endLane - startLane) * (i/(actualSteps-1));
-            n(Math.floor(lane), freq, beat*0.25*i);
-        }
-        t += beat;
+    // Helper: Simple pattern (less dense)
+    const simplePattern = (baseLane, freq, pattern) => {
+        pattern.forEach((offset, i) => {
+            if (Math.random() < noteDensity) { // Random chance to include note based on density
+                n(baseLane + i, freq, beat * offset);
+            }
+        });
+        t += beat * (pattern.length / 2);
     };
 
-    // Helper: Random pattern
-    const randomPattern = (freq, count) => {
-        const actualCount = Math.max(1, Math.floor(count * noteDensity));
-        for(let i=0; i<actualCount; i++) {
-            n(Math.floor(Math.random()*4), freq, beat*0.5*i);
+    // Helper: Gentle roll (slower, less notes)
+    const gentleRoll = (startLane, endLane, freq) => {
+        const steps = Math.max(2, Math.floor(3 * noteDensity));
+        for(let i=0; i<steps; i++) {
+            const lane = startLane + (endLane - startLane) * (i/(steps-1));
+            n(Math.floor(lane), freq, beat*0.5*i);
         }
-        t += beat * (actualCount/2);
+        t += beat * 2;
     };
 
-    // --- MORE INTERESTING SONG STRUCTURE ---
+    // --- IMPROVED SONG STRUCTURE WITH BETTER PACING ---
 
-    // INTRO: Simple alternating pattern
-    const introRepeats = Math.max(1, Math.floor(2 * noteDensity));
+    // INTRO: Very simple pattern to get players warmed up
+    const introRepeats = Math.max(1, Math.floor(1.5 * noteDensity));
     for(let i=0; i<introRepeats; i++) {
-        n(1, N.G); n(2, N.G, beat*0.5); n(1, N.G, beat*1.0); n(2, N.G, beat*1.5);
+        n(1, N.G, 0);
+        n(2, N.G, beat*1.0);
         t += beat * 2;
     }
 
-    // VERSE 1: Chord progressions
-    chord(N.G, [0, 1, 2, 3]);
-    t += beat;
-    chord(N.F, [0, 2]);
-    t += beat * 0.5;
-    chord(N.Eb, [1, 3]);
-    t += beat * 0.5;
-    chord(N.D, [0, 1, 2, 3]);
-    t += beat;
+    // VERSE 1: Simple chord progressions with space
+    chord(N.G, [0, 2]);
+    t += beat * 1.5;
+    
+    chord(N.F, [1, 3]);
+    t += beat * 1.5;
+    
+    chord(N.Eb, [0, 1, 2, 3]);
+    t += beat * 2;
 
-    // VERSE 2: Rolling patterns
-    const rollRepeats = Math.max(1, Math.floor(4 * noteDensity));
+    // VERSE 2: Gentle rolling patterns
+    const rollRepeats = Math.max(1, Math.floor(2 * noteDensity));
     for(let i=0; i<rollRepeats; i++) {
-        roll(0, 3, N.G);
-        roll(3, 0, N.F);
-        roll(1, 2, N.Eb);
-        roll(2, 1, N.D);
+        gentleRoll(0, 2, N.G);
+        gentleRoll(3, 1, N.F);
     }
 
-    // CHORUS: Intense patterns
-    const chorusRepeats = Math.max(2, Math.floor(4 * noteDensity));
+    // CHORUS: More active but not overwhelming
+    const chorusRepeats = Math.max(1, Math.floor(2 * noteDensity));
     for(let i=0; i<chorusRepeats; i++) {
-        // Double hits
-        n(0, N.G); n(3, N.G, beat*0.25);
-        n(1, N.F, beat*0.5); n(2, N.F, beat*0.75);
-        t += beat;
+        // Simple alternating pattern
+        n(0, N.G, 0);
+        n(1, N.F, beat*0.5);
+        n(2, N.Eb, beat*1.0);
+        n(3, N.D, beat*1.5);
+        t += beat * 2;
         
-        // Alternating
-        n(0, N.Eb, beat*0); n(1, N.Eb, beat*0.25);
-        n(2, N.D, beat*0.5); n(3, N.D, beat*0.75);
+        // Chord for emphasis
+        chord(N.G, [0, 1, 2, 3], beat*0);
         t += beat;
     }
 
-    // BRIDGE: Random patterns for variety
-    const bridgeRepeats = Math.max(2, Math.floor(4 * noteDensity));
-    for(let i=0; i<bridgeRepeats; i++) {
-        randomPattern(N.G, 4);
-        randomPattern(N.F, 4);
-        randomPattern(N.Eb, 4);
-        randomPattern(N.D, 4);
-    }
+    // BRIDGE: Melodic patterns with breathing room
+    const bridgePatterns = [
+        [[0, 2], N.G],
+        [[1, 3], N.F],
+        [[0, 1, 2, 3], N.Eb],
+        [[0, 3], N.D]
+    ];
+    
+    bridgePatterns.forEach(([lanes, freq], idx) => {
+        if (Array.isArray(lanes)) {
+            chord(freq, lanes);
+        } else {
+            n(lanes, freq);
+        }
+        t += beat * (idx % 2 === 0 ? 1.5 : 1.0);
+    });
 
-    // FINAL CHORUS: Fast and intense
-    const finalRepeats = Math.max(4, Math.floor(8 * noteDensity));
-    for(let i=0; i<finalRepeats; i++) {
-        const lane = i % 4;
-        const freq = [N.G, N.F, N.Eb, N.D][i % 4];
-        n(lane, freq, 0);
+    // FINAL SECTION: Build up gradually
+    const buildUpRepeats = Math.max(2, Math.floor(3 * noteDensity));
+    for(let i=0; i<buildUpRepeats; i++) {
+        const intensity = i / buildUpRepeats; // 0 to 1
         
-        // Every 4th note, add a chord
-        if (i % 4 === 3) {
-            chord(freq, [0, 1, 2, 3], beat*0.5);
+        // Gradually increase note density
+        if (Math.random() < noteDensity * (0.5 + intensity * 0.5)) {
+            const lane = Math.floor(Math.random() * 4);
+            const freq = [N.G, N.F, N.Eb, N.D][Math.floor(Math.random() * 4)];
+            n(lane, freq, 0);
         }
         
-        t += beat * 0.5;
+        // Add chords at certain points
+        if (i % 3 === 2) {
+            chord(N.G, [0, 1, 2, 3], beat*0.5);
+        }
+        
+        t += beat * 0.75;
     }
 
-    // OUTRO: Slow down
-    n(0, N.G); n(3, N.G, beat);
-    n(1, N.F, beat*2); n(2, N.F, beat*3);
+    // OUTRO: Slow and satisfying ending
+    n(0, N.G, 0);
+    n(3, N.G, beat*1.5);
+    n(1, N.F, beat*3.0);
+    n(2, N.F, beat*4.5);
 
     return notes;
 }
