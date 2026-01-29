@@ -497,83 +497,104 @@ const Audio = {
     }
 };
 
-// --- MAPPING LOGIC (The Fix) ---
-const N = { G:196, F:174, Eb:155, D:146 };
+// --- ENHANCED MAPPING LOGIC ---
+const N = {
+    G:196, F:174, Eb:155, D:146,
+    C:130, Bb:233, A:220, E:164
+};
 
 function generateMap() {
     let notes = [];
-    let t = 2.0;
-    const beat = 60 / 135; 
-
-    // Helper: Push note
+    let t = 1.5; // Start earlier
+    const beat = 60 / 150; // Slightly faster tempo
+    
+    // Helper: Push note with optional type
     const n = (lane, freq, timeOffset=0, type='normal') => {
-        notes.push({ lane, f: freq, t: t + timeOffset, type, hit:false });
+        notes.push({ lane, f: freq, t: t + timeOffset, type, hit:false, judgment: null });
     };
 
-    // Helper: Patterns
-    // 1. Alternating (Trill)
-    const trill = (f) => {
-        n(1, f); n(2, f, beat*0.5); n(1, f, beat*1.0); n(2, f, beat*1.5);
-        t += beat * 2;
+    // Helper: Chord (multiple lanes at once)
+    const chord = (freq, lanes, timeOffset=0) => {
+        lanes.forEach(lane => n(lane, freq, timeOffset, 'chord'));
     };
     
-    // 2. Stairs Down (Gm -> Dm feel)
-    const stairDown = (f) => {
-        n(3, f); n(2, f, beat*0.5); n(1, f, beat*1.0); n(0, f, beat*1.5);
-        t += beat * 2;
+    // Helper: Roll (rapid sequence)
+    const roll = (startLane, endLane, freq, steps=4) => {
+        for(let i=0; i<steps; i++) {
+            const lane = startLane + (endLane - startLane) * (i/(steps-1));
+            n(Math.floor(lane), freq, beat*0.25*i);
+        }
+        t += beat;
     };
 
-    // 3. Wide Jumps (Harder)
-    const jump = (f) => {
-        n(0, f); n(3, f, beat*0.5); n(1, f, beat*1.0); n(2, f, beat*1.5);
-        t += beat * 2;
+    // Helper: Random pattern
+    const randomPattern = (freq, count) => {
+        for(let i=0; i<count; i++) {
+            n(Math.floor(Math.random()*4), freq, beat*0.5*i);
+        }
+        t += beat * (count/2);
     };
 
-    // 4. Double (Impact)
-    const double = (f) => {
-        n(0, f); n(3, f); // Boom
-        t += beat * 2; // Give some rest or continue
-    };
+    // --- MORE INTERESTING SONG STRUCTURE ---
 
-    // --- SONG STRUCTURE ---
-
-    // PART 1: INTRO (Center lanes focus)
-    // 4 Bars
-    for(let i=0; i<4; i++) trill(N.G);
-
-    // PART 2: MAIN THEME (Movement)
-    // Gm -> F -> Eb -> Dm
+    // INTRO: Simple alternating pattern
     for(let i=0; i<2; i++) {
-        stairDown(N.G); // 3-2-1-0
-        stairDown(N.F); 
-        stairDown(N.Eb);
-        stairDown(N.D);
+        n(1, N.G); n(2, N.G, beat*0.5); n(1, N.G, beat*1.0); n(2, N.G, beat*1.5);
+        t += beat * 2;
     }
 
-    // PART 3: TENSION (Jumps)
-    // Randomize feel
-    for(let i=0; i<2; i++) {
-        jump(N.G); jump(N.F);
-        jump(N.Eb); jump(N.D);
-    }
+    // VERSE 1: Chord progressions
+    chord(N.G, [0, 1, 2, 3]);
+    t += beat;
+    chord(N.F, [0, 2]);
+    t += beat * 0.5;
+    chord(N.Eb, [1, 3]);
+    t += beat * 0.5;
+    chord(N.D, [0, 1, 2, 3]);
+    t += beat;
 
-    // PART 4: CLIMAX (Doubles & Density)
-    // Heavy hits
-    for(let i=0; i<2; i++) {
-        // Gm
-        double(N.G); n(1, N.G, beat*1.0); n(2, N.G, beat*1.5);
-        // F
-        double(N.F); n(1, N.F, beat*1.0); n(2, N.F, beat*1.5);
-        // Eb
-        double(N.Eb); n(1, N.Eb, beat*1.0); n(2, N.Eb, beat*1.5);
-        // Dm
-        double(N.D); n(1, N.D, beat*1.0); n(2, N.D, beat*1.5);
+    // VERSE 2: Rolling patterns
+    roll(0, 3, N.G);
+    roll(3, 0, N.F);
+    roll(1, 2, N.Eb);
+    roll(2, 1, N.D);
+
+    // CHORUS: Intense patterns
+    for(let i=0; i<4; i++) {
+        // Double hits
+        n(0, N.G); n(3, N.G, beat*0.25);
+        n(1, N.F, beat*0.5); n(2, N.F, beat*0.75);
+        t += beat;
         
-        t += beat * 2; // Fix timing accumulation from the manual 'double' function adds
+        // Alternating
+        n(0, N.Eb, beat*0); n(1, N.Eb, beat*0.25);
+        n(2, N.D, beat*0.5); n(3, N.D, beat*0.75);
+        t += beat;
     }
 
-    // OUTRO
-    n(0, N.G); n(3, N.G);
+    // BRIDGE: Random patterns for variety
+    randomPattern(N.G, 4);
+    randomPattern(N.F, 4);
+    randomPattern(N.Eb, 4);
+    randomPattern(N.D, 4);
+
+    // FINAL CHORUS: Fast and intense
+    for(let i=0; i<8; i++) {
+        const lane = i % 4;
+        const freq = [N.G, N.F, N.Eb, N.D][i % 4];
+        n(lane, freq, 0);
+        
+        // Every 4th note, add a chord
+        if (i % 4 === 3) {
+            chord(freq, [0, 1, 2, 3], beat*0.5);
+        }
+        
+        t += beat * 0.5;
+    }
+
+    // OUTRO: Slow down
+    n(0, N.G); n(3, N.G, beat);
+    n(1, N.F, beat*2); n(2, N.F, beat*3);
 
     return notes;
 }
@@ -808,14 +829,25 @@ const Game = {
             const y = this.hitY - (n.t - now) * (this.hitY/spd);
             
             if(y > -50 && y < this.h) {
-                // Different color for double hits visual cue?
-                this.ctx.fillStyle = '#fff';
-                // Note body
-                this.ctx.fillRect(n.lane*this.lw + 5, y-10, this.lw-10, 20);
+                // Different colors for different note types
+                if (n.type === 'chord') {
+                    this.ctx.fillStyle = '#4ecdc4'; // Cyan for chords
+                    this.ctx.fillRect(n.lane*this.lw + 2, y-15, this.lw-4, 30);
+                    
+                    // Glow effect for chords
+                    this.ctx.shadowColor = '#4ecdc4';
+                    this.ctx.shadowBlur = 15;
+                    this.ctx.fillRect(n.lane*this.lw + 2, y-15, this.lw-4, 30);
+                    this.ctx.shadowBlur = 0;
+                } else {
+                    this.ctx.fillStyle = '#fff'; // White for normal notes
+                    this.ctx.fillRect(n.lane*this.lw + 5, y-10, this.lw-10, 20);
+                }
                 
                 // Trail
+                const trailColor = n.type === 'chord' ? 'rgba(78, 205, 196, 0.3)' : 'rgba(255,255,255,0.3)';
                 const grad = this.ctx.createLinearGradient(0, y, 0, y-100);
-                grad.addColorStop(0, 'rgba(255,255,255,0.3)');
+                grad.addColorStop(0, trailColor);
                 grad.addColorStop(1, 'rgba(255,255,255,0)');
                 this.ctx.fillStyle = grad;
                 this.ctx.fillRect(n.lane*this.lw + 5, y-100, this.lw-10, 100);
