@@ -80,7 +80,7 @@
         .start-instruction {
             font-size: 18px;
             color: #4ecdc4;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             letter-spacing: 2px;
             animation: pulse 1.5s ease-in-out infinite;
         }
@@ -88,6 +88,63 @@
         @keyframes pulse {
             0%, 100% { opacity: 0.7; transform: scale(1); }
             50% { opacity: 1; transform: scale(1.05); }
+        }
+        
+        .difficulty-selection {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .difficulty-title {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .difficulty-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .difficulty-btn {
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #888;
+            border: 1px solid #444;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .difficulty-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        
+        .difficulty-btn.active {
+            background: #4ecdc4;
+            color: #000;
+            border-color: #4ecdc4;
+            font-weight: bold;
+        }
+        
+        .difficulty-btn.easy.active {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+        
+        .difficulty-btn.hard.active {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+        
+        .difficulty-btn.expert.active {
+            background: #9c27b0;
+            border-color: #9c27b0;
         }
         
         .key-guide {
@@ -297,6 +354,16 @@
         
         <div class="start-instruction">按任意鍵開始遊戲</div>
         
+        <div class="difficulty-selection">
+            <div class="difficulty-title">選擇難度</div>
+            <div class="difficulty-options">
+                <button class="difficulty-btn easy" data-difficulty="easy">簡單</button>
+                <button class="difficulty-btn normal active" data-difficulty="normal">普通</button>
+                <button class="difficulty-btn hard" data-difficulty="hard">困難</button>
+                <button class="difficulty-btn expert" data-difficulty="expert">專家</button>
+            </div>
+        </div>
+        
         <div class="key-guide">
             <div class="k">D</div><div class="k">F</div>
             <div class="k">J</div><div class="k">K</div>
@@ -503,10 +570,34 @@ const N = {
     C:130, Bb:233, A:220, E:164
 };
 
-function generateMap() {
+function generateMap(difficulty = 'normal') {
     let notes = [];
     let t = 1.5; // Start earlier
-    const beat = 60 / 150; // Slightly faster tempo
+    
+    // Adjust tempo based on difficulty
+    let tempo = 150; // BPM
+    let noteDensity = 1.0;
+    
+    switch(difficulty) {
+        case 'easy':
+            tempo = 120;
+            noteDensity = 0.6;
+            break;
+        case 'normal':
+            tempo = 150;
+            noteDensity = 1.0;
+            break;
+        case 'hard':
+            tempo = 180;
+            noteDensity = 1.4;
+            break;
+        case 'expert':
+            tempo = 210;
+            noteDensity = 1.8;
+            break;
+    }
+    
+    const beat = 60 / tempo;
     
     // Helper: Push note with optional type
     const n = (lane, freq, timeOffset=0, type='normal') => {
@@ -520,8 +611,9 @@ function generateMap() {
     
     // Helper: Roll (rapid sequence)
     const roll = (startLane, endLane, freq, steps=4) => {
-        for(let i=0; i<steps; i++) {
-            const lane = startLane + (endLane - startLane) * (i/(steps-1));
+        const actualSteps = Math.max(2, Math.floor(steps * noteDensity));
+        for(let i=0; i<actualSteps; i++) {
+            const lane = startLane + (endLane - startLane) * (i/(actualSteps-1));
             n(Math.floor(lane), freq, beat*0.25*i);
         }
         t += beat;
@@ -529,16 +621,18 @@ function generateMap() {
 
     // Helper: Random pattern
     const randomPattern = (freq, count) => {
-        for(let i=0; i<count; i++) {
+        const actualCount = Math.max(1, Math.floor(count * noteDensity));
+        for(let i=0; i<actualCount; i++) {
             n(Math.floor(Math.random()*4), freq, beat*0.5*i);
         }
-        t += beat * (count/2);
+        t += beat * (actualCount/2);
     };
 
     // --- MORE INTERESTING SONG STRUCTURE ---
 
     // INTRO: Simple alternating pattern
-    for(let i=0; i<2; i++) {
+    const introRepeats = Math.max(1, Math.floor(2 * noteDensity));
+    for(let i=0; i<introRepeats; i++) {
         n(1, N.G); n(2, N.G, beat*0.5); n(1, N.G, beat*1.0); n(2, N.G, beat*1.5);
         t += beat * 2;
     }
@@ -554,13 +648,17 @@ function generateMap() {
     t += beat;
 
     // VERSE 2: Rolling patterns
-    roll(0, 3, N.G);
-    roll(3, 0, N.F);
-    roll(1, 2, N.Eb);
-    roll(2, 1, N.D);
+    const rollRepeats = Math.max(1, Math.floor(4 * noteDensity));
+    for(let i=0; i<rollRepeats; i++) {
+        roll(0, 3, N.G);
+        roll(3, 0, N.F);
+        roll(1, 2, N.Eb);
+        roll(2, 1, N.D);
+    }
 
     // CHORUS: Intense patterns
-    for(let i=0; i<4; i++) {
+    const chorusRepeats = Math.max(2, Math.floor(4 * noteDensity));
+    for(let i=0; i<chorusRepeats; i++) {
         // Double hits
         n(0, N.G); n(3, N.G, beat*0.25);
         n(1, N.F, beat*0.5); n(2, N.F, beat*0.75);
@@ -573,13 +671,17 @@ function generateMap() {
     }
 
     // BRIDGE: Random patterns for variety
-    randomPattern(N.G, 4);
-    randomPattern(N.F, 4);
-    randomPattern(N.Eb, 4);
-    randomPattern(N.D, 4);
+    const bridgeRepeats = Math.max(2, Math.floor(4 * noteDensity));
+    for(let i=0; i<bridgeRepeats; i++) {
+        randomPattern(N.G, 4);
+        randomPattern(N.F, 4);
+        randomPattern(N.Eb, 4);
+        randomPattern(N.D, 4);
+    }
 
     // FINAL CHORUS: Fast and intense
-    for(let i=0; i<8; i++) {
+    const finalRepeats = Math.max(4, Math.floor(8 * noteDensity));
+    for(let i=0; i<finalRepeats; i++) {
         const lane = i % 4;
         const freq = [N.G, N.F, N.Eb, N.D][i % 4];
         n(lane, freq, 0);
@@ -625,7 +727,7 @@ const Game = {
     // Mobile detection
     isMobile: false,
     
-    init() {
+    init(difficulty = 'normal') {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.canvas.width = this.w;
@@ -639,7 +741,7 @@ const Game = {
         if (!Audio.ctx) {
             Audio.init();
         }
-        this.notes = generateMap();
+        this.notes = generateMap(difficulty);
         this.state.playing = true;
         this.state.t0 = Audio.ctx.currentTime;
         
@@ -937,8 +1039,9 @@ if(now > 35) { // End of snippet
     }
 };
 
-// Global variable to track if game has started
+// Global variables
 let gameStarted = false;
+let currentDifficulty = 'normal';
 
 // Function to start the game
 function startGame() {
@@ -956,9 +1059,28 @@ function startGame() {
     // Play button sound
     Audio.playButton();
     
-    // Start the game
-    Game.init();
+    // Start the game with selected difficulty
+    Game.init(currentDifficulty);
 }
+
+// Difficulty selection
+document.querySelectorAll('.difficulty-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove active class from all buttons
+        document.querySelectorAll('.difficulty-btn').forEach(b => {
+            b.classList.remove('active');
+        });
+        
+        // Add active class to clicked button
+        btn.classList.add('active');
+        
+        // Update current difficulty
+        currentDifficulty = btn.dataset.difficulty;
+        
+        // Play selection sound
+        Audio.playButton();
+    });
+});
 
 // Enhanced input binding for game controls
 window.addEventListener('keydown', (e) => {

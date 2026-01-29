@@ -562,6 +562,110 @@
             box-shadow: 0 8px 25px rgba(255, 255, 255, 0.4);
         }
 
+        /* 開始畫面 */
+        #startScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            text-align: center;
+        }
+
+        .start-title {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #FF0000, #FFA500, #FFFF00, #008000, #0000FF, #4B0082, #EE82EE);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+            letter-spacing: 2px;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { text-shadow: 0 0 30px rgba(255, 0, 0, 0.5); }
+            to { text-shadow: 0 0 50px rgba(255, 0, 0, 0.8), 0 0 60px rgba(255, 165, 0, 0.6); }
+        }
+
+        .start-subtitle {
+            font-size: 1.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            max-width: 800px;
+            line-height: 1.6;
+        }
+
+        .start-instruction {
+            font-size: 1.5rem;
+            color: #00FF00;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .start-button {
+            padding: 20px 60px;
+            background: linear-gradient(45deg, #FF0000, #FF4500);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(255, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 0, 0, 0.6);
+            background: linear-gradient(45deg, #FF4500, #FF0000);
+        }
+
+        .start-controls {
+            display: flex;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .control-hint {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .control-key {
+            font-size: 1.2rem;
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .control-desc {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+        }
+
         /* 載入畫面 */
         #loadingScreen {
             position: fixed;
@@ -575,6 +679,7 @@
             align-items: center;
             justify-content: center;
             z-index: 2000;
+            display: none; /* 預設隱藏 */
         }
 
         .loader {
@@ -768,6 +873,36 @@
     </style>
 </head>
 <body>
+    <!-- 開始畫面 -->
+    <div id="startScreen">
+        <h1 class="start-title">Super Mario Kart 體感賽車</h1>
+        <div class="start-subtitle">使用手勢控制賽車！揮動雙手轉動方向盤，握拳加速，開始你的賽車之旅！</div>
+        <div class="start-instruction">按任意鍵或點擊按鈕開始遊戲</div>
+        
+        <button class="start-button" id="startScreenBtn">
+            🏁 開始比賽
+        </button>
+        
+        <div class="start-controls">
+            <div class="control-hint">
+                <div class="control-key">← →</div>
+                <div class="control-desc">方向控制</div>
+            </div>
+            <div class="control-hint">
+                <div class="control-key">↑</div>
+                <div class="control-desc">加速</div>
+            </div>
+            <div class="control-hint">
+                <div class="control-key">↓</div>
+                <div class="control-desc">煞車</div>
+            </div>
+            <div class="control-hint">
+                <div class="control-key">空格鍵</div>
+                <div class="control-desc">使用道具</div>
+            </div>
+        </div>
+    </div>
+
     <!-- 載入畫面 -->
     <div id="loadingScreen">
         <div class="loader"></div>
@@ -801,6 +936,9 @@
         </div>
         <button class="control-btn primary" id="restartBtn" style="margin-top: 20px;">
             🔄 重新開始
+        </button>
+        <button class="control-btn secondary" id="backToMenuBtn" style="margin-top: 10px;">
+            🏠 返回主選單
         </button>
     </div>
 
@@ -1010,9 +1148,12 @@
         
         // DOM元素
         const gameCanvas = document.getElementById('gameCanvas');
+        const startScreen = document.getElementById('startScreen');
+        const startScreenBtn = document.getElementById('startScreenBtn');
         const startBtn = document.getElementById('startBtn');
         const pauseBtn = document.getElementById('pauseBtn');
         const restartBtn = document.getElementById('restartBtn');
+        const backToMenuBtn = document.getElementById('backToMenuBtn');
         const gameOverScreen = document.getElementById('gameOverScreen');
         const gameOverTitle = document.getElementById('gameOverTitle');
         const finalRank = document.getElementById('finalRank');
@@ -1078,13 +1219,11 @@
             // 開始遊戲循環
             gameLoop();
             
+            // 顯示開始畫面
+            startScreen.style.display = 'flex';
+            
             // 隱藏載入畫面
-            setTimeout(() => {
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                }, 500);
-            }, 1000);
+            loadingScreen.style.display = 'none';
         }
         
         function initCanvas() {
@@ -1746,6 +1885,14 @@
         }
         
         // ==================== 遊戲控制 ====================
+        function startGame() {
+            // 隱藏開始畫面
+            startScreen.style.display = 'none';
+            
+            // 開始比賽
+            startRace();
+        }
+        
         function startRace() {
             if (!gameActive) {
                 gameActive = true;
@@ -2022,9 +2169,28 @@
         
         // ==================== 事件監聽器 ====================
         function setupEventListeners() {
+            // 開始畫面按鈕
+            startScreenBtn.addEventListener('click', startGame);
+            
+            // 開始畫面點擊事件（按任意鍵開始）
+            startScreen.addEventListener('click', (e) => {
+                if (e.target === startScreen) {
+                    startGame();
+                }
+            });
+            
+            // 按任意鍵開始
+            document.addEventListener('keydown', (e) => {
+                if (startScreen.style.display === 'flex' && e.key !== 'Escape') {
+                    startGame();
+                }
+            });
+            
+            // 遊戲控制按鈕
             startBtn.addEventListener('click', startRace);
             pauseBtn.addEventListener('click', togglePause);
             restartBtn.addEventListener('click', restartGame);
+            backToMenuBtn.addEventListener('click', backToMenu);
             
             // 道具使用按鈕（用於測試）
             itemSlot.addEventListener('click', useItem);
@@ -2037,6 +2203,24 @@
                 permissionPrompt.style.display = 'none';
                 // 這裡可以重新嘗試攝影機權限
             });
+        }
+        
+        function backToMenu() {
+            // 隱藏遊戲結束畫面
+            gameOverScreen.style.display = 'none';
+            
+            // 重置遊戲狀態
+            gameActive = false;
+            raceStarted = false;
+            gamePaused = false;
+            
+            // 顯示開始畫面
+            startScreen.style.display = 'flex';
+            
+            // 重置開始按鈕
+            startBtn.textContent = '🏁 開始比賽';
+            startBtn.classList.add('primary');
+            startBtn.classList.remove('secondary');
         }
         
         // ==================== 初始化遊戲 ====================
