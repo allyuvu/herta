@@ -521,9 +521,215 @@
                 font-size: 2rem;
             }
         }
+
+        /* 開始畫面樣式 */
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .start-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .start-title {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #FFD700, #FF8C00, #FF4500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3);
+            letter-spacing: 3px;
+            animation: pulse 1.5s ease infinite;
+        }
+
+        .start-instruction {
+            font-size: 1.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .start-button {
+            padding: 20px 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #4CAF50, #2E7D32);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.6);
+            background: linear-gradient(45deg, #66BB6A, #388E3C);
+        }
+
+        /* 分數顯示位置 */
+        .score-display {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .score-label {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        /* 遊戲結束畫面 */
+        .game-over-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .game-over-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .game-over-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #FF5252, #FF8C00, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .game-over-score {
+            font-size: 3rem;
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+
+        .game-over-message {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .game-over-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .game-over-btn {
+            padding: 18px 35px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .game-over-btn.play-again {
+            background: linear-gradient(45deg, #4CAF50, #2E7D32);
+            color: white;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .game-over-btn.play-again:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .game-over-btn.menu {
+            background: linear-gradient(45deg, #2196F3, #0D47A1);
+            color: white;
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .game-over-btn.menu:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.6);
+        }
     </style>
 </head>
 <body>
+    <!-- 開始畫面 -->
+    <div class="start-screen" id="startScreen">
+        <h1 class="start-title">經典猜數字</h1>
+        <p class="start-instruction">按任意鍵或點擊按鈕開始遊戲</p>
+        <button class="start-button" id="startGameBtn">開始遊戲</button>
+    </div>
+
+    <!-- 分數顯示 -->
+    <div class="score-display" id="scoreDisplay" style="display: none;">
+        <span class="score-label">分數:</span>
+        <span class="score-value" id="scoreValue">0</span>
+    </div>
+
+    <!-- 遊戲結束畫面 -->
+    <div class="game-over-screen" id="gameOverScreen">
+        <h2 class="game-over-title" id="gameOverTitle">遊戲結束</h2>
+        <div class="game-over-score" id="gameOverScore">分數: 0</div>
+        <p class="game-over-message" id="gameOverMessage"></p>
+        <div class="game-over-buttons">
+            <button class="game-over-btn play-again" id="playAgainBtn">再玩一次</button>
+            <button class="game-over-btn menu" id="menuBtn">返回主選單</button>
+        </div>
+    </div>
+
     <div class="game-container">
         <!-- 標題區 -->
         <header class="header">
@@ -636,6 +842,7 @@
         let gameWon = false;
         let usedNumbers = new Set();
         let gameHistory = [];
+        let currentScore = 0;
         
         // 難度設定
         const DIFFICULTY_SETTINGS = {
@@ -663,16 +870,38 @@
         const hintText = document.getElementById('hintText');
         const numberButtons = document.getElementById('numberButtons');
         
+        // 新添加的DOM元素
+        const startScreen = document.getElementById('startScreen');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const scoreValue = document.getElementById('scoreValue');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const gameOverTitle = document.getElementById('gameOverTitle');
+        const gameOverScore = document.getElementById('gameOverScore');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const menuBtn = document.getElementById('menuBtn');
+        
         // ==================== 初始化 ====================
         function init() {
             setupEventListeners();
             generateNumberButtons();
             updateHint();
+            
+            // 隱藏遊戲容器，顯示開始畫面
+            document.querySelector('.game-container').style.display = 'none';
+            startScreen.classList.remove('hidden');
+            
+            // 添加鍵盤事件監聽器
+            document.addEventListener('keydown', handleStartKeyPress);
         }
         
         // ==================== 事件監聽器 ====================
         function setupEventListeners() {
-            // 開始遊戲按鈕
+            // 開始畫面按鈕
+            startGameBtn.addEventListener('click', hideStartScreen);
+            
+            // 遊戲內開始按鈕
             startBtn.addEventListener('click', startGame);
             
             // 猜測按鈕
@@ -680,6 +909,10 @@
             
             // 重新開始按鈕
             resetBtn.addEventListener('click', resetGame);
+            
+            // 遊戲結束畫面按鈕
+            playAgainBtn.addEventListener('click', playAgain);
+            menuBtn.addEventListener('click', returnToMenu);
             
             // 輸入框事件
             guessInput.addEventListener('input', validateInput);
@@ -702,6 +935,59 @@
             });
         }
         
+        // ==================== 開始畫面功能 ====================
+        function handleStartKeyPress(e) {
+            if (!startScreen.classList.contains('hidden')) {
+                hideStartScreen();
+            }
+        }
+        
+        function hideStartScreen() {
+            startScreen.classList.add('hidden');
+            document.querySelector('.game-container').style.display = 'block';
+            scoreDisplay.style.display = 'flex';
+            document.removeEventListener('keydown', handleStartKeyPress);
+            
+            // 聚焦到輸入框
+            setTimeout(() => {
+                guessInput.focus();
+            }, 100);
+        }
+        
+        function showGameOverScreen(isWin) {
+            const score = calculateScore();
+            currentScore = score;
+            
+            if (isWin) {
+                gameOverTitle.textContent = '勝利！';
+                gameOverMessage.textContent = `恭喜！你在 ${guessCount} 次猜測中找到了數字 ${targetNumber}！`;
+            } else {
+                gameOverTitle.textContent = '遊戲結束';
+                gameOverMessage.textContent = `很遺憾，機會用完了！正確數字是 ${targetNumber}`;
+            }
+            
+            gameOverScore.textContent = `分數: ${score}`;
+            gameOverScreen.classList.add('active');
+        }
+        
+        function hideGameOverScreen() {
+            gameOverScreen.classList.remove('active');
+        }
+        
+        function playAgain() {
+            hideGameOverScreen();
+            resetGame();
+            guessInput.focus();
+        }
+        
+        function returnToMenu() {
+            hideGameOverScreen();
+            startScreen.classList.remove('hidden');
+            document.querySelector('.game-container').style.display = 'none';
+            scoreDisplay.style.display = 'none';
+            document.addEventListener('keydown', handleStartKeyPress);
+        }
+        
         // ==================== 遊戲邏輯 ====================
         function startGame() {
             if (gameActive) return;
@@ -711,6 +997,7 @@
             guessCount = 0;
             usedNumbers.clear();
             gameHistory = [];
+            currentScore = 0;
             
             // 根據難度生成目標數字
             const settings = DIFFICULTY_SETTINGS[currentDifficulty];
@@ -723,6 +1010,7 @@
             updateResultDisplay('active', '遊戲開始！', `猜一個 ${settings.min}-${settings.max} 之間的數字`);
             updateHistoryDisplay();
             updateNumberButtons();
+            updateScoreDisplay();
             
             // 啟用/禁用按鈕
             guessBtn.disabled = false;
@@ -734,6 +1022,10 @@
             updateHint();
             
             console.log(`遊戲開始！目標數字: ${targetNumber} (範圍: ${settings.min}-${settings.max})`);
+        }
+        
+        function updateScoreDisplay() {
+            scoreValue.textContent = currentScore;
         }
         
         function submitGuess() {
@@ -764,7 +1056,16 @@
                 
                 // 計算分數
                 const score = calculateScore();
+                currentScore = score;
                 resultMessage.textContent = `${message} 得分: ${score}`;
+                
+                // 更新分數顯示
+                updateScoreDisplay();
+                
+                // 顯示遊戲結束畫面
+                setTimeout(() => {
+                    showGameOverScreen(true);
+                }, 1500);
                 
                 // 顯示慶祝效果
                 showCelebration();
@@ -774,6 +1075,11 @@
                 resultType = 'lose';
                 resultTitle.textContent = '遊戲結束';
                 resultMessage.textContent = `很遺憾，機會用完了！正確數字是 ${targetNumber}`;
+                
+                // 顯示遊戲結束畫面
+                setTimeout(() => {
+                    showGameOverScreen(false);
+                }, 1000);
                 
             } else {
                 resultType = 'active';
@@ -886,12 +1192,14 @@
             guessCount = 0;
             usedNumbers.clear();
             gameHistory = [];
+            currentScore = 0;
             
             // 重置顯示
             updateGameInfo();
             updateResultDisplay('active', '準備開始！', '選擇難度並開始猜測');
             updateHistoryDisplay();
             updateNumberButtons();
+            updateScoreDisplay();
             
             // 重置按鈕狀態
             guessBtn.disabled = true;
