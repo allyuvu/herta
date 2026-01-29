@@ -2,310 +2,531 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>夏日告白：最後的 7 天 - 完整高級版</title>
+    <title>夏日告白 - 7天戀愛遊戲</title>
     <style>
-        :root { --main: #ff85a2; --glass: rgba(255, 255, 255, 0.9); --accent: #74b9ff; }
-        body { margin: 0; background: #000; font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            font-family: 'Microsoft JhengHei', sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
         
-        #game-container { 
-            width: 1024px; height: 640px; background: #222; position: relative; 
-            overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        #game-box {
+            width: 800px;
+            height: 500px;
+            background: #2d2d44;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            position: relative;
         }
-
-        /* 渲染層 */
-        #bg-layer { width: 100%; height: 100%; background-size: cover; background-position: center; transition: 1.5s filter, 1s background; }
-        #char-layer { 
-            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); 
-            height: 95%; transition: 0.5s all cubic-bezier(0.4, 0, 0.2, 1); z-index: 5; 
-            font-size: 400px; display: flex; align-items: flex-end;
+        
+        #screen {
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
         }
-        .char-hit { transform: translateX(-50%) scale(1.05); filter: brightness(1.2); }
-
-        /* 頂部資訊欄 */
-        #top-ui {
-            position: absolute; top: 0; width: 100%; height: 60px; 
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            display: flex; align-items: center; padding: 0 30px; color: #fff; z-index: 20;
+        
+        #stats {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
         }
-        .stat { margin-right: 30px; display: flex; align-items: center; gap: 8px; font-weight: bold; }
-        .stat-val { color: var(--main); text-shadow: 0 0 10px var(--main); }
-
-        /* 對話系統 */
-        #msg-window {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 960px; height: 180px; background: var(--glass);
-            border-radius: 15px; border: 3px solid white;
-            padding: 30px; box-sizing: border-box; z-index: 100; cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
-        #name-label {
-            position: absolute; top: -20px; left: 40px; background: var(--main);
-            color: white; padding: 6px 30px; border-radius: 30px; font-weight: bold; font-size: 24px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        
+        .stat-value {
+            color: #ff6b8b;
+            font-weight: bold;
         }
-        #text-content { font-size: 24px; color: #333; line-height: 1.7; letter-spacing: 1px; }
-
-        /* 選項系統 */
-        #choice-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 500; backdrop-filter: blur(5px);
+        
+        #dialog-area {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 20px;
+            height: 250px;
+            margin-bottom: 15px;
+            position: relative;
         }
+        
+        #speaker {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #ff6b8b;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        
+        #dialog {
+            color: #333;
+            font-size: 18px;
+            line-height: 1.6;
+            height: 180px;
+            overflow-y: auto;
+            padding-top: 10px;
+        }
+        
+        #choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
         .choice-btn {
-            width: 550px; padding: 20px; margin: 12px; background: white;
-            border-radius: 15px; border: none; color: #333;
-            font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2); text-align: center;
+            background: #4a4a6d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s;
         }
-        .choice-btn:hover { background: var(--main); color: white; transform: translateY(-3px); }
-
-        /* 背包/系統按鈕 */
-        .sys-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer; margin-left: 10px; }
         
-        /* 動畫特效 */
-        #flash { position: absolute; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; z-index: 999; }
+        .choice-btn:hover {
+            background: #ff6b8b;
+            transform: translateX(5px);
+        }
+        
+        #next-btn {
+            background: #ff6b8b;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            float: right;
+        }
+        
+        #next-btn:hover {
+            background: #ff8fab;
+        }
+        
+        .highlight {
+            color: #ff6b8b;
+            font-weight: bold;
+        }
+        
+        .ending-screen {
+            text-align: center;
+            padding-top: 50px;
+        }
+        
+        .ending-title {
+            font-size: 32px;
+            color: #ff6b8b;
+            margin-bottom: 30px;
+        }
+        
+        .ending-text {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
     </style>
 </head>
 <body>
-
-<div id="game-container">
-    <div id="bg-layer"></div>
-    <div id="char-layer"></div>
-    <div id="flash"></div>
-
-    <div id="top-ui">
-        <div class="stat">📅 <span id="ui-day">Day 1</span></div>
-        <div class="stat">🕒 <span id="ui-time">上午</span></div>
-        <div class="stat">❤️ <span id="ui-love" class="stat-val">0</span></div>
-        <div class="stat">📚 <span id="ui-int" class="stat-val">10</span></div>
-        <div class="stat">✨ <span id="ui-cha" class="stat-val">10</span></div>
-        <div style="flex-grow: 1"></div>
-        <button class="sys-btn" onclick="sys.save()">快速存檔</button>
-        <button class="sys-btn" onclick="sys.load()">載入進度</button>
+    <div id="game-box">
+        <div id="screen">
+            <div id="stats">
+                <div class="stat">📅 第 <span id="day" class="stat-value">1</span> 天</div>
+                <div class="stat">❤️ 好感度: <span id="love" class="stat-value">0</span></div>
+                <div class="stat">📚 智力: <span id="int" class="stat-value">10</span></div>
+                <div class="stat">✨ 魅力: <span id="cha" class="stat-value">10</span></div>
+            </div>
+            
+            <div id="dialog-area">
+                <div id="speaker">系統</div>
+                <div id="dialog">遊戲載入中...</div>
+            </div>
+            
+            <div id="choices"></div>
+            
+            <button id="next-btn" onclick="nextDialog()">繼續</button>
+        </div>
     </div>
 
-    <div id="msg-window" onclick="core.next()">
-        <div id="name-label">曉晴</div>
-        <div id="text-content">正在讀取校園記憶...</div>
-    </div>
-
-    <div id="choice-layer"></div>
-</div>
-
-<script>
-/**
- * 核心引擎：支援分支跳轉、條件判定與屬性影響
- */
-const core = {
-    state: {
-        love: 0, int: 10, cha: 10,
-        day: 1, timeIdx: 0, 
-        currentSlot: 'intro',
-        lineIdx: 0,
-        flags: new Set(),
-        inventory: [],
-        isTyping: false
-    },
-
-    times: ["上午", "下午", "黃昏", "深夜"],
-    
-    script: {
-        // --- 序章 ---
-        intro: [
-            { bg: 'linear-gradient(to top, #a1c4fd 0%, #c2e9fb 100%)', char: '' },
-            { name: '我', text: '那是蟬鳴最響亮的一個夏天。' },
-            { name: '我', text: '還有七天，我們就要各奔東西了。' },
-            { char: '👧', name: '？？？', text: '「學——長！你又在頂樓吹風了！」' },
-            { name: '我', text: '她是蘇曉晴，我這輩子見過最麻煩、也最放不下的女生。' },
-            { choice: [
-                { text: '「因為在等你啊。」', next: 'intro_flirt', love: 10, cha: 5 },
-                { text: '「這裡安靜，適合背公式。」', next: 'intro_study', int: 10 },
-                { text: '「只是在看雲。」', next: 'intro_normal' }
-            ]}
-        ],
-        intro_flirt: [
-            { char: '😳', name: '蘇曉晴', text: '「你、你今天吃錯藥了嗎？突然說這種讓人誤會的話...」' },
-            { name: '我', text: '她的臉紅得像熟透的蘋果。看來魅力值發揮作用了。' },
-            { call: () => core.jump('daily_map') }
-        ],
-        intro_study: [
-            { char: '😒', name: '蘇曉晴', text: '「真是個不解風情的書呆子。拿去，這是你忘在教室的參考書。」' },
-            { msg: '獲得了【曉晴的參考書】', call: () => core.state.inventory.push('參考書') },
-            { call: () => core.jump('daily_map') }
-        ],
-        intro_normal: [
-            { char: '😊', name: '蘇曉晴', text: '「雲有什麼好看的？對了，下午學校後門有祭典，要不要去？」' },
-            { call: () => core.jump('daily_map') }
-        ],
-
-        // --- 地點選擇系統 ---
-        daily_map: [
-            { bg: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%)', char: '', name: '系統', text: '現在是自由行動時間，你想去哪裡？' },
-            { choice: [
-                { text: '🏫 圖書館 (智力+10)', next: 'loc_library' },
-                { text: '🏀 體育館 (魅力+10)', next: 'loc_gym' },
-                { text: '🌳 後花園 (遇見曉晴)', next: 'loc_garden' },
-                { text: '🏠 回家 (休息/存檔)', next: 'loc_home' }
-            ]}
-        ],
-
-        loc_library: [
-            { name: '我', text: '在靜謐的書香中，我覺得大腦運轉快了不少。' },
-            { call: () => { core.state.int += 10; core.advance(); } }
-        ],
-        loc_gym: [
-            { name: '我', text: '在球場揮灑汗水，感覺自己充滿了活力。' },
-            { call: () => { core.state.cha += 10; core.advance(); } }
-        ],
-        loc_garden: [
-            { char: '👧', name: '蘇曉晴', text: '「嘿！沒想到會在這裡遇到你。既然來了，幫我個忙吧？」' },
-            { choice: [
-                { text: '幫她修剪花木 (好感+15)', next: 'garden_help', love: 15 },
-                { text: '陪她聊天 (好感+5, 魅力+5)', next: 'garden_chat', love: 5, cha: 5 }
-            ]}
-        ],
-        garden_help: [
-            { char: '✨', name: '蘇曉晴', text: '「看不出來你手還挺巧的嘛！獎勵你一顆糖果。」' },
-            { call: () => core.advance() }
-        ],
-        garden_chat: [
-            { name: '我', text: '我們聊了很久，關於未來的志願，還有那些沒說出口的約定。' },
-            { call: () => core.advance() }
-        ],
-
-        loc_home: [
-            { name: '系統', text: '休息後，體力恢復了。你要繼續戰鬥嗎？' },
-            { call: () => core.advance() }
-        ],
-
-        // --- 結局判定 ---
-        ending_check: [
-            { bg: '#000', char: '', name: '旁白', text: '七天過去了。蟬鳴聲漸漸消失，畢業的鐘聲響起。' },
-            { call: () => {
-                if(core.state.love >= 80) core.jump('ending_true');
-                else if(core.state.love >= 40) core.jump('ending_normal');
-                else core.jump('ending_bad');
-            }}
-        ],
-        ending_true: [
-            { bg: 'pink', char: '👩‍❤️‍👨', name: '蘇曉晴', text: '「學長，其實我一直...都喜歡著你。我們一起去東京讀大學吧！」' },
-            { name: '結局', text: '【真結局：夏日的永恆告白】' }
-        ],
-        ending_bad: [
-            { bg: 'gray', char: '🚶', name: '我', text: '最後，我們只是在畢業典禮上點了點頭。青春就像這場夏日，終究會結束。' },
-            { name: '結局', text: '【壞結局：遺憾的平行線】' }
-        ]
-    },
-
-    init() {
-        this.render();
-    },
-
-    render() {
-        const line = this.script[this.state.currentSlot][this.state.lineIdx];
-        if (!line) return;
-
-        // 處理背景與立繪
-        if (line.bg) document.getElementById('bg-layer').style.background = line.bg;
-        if (line.char !== undefined) {
-            const c = document.getElementById('char-layer');
-            c.innerText = line.char;
-            c.classList.add('char-hit');
-            setTimeout(() => c.classList.remove('char-hit'), 300);
+    <script>
+        // 遊戲狀態 - 簡單可靠
+        let game = {
+            day: 1,
+            love: 0,
+            intelligence: 10,
+            charm: 10,
+            sceneIndex: 0,
+            isChoosing: false,
+            gameEnded: false
+        };
+        
+        // 遊戲劇情 - 簡單線性
+        const story = [
+            // 第1天
+            { speaker: "系統", text: "【夏日告白 - 最後的7天】", action: "start" },
+            { speaker: "系統", text: "距離畢業只剩7天。這是向曉晴告白的最後機會..." },
+            { speaker: "旁白", text: "蟬鳴的夏天，教室裡，你看著坐在前排的曉晴。" },
+            { speaker: "蘇曉晴", text: "「學長，早安！今天天氣真好呢～」", char: "👧" },
+            
+            { 
+                speaker: "選擇", 
+                text: "你要如何回應？",
+                choices: [
+                    { text: "「是啊，今天陽光很溫暖呢。」", love: 10 },
+                    { text: "「嗯，早安。」", love: 5 },
+                    { text: "「我在想數學題目。」", intelligence: 5 }
+                ]
+            },
+            
+            // 第1天下午
+            { speaker: "系統", text: "下午，放學時間。" },
+            { speaker: "蘇曉晴", text: "「學長，等等有空嗎？我想去書店買參考書。」" },
+            
+            { 
+                speaker: "選擇",
+                text: "你的回答是？",
+                choices: [
+                    { text: "「當然有空！我陪妳去。」", love: 15, charm: 5 },
+                    { text: "「抱歉，我還有事。」", love: -5 },
+                    { text: "「我剛好也要去買書。」", love: 10, intelligence: 5 }
+                ]
+            },
+            
+            // 書店場景
+            { speaker: "系統", text: "你們一起走到學校附近的書店。" },
+            { speaker: "蘇曉晴", text: "「這本數學參考書好像不錯...學長覺得呢？」" },
+            
+            { 
+                speaker: "選擇",
+                text: "你的建議？",
+                choices: [
+                    { text: "「這本很不錯，解法很詳細。」", intelligence: 10, love: 5 },
+                    { text: "「選妳喜歡的就好。」", charm: 5 },
+                    { text: "「我不太懂這個...」", love: -3 }
+                ]
+            },
+            
+            // 第1天結束
+            { speaker: "系統", text: "第一天結束了。", action: "endDay" },
+            
+            // 第2天
+            { speaker: "系統", text: "第二天 上午", action: "newDay" },
+            { speaker: "蘇曉晴", text: "「學長，昨天謝謝你陪我！今天午餐一起吃好嗎？」" },
+            
+            { 
+                speaker: "選擇",
+                text: "午餐邀請？",
+                choices: [
+                    { text: "「好啊！一起去餐廳吧！」", love: 15, charm: 5 },
+                    { text: "「我帶了便當...」", love: 5 },
+                    { text: "「我要去圖書館。」", intelligence: 10, love: -5 }
+                ]
+            },
+            
+            // 第3天
+            { speaker: "系統", text: "第三天 放學後", action: "newDay" },
+            { speaker: "蘇曉晴", text: "「學長，這週末學校有園遊會，你會來嗎？」" },
+            
+            { 
+                speaker: "選擇",
+                text: "園遊會邀請？",
+                choices: [
+                    { text: "「一定會去！我們一起去吧！」", love: 20, charm: 10 },
+                    { text: "「我可能會去看看吧...」", love: 10 },
+                    { text: "「不太確定有沒有空...」", love: -10 }
+                ]
+            },
+            
+            // 第4天
+            { speaker: "系統", text: "第四天 午休時間", action: "newDay" },
+            { speaker: "蘇曉晴", text: "「學長，你有想好要考哪間大學了嗎？」" },
+            
+            { 
+                speaker: "選擇",
+                text: "關於未來...",
+                choices: [
+                    { text: "「我想去台大，妳呢？」", intelligence: 15, love: 10 },
+                    { text: "「還沒決定...妳有什麼建議？」", charm: 10, love: 5 },
+                    { text: "「不知道...」", love: -5 }
+                ]
+            },
+            
+            // 第5天
+            { speaker: "系統", text: "第五天 體育課", action: "newDay" },
+            { speaker: "蘇曉晴", text: "「學長，你會打籃球嗎？要不要一起？」" },
+            
+            { 
+                speaker: "選擇",
+                text: "體育課邀請",
+                choices: [
+                    { text: "「好啊！我來教妳！」", charm: 15, love: 15 },
+                    { text: "「我打得不太好...」", love: 5 },
+                    { text: "「我想在旁邊休息。」", love: -10 }
+                ]
+            },
+            
+            // 第6天
+            { speaker: "系統", text: "第六天 放學路上", action: "newDay" },
+            { speaker: "蘇曉晴", text: "「學長...明天就是最後一天了。」" },
+            { speaker: "蘇曉晴", text: "「這幾年，真的很謝謝你一直照顧我...」" },
+            
+            { 
+                speaker: "選擇",
+                text: "你的回應？",
+                choices: [
+                    { text: "「我也很感謝能認識妳。」", love: 25, charm: 10 },
+                    { text: "「嗯...時間過得真快。」", love: 10 },
+                    { text: "「......」（沉默）", love: -15 }
+                ]
+            },
+            
+            // 第7天 - 畢業典禮
+            { speaker: "系統", text: "最後一天 畢業典禮", action: "newDay" },
+            { speaker: "系統", text: "典禮結束了。大家在互相道別..." },
+            { speaker: "蘇曉晴", text: "「學長...」", emotion: "緊張" },
+            
+            { 
+                speaker: "選擇",
+                text: "這是最後的機會了！你要...",
+                choices: [
+                    { text: "「曉晴，我有話想對妳說...」", special: "confess" },
+                    { text: "「畢業快樂，保重。」", special: "goodbye" },
+                    { text: "「......再見。」", special: "silence" }
+                ]
+            },
+            
+            // 結局
+            { speaker: "系統", text: "畢業典禮結束，夏天也結束了...", action: "showEnding" }
+        ];
+        
+        // 初始化遊戲
+        function initGame() {
+            updateStats();
+            showCurrentScene();
         }
-
-        // 處理特殊呼叫
-        if (line.call) line.call();
-        if (line.msg) alert(line.msg);
-
-        // 處理分支
-        if (line.choice) {
-            this.showChoices(line.choice);
-        } else {
-            document.getElementById('name-label').innerText = line.name || "";
-            this.type(line.text || "");
+        
+        // 更新狀態顯示
+        function updateStats() {
+            document.getElementById("day").textContent = game.day;
+            document.getElementById("love").textContent = game.love;
+            document.getElementById("int").textContent = game.intelligence;
+            document.getElementById("cha").textContent = game.charm;
         }
-        this.updateUI();
-    },
-
-    type(txt) {
-        this.state.isTyping = true;
-        let i = 0;
-        const el = document.getElementById('text-content');
-        el.innerText = "";
-        const timer = setInterval(() => {
-            el.innerText += txt[i] || "";
-            i++;
-            if (i >= txt.length) {
-                clearInterval(timer);
-                this.state.isTyping = false;
+        
+        // 顯示當前場景
+        function showCurrentScene() {
+            if (game.gameEnded) return;
+            
+            const scene = story[game.sceneIndex];
+            if (!scene) {
+                // 遊戲結束
+                showEnding();
+                return;
             }
-        }, 40);
-    },
-
-    next() {
-        if (this.state.isTyping) return;
-        const slot = this.script[this.state.currentSlot];
-        if (this.state.lineIdx < slot.length - 1) {
-            this.state.lineIdx++;
-            this.render();
+            
+            // 設置說話者和對話
+            document.getElementById("speaker").textContent = scene.speaker;
+            document.getElementById("dialog").textContent = scene.text;
+            
+            // 清空選擇區域
+            const choicesDiv = document.getElementById("choices");
+            choicesDiv.innerHTML = "";
+            
+            // 如果有特殊動作
+            if (scene.action) {
+                handleAction(scene.action);
+            }
+            
+            // 如果有選擇項目
+            if (scene.choices) {
+                showChoices(scene.choices);
+                document.getElementById("next-btn").style.display = "none";
+            } else {
+                document.getElementById("next-btn").style.display = "block";
+            }
         }
-    },
-
-    jump(slot) {
-        this.state.currentSlot = slot;
-        this.state.lineIdx = 0;
-        this.render();
-    },
-
-    showChoices(choices) {
-        const layer = document.getElementById('choice-layer');
-        layer.innerHTML = "";
-        layer.style.display = "flex";
-        choices.forEach(c => {
-            const btn = document.createElement('button');
-            btn.className = 'choice-btn';
-            btn.innerText = c.text;
-            btn.onclick = () => {
-                if (c.love) this.state.love += c.love;
-                if (c.int) this.state.int += c.int;
-                if (c.cha) this.state.cha += c.cha;
-                layer.style.display = "none";
-                this.jump(c.next);
+        
+        // 處理特殊動作
+        function handleAction(action) {
+            switch(action) {
+                case "start":
+                    game.day = 1;
+                    game.love = 0;
+                    game.intelligence = 10;
+                    game.charm = 10;
+                    break;
+                    
+                case "newDay":
+                    game.day++;
+                    break;
+                    
+                case "endDay":
+                    // 簡單的過場
+                    setTimeout(() => {
+                        game.sceneIndex++;
+                        showCurrentScene();
+                    }, 1000);
+                    break;
+            }
+        }
+        
+        // 顯示選擇項目
+        function showChoices(choices) {
+            game.isChoosing = true;
+            const choicesDiv = document.getElementById("choices");
+            
+            choices.forEach((choice, index) => {
+                const button = document.createElement("button");
+                button.className = "choice-btn";
+                button.textContent = choice.text;
+                
+                button.onclick = function() {
+                    // 處理選擇效果
+                    if (choice.love) game.love += choice.love;
+                    if (choice.intelligence) game.intelligence += choice.intelligence;
+                    if (choice.charm) game.charm += choice.charm;
+                    
+                    // 特殊選擇
+                    if (choice.special === "confess") {
+                        game.love += 50; // 告白大幅增加好感度
+                    } else if (choice.special === "goodbye") {
+                        game.love += 10;
+                    } else if (choice.special === "silence") {
+                        game.love -= 30;
+                    }
+                    
+                    // 更新顯示
+                    updateStats();
+                    
+                    // 繼續到下一個場景
+                    game.isChoosing = false;
+                    game.sceneIndex++;
+                    
+                    // 確保不會超出範圍
+                    if (game.sceneIndex >= story.length) {
+                        showEnding();
+                    } else {
+                        showCurrentScene();
+                    }
+                };
+                
+                choicesDiv.appendChild(button);
+            });
+        }
+        
+        // 下一個對話
+        function nextDialog() {
+            if (game.isChoosing || game.gameEnded) return;
+            
+            game.sceneIndex++;
+            
+            if (game.sceneIndex >= story.length) {
+                showEnding();
+            } else {
+                showCurrentScene();
+            }
+        }
+        
+        // 顯示結局
+        function showEnding() {
+            game.gameEnded = true;
+            
+            const screen = document.getElementById("screen");
+            screen.innerHTML = "";
+            
+            screen.className = "ending-screen";
+            
+            let title, description;
+            
+            if (game.love >= 100) {
+                title = "🎉 真結局：永遠的夏天";
+                description = "你鼓起勇氣向曉晴告白，她也說出了同樣的心意。<br>你們約好要上同一所大學，這個夏天成為愛情故事的開始。";
+            } else if (game.love >= 70) {
+                title = "😊 美好結局：珍貴的友誼";
+                description = "你們交換了聯絡方式，約定永遠是朋友。<br>雖然沒有成為戀人，但這段回憶永遠珍貴。";
+            } else if (game.love >= 40) {
+                title = "😐 普通結局：青春的回憶";
+                description = "畢業典禮結束，你們簡單道別。<br>夏天結束了，但青春的回憶會一直留著。";
+            } else {
+                title = "😢 遺憾結局：錯過的告白";
+                description = "你始終沒有說出心裡的話。<br>看著曉晴離開的背影，你知道有些機會一旦錯過就不會再來。";
+            }
+            
+            // 添加統計
+            description += `<br><br>最終統計：<br>
+                ❤️ 好感度: ${game.love}<br>
+                📚 智力: ${game.intelligence}<br>
+                ✨ 魅力: ${game.charm}`;
+            
+            const html = `
+                <h1 class="ending-title">${title}</h1>
+                <div class="ending-text">${description}</div>
+                <button id="next-btn" onclick="restartGame()" style="margin: 20px auto; display: block;">
+                    重新開始遊戲
+                </button>
+            `;
+            
+            screen.innerHTML = html;
+        }
+        
+        // 重新開始遊戲
+        function restartGame() {
+            game = {
+                day: 1,
+                love: 0,
+                intelligence: 10,
+                charm: 10,
+                sceneIndex: 0,
+                isChoosing: false,
+                gameEnded: false
             };
-            layer.appendChild(btn);
-        });
-    },
-
-    advance() {
-        this.state.timeIdx++;
-        if (this.state.timeIdx >= 4) {
-            this.state.timeIdx = 0;
-            this.state.day++;
+            
+            const screen = document.getElementById("screen");
+            screen.className = "";
+            screen.innerHTML = `
+                <div id="stats">
+                    <div class="stat">📅 第 <span id="day" class="stat-value">1</span> 天</div>
+                    <div class="stat">❤️ 好感度: <span id="love" class="stat-value">0</span></div>
+                    <div class="stat">📚 智力: <span id="int" class="stat-value">10</span></div>
+                    <div class="stat">✨ 魅力: <span id="cha" class="stat-value">10</span></div>
+                </div>
+                
+                <div id="dialog-area">
+                    <div id="speaker">系統</div>
+                    <div id="dialog">遊戲載入中...</div>
+                </div>
+                
+                <div id="choices"></div>
+                
+                <button id="next-btn" onclick="nextDialog()">繼續</button>
+            `;
+            
+            initGame();
         }
-        if (this.state.day > 7) {
-            this.jump('ending_check');
-        } else {
-            this.jump('daily_map');
-        }
-    },
-
-    updateUI() {
-        document.getElementById('ui-day').innerText = `Day ${this.state.day}`;
-        document.getElementById('ui-time').innerText = this.times[this.state.timeIdx];
-        document.getElementById('ui-love').innerText = this.state.love;
-        document.getElementById('ui-int').innerText = this.state.int;
-        document.getElementById('ui-cha').innerText = this.state.cha;
-    }
-};
-
-const sys = {
-    save() { localStorage.setItem('summer_save', JSON.stringify(core.state)); alert('進度已記錄在瀏覽器中！'); },
-    load() {
-        const d = localStorage.getItem('summer_save');
-        if (d) { core.state = JSON.parse(d); core.render(); }
-    }
-};
+        
+        // 開始遊戲
+        window.onload = initGame;
+    </script>
+</body>
+</html>
 
 core.init();
 </script>
