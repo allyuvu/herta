@@ -33,8 +33,9 @@
         }
 
         #combo-display {
-            position: absolute; bottom: 20%; font-size: 80px; font-weight: 100;
-            color: rgba(255,255,255,0.1); font-family: sans-serif;
+            position: absolute; top: 20px; left: 20px; font-size: 60px; font-weight: 100;
+            color: rgba(255,255,255,0.2); font-family: sans-serif;
+            text-shadow: 0 0 10px rgba(255,255,255,0.1);
         }
 
         /* Start Screen */
@@ -47,13 +48,79 @@
         .title-box { border: 1px solid #fff; padding: 40px; text-align: center; }
         h1 { font-size: 24px; letter-spacing: 8px; margin: 0 0 10px 0; font-weight: normal; }
         h2 { font-size: 12px; letter-spacing: 4px; color: #888; font-weight: normal; margin-bottom: 0;}
+        
+        .start-instruction {
+            margin-top: 20px;
+            color: #888;
+            font-size: 14px;
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
 
         button {
-            margin-top: 50px; background: transparent; border: none; 
+            margin-top: 50px; background: transparent; border: none;
             color: #fff; border-bottom: 1px solid #fff; padding-bottom: 5px;
             font-size: 16px; letter-spacing: 3px; cursor: pointer; transition: 0.3s;
         }
         button:hover { color: #aaa; border-bottom: 1px solid #aaa; }
+        
+        /* Game Over Screen */
+        .game-over-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); z-index: 200;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+        }
+        
+        .game-over-title {
+            font-size: 32px;
+            letter-spacing: 6px;
+            margin-bottom: 20px;
+            color: #fff;
+            text-align: center;
+        }
+        
+        .game-over-score {
+            font-size: 20px;
+            color: #888;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .game-over-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .game-over-btn {
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            padding: 10px 30px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .game-over-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .game-over-btn.restart {
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+        
+        .game-over-btn.menu {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
 
     </style>
 </head>
@@ -72,7 +139,18 @@
             <h1>IN MEMORIAM</h1>
             <h2>KIRILL RICHTER</h2>
         </div>
+        <div class="start-instruction">按任意鍵或點擊按鈕開始遊戲</div>
         <button id="start-btn">PLAY</button>
+    </div>
+    
+    <div class="game-over-screen" id="gameOverScreen">
+        <h1 class="game-over-title">SEQUENCE COMPLETE</h1>
+        <div class="game-over-score" id="finalCombo">最高連擊: 0</div>
+        <div class="game-over-score" id="finalAccuracy">準確率: 0%</div>
+        <div class="game-over-buttons">
+            <button class="game-over-btn restart" id="playAgainBtn">再玩一次</button>
+            <button class="game-over-btn menu" id="menuBtn">返回選單</button>
+        </div>
     </div>
 </div>
 
@@ -430,17 +508,70 @@ const Game = {
         // Progress text update
         if(now > 10 && now < 15) document.getElementById('lyric-line').style.opacity = 1;
         if(now > 35 && now < 40) document.getElementById('lyric-line').innerText = "The Memory";
+        
+        // Check if game should end
         if(now > SONG_DATA.duration) {
             this.state.playing = false;
-            alert("Sequence Complete");
-            location.reload();
+            this.showGameOver();
         }
 
         requestAnimationFrame(() => this.loop());
+    },
+    
+    showGameOver() {
+        // Calculate accuracy
+        const totalNotes = this.notes.filter(n => !n.auto).length;
+        const hitNotes = this.notes.filter(n => n.hit && !n.auto).length;
+        const accuracy = totalNotes > 0 ? Math.round((hitNotes / totalNotes) * 100) : 0;
+        
+        // Update game over screen
+        document.getElementById('finalCombo').textContent = `最高連擊: ${this.state.combo}`;
+        document.getElementById('finalAccuracy').textContent = `準確率: ${accuracy}%`;
+        
+        // Show game over screen
+        document.getElementById('gameOverScreen').style.display = 'flex';
+    },
+    
+    restartGame() {
+        // Reset game state
+        this.state.playing = false;
+        this.state.combo = 0;
+        this.state.startT = 0;
+        this.state.inputs = [0, 0, 0, 0];
+        this.notes = [];
+        this.particles = [];
+        
+        // Hide game over screen
+        document.getElementById('gameOverScreen').style.display = 'none';
+        
+        // Show start screen
+        document.getElementById('start-screen').style.display = 'flex';
+        
+        // Reset combo display
+        document.getElementById('combo-display').innerText = '0';
     }
 };
 
+// Start game with button click
 document.getElementById('start-btn').addEventListener('click', () => Game.init());
+
+// Start game with any key press
+document.addEventListener('keydown', (e) => {
+    const startScreen = document.getElementById('start-screen');
+    if (startScreen.style.display !== 'none') {
+        Game.init();
+    }
+});
+
+// Game over screen button handlers
+document.getElementById('playAgainBtn').addEventListener('click', () => {
+    Game.restartGame();
+    setTimeout(() => Game.init(), 100); // Small delay before restarting
+});
+
+document.getElementById('menuBtn').addEventListener('click', () => {
+    Game.restartGame();
+});
 
 </script>
 </body>

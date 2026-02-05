@@ -997,56 +997,84 @@ const Game = {
         });
         this.fx = this.fx.filter(f => f.life > 0);
 
-if(now > 35) { // End of snippet
-             this.state.playing = false;
-             
-             // Show game over screen
-             const gameOverScreen = document.createElement('div');
-             gameOverScreen.className = 'game-over-screen';
-             
-             const title = document.createElement('h1');
-             title.className = 'game-over-title';
-             title.textContent = '🎵 遊戲結束 🎵';
-             
-             const score = document.createElement('div');
-             score.className = 'game-over-score';
-             score.textContent = `最終分數: ${this.state.score}`;
-             
-             const combo = document.createElement('div');
-             combo.className = 'game-over-score';
-             combo.textContent = `最高連擊: ${this.state.combo}`;
-             combo.style.fontSize = '1.5rem';
-             combo.style.color = '#ff6b6b';
-             
-             const buttonsContainer = document.createElement('div');
-             buttonsContainer.className = 'game-over-buttons';
-             
-             const restartBtn = document.createElement('button');
-             restartBtn.className = 'game-over-btn restart';
-             restartBtn.textContent = '再玩一次';
-             restartBtn.onclick = () => location.reload();
-             
-             const menuBtn = document.createElement('button');
-             menuBtn.className = 'game-over-btn menu';
-             menuBtn.textContent = '返回主選單';
-             menuBtn.onclick = () => {
-                 // Remove game over screen
-                 document.body.removeChild(gameOverScreen);
-                 // Show start screen again
-                 document.getElementById('start-screen').style.display = 'flex';
-                 gameStarted = false;
-             };
-             
-             buttonsContainer.appendChild(restartBtn);
-             buttonsContainer.appendChild(menuBtn);
-             
-             gameOverScreen.appendChild(title);
-             gameOverScreen.appendChild(score);
-             gameOverScreen.appendChild(combo);
-             gameOverScreen.appendChild(buttonsContainer);
-             
-             document.body.appendChild(gameOverScreen);
-         }
+// Check if all notes have been processed and enough time has passed
+const activeNotes = this.notes.filter(n => !n.hit && !n.auto);
+if (activeNotes.length === 0 && now > 30) {
+    this.state.playing = false;
+    
+    // Remove any existing game over screen first
+    const existingScreen = document.querySelector('.game-over-screen');
+    if (existingScreen) {
+        existingScreen.remove();
+    }
+    
+    // Show game over screen
+    const gameOverScreen = document.createElement('div');
+    gameOverScreen.className = 'game-over-screen';
+    
+    const title = document.createElement('h1');
+    title.className = 'game-over-title';
+    title.textContent = '🎵 遊戲結束 🎵';
+    
+    const score = document.createElement('div');
+    score.className = 'game-over-score';
+    score.textContent = `最終分數: ${this.state.score}`;
+    
+    const combo = document.createElement('div');
+    combo.className = 'game-over-score';
+    combo.textContent = `最高連擊: ${this.state.combo}`;
+    combo.style.fontSize = '1.5rem';
+    combo.style.color = '#ff6b6b';
+    
+    const accuracy = document.createElement('div');
+    accuracy.className = 'game-over-score';
+    const totalNotes = this.notes.filter(n => !n.auto).length;
+    const hitNotes = this.notes.filter(n => n.hit && !n.auto && n.judgment && n.judgment !== 'miss').length;
+    const accuracyPercent = totalNotes > 0 ? Math.round((hitNotes / totalNotes) * 100) : 0;
+    accuracy.textContent = `準確率: ${accuracyPercent}%`;
+    accuracy.style.color = '#4ecdc4';
+    
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'game-over-buttons';
+    
+    const restartBtn = document.createElement('button');
+    restartBtn.className = 'game-over-btn restart';
+    restartBtn.textContent = '再玩一次';
+    restartBtn.onclick = () => {
+        location.reload();
+    };
+    
+    const menuBtn = document.createElement('button');
+    menuBtn.className = 'game-over-btn menu';
+    menuBtn.textContent = '返回主選單';
+    menuBtn.onclick = () => {
+        // Remove game over screen
+        gameOverScreen.remove();
+        // Show start screen again
+        document.getElementById('start-screen').style.display = 'flex';
+        gameStarted = false;
+        this.state.playing = false;
+        
+        // Reset game state
+        this.state.score = 0;
+        this.state.combo = 0;
+        this.updateUI();
+    };
+    
+    buttonsContainer.appendChild(restartBtn);
+    buttonsContainer.appendChild(menuBtn);
+    
+    gameOverScreen.appendChild(title);
+    gameOverScreen.appendChild(score);
+    gameOverScreen.appendChild(combo);
+    gameOverScreen.appendChild(accuracy);
+    gameOverScreen.appendChild(buttonsContainer);
+    
+    document.body.appendChild(gameOverScreen);
+    
+    // Play game over sound
+    Audio.playButton();
+}
 
                 // Update performance monitoring
         this.updateFPS(performance.now());

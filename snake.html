@@ -1567,11 +1567,11 @@
                 score += 10;
                 scoreElement.textContent = score;
                 
-                // 每得50分增加速度
+                // 每得50分增加速度（优化版）
                 if (score % 50 === 0 && gameSpeed > 50) {
-                    gameSpeed -= 10;
-                    clearInterval(gameLoop);
-                    gameLoop = setInterval(gameStep, gameSpeed);
+                    gameSpeed = Math.max(50, gameSpeed - 10);
+                    // 不需要重新设置游戏循环，因为使用的是 requestAnimationFrame
+                    // 游戏速度通过 lastUpdate 时间差控制
                 }
                 
                 // 生成新食物

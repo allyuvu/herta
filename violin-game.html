@@ -100,7 +100,20 @@
             z-index: 20;
         }
 
-        h1 { color: var(--gold-color); margin-bottom: 20px; font-size: 42px; text-shadow: 0 0 10px var(--gold-color); }
+        h1 { color: var(--gold-color); margin-bottom: 10px; font-size: 42px; text-shadow: 0 0 10px var(--gold-color); }
+        
+        .start-instruction {
+            color: #aaa;
+            font-size: 18px;
+            margin-bottom: 30px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
         
         button {
             background: var(--gold-color);
@@ -113,8 +126,21 @@
             cursor: pointer;
             transition: transform 0.1s;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            margin-bottom: 20px;
         }
         button:hover { transform: scale(1.05); }
+        
+        /* 分數顯示 */
+        .score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: var(--gold-color);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            display: none;
+            z-index: 10;
+        }
 
         /* 琴弦視覺化標籤 */
         .string-labels {
@@ -182,8 +208,13 @@
 
         <div id="start-overlay">
             <h1>完整音階小提琴</h1>
-            <p style="color:#aaa; margin-bottom: 30px; font-size: 18px;">Do Re Mi Fa Sol La Ti Do</p>
+            <p style="color:#aaa; margin-bottom: 10px; font-size: 18px;">Do Re Mi Fa Sol La Ti Do</p>
+            <div class="start-instruction">按任意鍵或點擊按鈕開始演奏</div>
             <button onclick="startGame()">開始演奏</button>
+        </div>
+        
+        <div class="score-display" id="scoreDisplay">
+            演奏時間: <span id="playTime">0</span>秒
         </div>
     </div>
 
@@ -293,8 +324,16 @@
     const ctx = canvas.getContext('2d');
     const noteDisplay = document.getElementById('current-note');
     const stringContainer = document.getElementById('string-container');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const playTimeElement = document.getElementById('playTime');
 
     const keysPressed = {};
+    
+    // 遊戲狀態
+    let gameStarted = false;
+    let startTime = 0;
+    let playTime = 0;
+    let playTimer = null;
     
     // 小提琴參數
     const violin = {
@@ -380,12 +419,31 @@
     }
 
     function startGame() {
+        if (gameStarted) return;
+        
+        gameStarted = true;
         initAudio();
         initStringUI();
         document.getElementById('start-overlay').style.display = 'none';
+        scoreDisplay.style.display = 'block';
         updateUI();
+        
+        // 開始計時
+        startTime = Date.now();
+        playTimer = setInterval(() => {
+            playTime = Math.floor((Date.now() - startTime) / 1000);
+            playTimeElement.textContent = playTime;
+        }, 1000);
+        
         gameLoop();
     }
+    
+    // 鍵盤任意鍵開始
+    document.addEventListener('keydown', (e) => {
+        if (!gameStarted && e.key !== 'F5' && e.key !== 'F12' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            startGame();
+        }
+    });
 
     // --- 繪圖函數 ---
     
