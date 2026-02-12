@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Herta's Game Center - Attack Ops Loading</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ee8c2b",
+                        "secondary": "#ef4444", 
+                        "background-light": "#ffffff",
+                        "background-dark": "#221910",
+                        "surface-light": "#f8f7f6",
+                        "surface-dark": "#2d241b",
+                        "text-primary-light": "#1b140d",
+                        "text-secondary-light": "#6b5e53",
+                        "text-primary-dark": "#fcfaf8",
+                        "text-secondary-dark": "#b0a69e",
+                    },
+                    fontFamily: {
+                        "display": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #f0f0f0 1px, transparent 1px), linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .loading-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark min-h-screen flex flex-col overflow-hidden relative selection:bg-primary/20">
+<!-- Subtle Geometric Background Pattern -->
+<div class="absolute inset-0 z-0 opacity-40 pointer-events-none bg-grid-pattern dark:opacity-5 bg-[size:40px_40px]"></div>
+<!-- Top Navigation / Status (Optional for context) -->
+<div class="relative z-10 w-full px-6 py-4 flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">sports_esports</span>
+<span class="font-bold text-lg tracking-tight">Herta's Game Center</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="px-3 py-1 bg-surface-light dark:bg-surface-dark rounded-full border border-gray-100 dark:border-gray-800 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">Online</span>
+</div>
+</div>
+</div>
+<!-- Main Content -->
+<div class="flex-1 flex flex-col items-center justify-center relative z-10 w-full max-w-[1200px] mx-auto px-4 sm:px-8">
+<!-- Centerpiece: Game Logo/Icon -->
+<div class="flex flex-col items-center mb-12 animate-fade-in-up">
+<div class="relative group">
+<!-- Decorative Glow Behind Logo -->
+<div class="absolute -inset-4 bg-gradient-to-tr from-primary/30 to-secondary/30 rounded-full blur-2xl opacity-60 dark:opacity-40 animate-pulse"></div>
+<!-- Main Icon Container -->
+<div class="relative w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-white to-surface-light dark:from-surface-dark dark:to-background-dark rounded-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] dark:shadow-none border border-white/50 dark:border-white/10 flex items-center justify-center transform transition-transform duration-700 hover:scale-105">
+<span class="material-symbols-outlined text-[64px] sm:text-[80px] bg-clip-text text-transparent bg-gradient-to-br from-primary to-secondary" style="-webkit-background-clip: text;">swords</span>
+</div>
+<!-- Floating decorative elements -->
+<div class="absolute -top-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white dark:border-background-dark">
+<span class="material-symbols-outlined text-sm">bolt</span>
+</div>
+</div>
+<h1 class="mt-8 text-4xl sm:text-5xl font-bold tracking-tight text-center bg-clip-text text-transparent bg-gradient-to-r from-text-primary-light to-text-secondary-light dark:from-white dark:to-gray-400">
+                Attack Ops
+            </h1>
+<p class="mt-2 text-text-secondary-light dark:text-text-secondary-dark font-medium text-sm tracking-widest uppercase opacity-80">Tactical Warfare Simulator</p>
+</div>
+<!-- Loading Area -->
+<div class="w-full max-w-[480px] flex flex-col gap-4">
+<!-- Status Text -->
+<div class="flex justify-between items-end px-1">
+<h2 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark">正在進入遊戲...</h2>
+<span class="text-primary font-bold font-mono text-lg">65%</span>
+</div>
+<!-- Progress Bar -->
+<div class="h-4 w-full bg-surface-light dark:bg-surface-dark rounded-full overflow-hidden shadow-inner border border-gray-100 dark:border-gray-800 p-0.5">
+<div class="h-full w-[65%] rounded-full bg-gradient-to-r from-primary to-secondary relative overflow-hidden transition-all duration-300 ease-out shadow-sm">
+<div class="absolute inset-0 loading-shimmer w-full h-full"></div>
+</div>
+</div>
+<!-- Flavor Text / Tips -->
+<div class="bg-surface-light/50 dark:bg-surface-dark/50 backdrop-blur-sm rounded-xl p-4 mt-2 border border-white/50 dark:border-white/5 shadow-sm text-center">
+<div class="flex items-center justify-center gap-2 mb-1 text-primary">
+<span class="material-symbols-outlined text-sm">lightbulb</span>
+<span class="text-xs font-bold uppercase tracking-wider">Game Tip</span>
+</div>
+<p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium leading-relaxed">
+                    提示：連擊可以獲得更高分數！保持節奏，不要中斷連鎖攻擊。
+                </p>
+</div>
+</div>
+</div>
+<!-- Bottom Graphic / Footer -->
+<div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white via-white/80 to-transparent dark:from-background-dark dark:via-background-dark/80 pointer-events-none z-0"></div>
+<!-- Hero Image Placeholder (Background Visuals) -->
+<!-- Using a very subtle abstract image to add depth without cluttering the "clean" look -->
+<div class="absolute bottom-0 right-0 w-1/2 h-1/2 opacity-[0.03] dark:opacity-[0.05] pointer-events-none z-[-1] overflow-hidden">
+<div class="w-full h-full bg-contain bg-right-bottom bg-no-repeat" data-alt="Abstract subtle geometric shapes background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBAzIE5ZxP3xTpt8af3bHzDLTr7bg5JTpeeI9ejNQzKcL0tmUKLWtrK6wZac-BuUfWFkdvIGidvLHzhlJRhSAqnfiKDlm0DhUjrAqTze4JMYNa0aZQH_P-AJ5t7xSrDtpYOIFS87aATEAzOTcEEP5DQiZJ5qs6Izz66mf5OMtY5aZDRYAPcrT-nQ9zZe6-BWL4cbjFnePnCqc25LDvEeGTRquxITgPRQU6VH7Chh8lak1kzmPEik8hQ7N05Vlhn5ryUiIh9sceP9QA');"></div>
+</div>
+</body></html>

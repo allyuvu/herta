@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>測試遊戲連結</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>測試 Herta's Game Center 遊戲連結</h1>
+    <div id="results"></div>
+    
+    <script>
+        const games = [
+            { filename: "attack.html", title: "攻擊數學實習老師" },
+            { filename: "love-sim.html", title: "夏日告白 - 7天戀愛遊戲" },
+            { filename: "hide-seek.html", title: "躲貓貓大作戰" },
+            { filename: "violin-game.html", title: "小提琴大師" },
+            { filename: "music-game.html", title: "節奏大師 - Technical Ver." },
+            { filename: "snake.html", title: "黑色貪吃蛇" },
+            { filename: "mario.html", title: "Super Mario Kart 體感賽車" },
+            { filename: "game1.html", title: "經典猜數字遊戲" },
+            { filename: "game2.html", title: "手勢包剪揼對戰" },
+            { filename: "music-game2.html", title: "Easy Piano: Fur Elise" }
+        ];
+        
+        const resultsDiv = document.getElementById('results');
+        let allValid = true;
+        
+        games.forEach(game => {
+            const li = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = game.filename;
+            link.textContent = `${game.title} (${game.filename})`;
+            link.target = "_blank";
+            
+            // 檢查文件是否存在
+            fetch(game.filename, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        li.classList.add('success');
+                        li.textContent = '✓ ';
+                    } else {
+                        li.classList.add('error');
+                        li.textContent = '✗ ';
+                        allValid = false;
+                    }
+                    li.appendChild(link);
+                })
+                .catch(error => {
+                    li.classList.add('error');
+                    li.textContent = '✗ ';
+                    li.appendChild(link);
+                    li.appendChild(document.createTextNode(` - 錯誤: ${error.message}`));
+                    allValid = false;
+                });
+            
+            resultsDiv.appendChild(li);
+        });
+        
+        // 顯示總結果
+        setTimeout(() => {
+            const summary = document.createElement('div');
+            summary.style.marginTop = '20px';
+            summary.style.padding = '10px';
+            summary.style.borderRadius = '5px';
+            summary.style.fontWeight = 'bold';
+            
+            if (allValid) {
+                summary.classList.add('success');
+                summary.textContent = '✅ 所有遊戲連結都有效！';
+            } else {
+                summary.classList.add('error');
+                summary.textContent = '❌ 有些遊戲連結無效，請檢查文件名。';
+            }
+            
+            resultsDiv.appendChild(summary);
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊戲加載中 - Herta's Game Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        /* 主題顏色 */
+        .dark {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #ffffff;
+        }
+        
+        .light {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+            color: #212529;
+        }
+        
+        .loading-container {
+            max-width: 600px;
+            width: 90%;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .dark .loading-container {
+            background: rgba(30, 30, 46, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .light .loading-container {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .game-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        .game-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #ff7b00, #e52e71, #8e3eb0, #00dcb0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .game-description {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .dark .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff7b00, #e52e71);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        
+        .tip-container {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+        
+        .dark .tip-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #00dcb0;
+        }
+        
+        .light .tip-container {
+            background: rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #e52e71;
+        }
+        
+        .status-text {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body class="dark">
+    <div class="loading-container">
+        <div class="game-icon" id="game-icon">🎮</div>
+        <h1 class="game-title" id="game-title">遊戲加載中</h1>
+        <p class="game-description" id="game-description">請稍候...</p>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        
+        <div class="progress-text">
+            <span>開始</span>
+            <span id="progress-percent">0%</span>
+            <span>完成</span>
+        </div>
+        
+        <div class="tip-container">
+            <div id="game-tip">加載提示將在這裡顯示...</div>
+        </div>
+        
+        <div class="status-text" id="status-text">初始化遊戲引擎...</div>
+        
+        <div class="footer">
+            Herta's Game Center • 按 ESC 鍵跳過加載
+        </div>
+    </div>
+
+    <script>
+        // 遊戲數據 - 從 URL 哈希或默認值獲取
+        const gameData = {
+            title: '遊戲',
+            icon: '🎮',
+            description: '加載中...',
+            target: 'index.html'
+        };
+        
+        // 嘗試從 URL 哈希獲取遊戲數據
+        try {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                const decoded = decodeURIComponent(hash);
+                const data = JSON.parse(decoded);
+                Object.assign(gameData, data);
+            }
+        } catch (e) {
+            console.log('使用默認遊戲數據');
+        }
+        
+        // 遊戲提示
+        const gameTips = [
+            "戰術提示：閃避比硬拼更有效。",
+            "連擊可以獲得更高分數！保持節奏，不要中斷連鎖攻擊。",
+            "觀察敵人模式，找到最佳攻擊時機。",
+            "善用環境掩護，減少受到的傷害。",
+            "收集道具可以增強角色能力。",
+            "保持移動，不要停留在同一個位置太久。",
+            "學習敵人的攻擊模式，提前做好閃避準備。",
+            "合理分配資源，不要一次性用完所有技能。",
+            "團隊合作時，注意隊友的位置和狀態。",
+            "練習是提高遊戲技巧的最佳方式。"
+        ];
+        
+        // 加載步驟
+        const loadingSteps = [
+            { percent: 15, message: "初始化遊戲引擎..." },
+            { percent: 30, message: "檢查遊戲文件..." },
+            { percent: 45, message: "加載遊戲資源..." },
+            { percent: 60, message: "準備遊戲場景..." },
+            { percent: 75, message: "初始化音效系統..." },
+            { percent: 90, message: "校準控制設定..." },
+            { percent: 100, message: "準備完成！" }
+        ];
+        
+        // 設置主題
+        function applyTheme() {
+            const body = document.body;
+            const savedTheme = localStorage.getItem('theme');
+            
+            if (savedTheme === 'dark' || savedTheme === 'light') {
+                body.className = savedTheme;
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                body.className = 'dark';
+            } else {
+                body.className = 'light';
+            }
+        }
+        
+        // 獲取隨機提示
+        function getRandomTip() {
+            return gameTips[Math.floor(Math.random() * gameTips.length)];
+        }
+        
+        // 更新遊戲信息
+        function updateGameInfo() {
+            document.getElementById('game-title').textContent = gameData.title;
+            document.getElementById('game-icon').textContent = gameData.icon;
+            document.getElementById('game-description').textContent = gameData.description;
+            document.getElementById('game-tip').textContent = getRandomTip();
+        }
+        
+        // 模擬加載
+        function simulateLoading() {
+            let progress = 0;
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercent = document.getElementById('progress-percent');
+            const statusText = document.getElementById('status-text');
+            const gameTip = document.getElementById('game-tip');
+            
+            function updateProgress() {
+                if (progress >= 100) {
+                    progress = 100;
+                    progressBar.style.width = '100%';
+                    progressPercent.textContent = '100%';
+                    statusText.textContent = '準備進入遊戲...';
+                    
+                    // 短暫延遲後跳轉
+                    setTimeout(() => {
+                        window.location.href = gameData.target;
+                    }, 800);
+                    return;
+                }
+                
+                // 平滑增加進度
+                let increment;
+                if (progress < 30) {
+                    increment = 1.5 + Math.random() * 2;
+                } else if (progress < 70) {
+                    increment = 1.0 + Math.random() * 1.5;
+                } else {
+                    increment = 0.5 + Math.random() * 1.0;
+                }
+                
+                progress = Math.min(progress + increment, 100);
+                
+                // 更新UI
+                progressBar.style.width = progress + '%';
+                progressPercent.textContent = Math.floor(progress) + '%';
+                
+                // 更新狀態消息
+                const currentStep = loadingSteps.find(step => progress <= step.percent) || loadingSteps[loadingSteps.length - 1];
+                statusText.textContent = currentStep.message;
+                
+                // 隨機更換提示（10%機率）
+                if (Math.random() > 0.9) {
+                    gameTip.textContent = getRandomTip();
+                }
+                
+                // 繼續加載
+                setTimeout(updateProgress, 30 + Math.random() * 70);
+            }
+            
+            // 開始加載
+            setTimeout(updateProgress, 500);
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            applyTheme();
+            updateGameInfo();
+            simulateLoading();
+            
+            // ESC 鍵跳過加載
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (confirm('跳過加載並直接進入遊戲？')) {
+                        window.location.href = gameData.target;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

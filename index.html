@@ -3,1019 +3,683 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的遊戲館 | 多樣化遊戲集合</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='50%' x='50%' font-size='50' text-anchor='middle' dominant-baseline='middle'>🎮</text></svg>">
+    <title>Herta's Game Center - 我的遊戲館</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e63374",
+                        "background-dark": "#0f0c29",
+                        "background-light": "#f8f9fa",
+                        "glass-dark": "rgba(45, 45, 68, 0.9)",
+                        "glass-light": "rgba(255, 255, 255, 0.8)",
+                        "text-light": "#b0b0d0",
+                        "text-dark": "#1e293b",
+                        "neon-blue": "#00dcb0",
+                        "neon-purple": "#8e3eb0",
+                        "neon-pink": "#e52e71",
+                        "neon-orange": "#ff7b00",
+                        "charcoal": "#1e293b",
+                        "slate-text": "#64748b",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.3)',
+                        'soft-light': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                        'glow': '0 0 20px rgba(230, 51, 116, 0.5)',
+                        'glow-light': '0 0 20px rgba(230, 51, 116, 0.3)',
+                    }
+                },
+            },
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #e63374;
+            --neon-blue: #00dcb0;
+            --neon-purple: #8e3eb0;
+            --neon-pink: #e52e71;
+            --neon-orange: #ff7b00;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: #fff;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* 頭部樣式 */
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-            padding: 30px 0;
-            position: relative;
-        }
-
-        .header h1 {
-            font-size: 3.5rem;
-            margin-bottom: 15px;
-            background: linear-gradient(45deg, #ff8a00, #e52e71, #9d50bb, #00ffcc);
+        .neon-text-gradient {
+            background: linear-gradient(to right, var(--neon-orange), var(--neon-pink), var(--neon-purple), var(--neon-blue));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            letter-spacing: 2px;
+            filter: drop-shadow(0 0 15px rgba(229, 46, 113, 0.6));
         }
 
-        .header p {
-            font-size: 1.2rem;
-            color: #b0b0d0;
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 1.6;
+        .dark .glass-panel {
+            background: rgba(20, 20, 35, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
         }
 
-        .header::after {
-            content: '';
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+
+        .dark .glass-card {
+            background: rgba(45, 45, 68, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        .light .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.01);
+        }
+
+        .glass-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark .glass-card:hover {
+            background: rgba(55, 55, 80, 0.95);
+            border-color: rgba(230, 51, 116, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 0 25px rgba(230, 51, 116, 0.15), 0 20px 40px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .light .glass-card:hover {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(230, 51, 116, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .blob {
             position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
-            height: 4px;
-            background: linear-gradient(90deg, #ff8a00, #e52e71, #9d50bb, #00ffcc);
-            border-radius: 2px;
+            border-radius: 9999px;
+            filter: blur(80px);
+            opacity: 0.35;
+            z-index: -10;
         }
 
-        /* 遊戲分類 */
-        .category-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
+        .dark .blob {
+            opacity: 0.35;
         }
 
-        .tab-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: #b0b0d0;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
+        .light .blob {
+            opacity: 0.6;
         }
 
-        .tab-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(45deg, #e52e71, #9d50bb);
-            color: white;
-            box-shadow: 0 5px 15px rgba(229, 46, 113, 0.3);
-        }
-
-        /* 遊戲卡片區域 */
-        .games-section {
-            margin-bottom: 60px;
-        }
-
-        .section-title {
-            font-size: 2rem;
-            margin-bottom: 30px;
-            text-align: center;
-            color: #00ffcc;
-            text-shadow: 0 2px 10px rgba(0, 255, 204, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .section-title::before,
-        .section-title::after {
-            content: '🎮';
-            font-size: 1.5rem;
-        }
-
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-            justify-content: center;
-        }
-
-        /* 遊戲卡片樣式 */
-        .game-card {
-            background: linear-gradient(145deg, rgba(45, 45, 68, 0.9), rgba(30, 30, 50, 0.9));
-            border-radius: 20px;
-            padding: 30px 25px;
-            text-decoration: none;
-            color: white;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            min-height: 250px;
-        }
-
-        .game-card::before {
-            content: '';
+        .game-card-new {
             position: absolute;
             top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: 0.5s;
+            right: 0;
+            background: linear-gradient(to bottom right, var(--neon-pink), var(--neon-purple));
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 0.25rem 0.75rem;
+            border-bottom-left-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            z-index: 20;
         }
 
-        .game-card:hover::before {
-            left: 100%;
+        .game-card-hot {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: linear-gradient(to bottom right, var(--neon-orange), #ff4444);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 0.25rem 0.75rem;
+            border-bottom-left-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            z-index: 20;
         }
 
-        .game-card:hover {
-            transform: translateY(-15px) scale(1.03);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            border-color: rgba(0, 255, 204, 0.3);
-            background: linear-gradient(145deg, rgba(55, 55, 88, 0.95), rgba(40, 40, 70, 0.95));
-        }
-
-        .game-icon {
-            font-size: 4.5rem;
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
-            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
-        }
-
-        .game-card:hover .game-icon {
-            transform: scale(1.3) rotate(8deg);
-        }
-
-        .game-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #fff;
-            letter-spacing: 1px;
-        }
-
-        .game-desc {
-            font-size: 1rem;
-            color: #b0b0d0;
-            line-height: 1.6;
-            margin-bottom: 15px;
-            flex-grow: 1;
-        }
-
-        .game-tags {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .game-tag {
+        .category-tag {
             display: inline-block;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border: 1px solid;
-        }
-
-        .tag-new {
-            background: rgba(255, 193, 7, 0.2);
-            color: #ffd54f;
-            border-color: rgba(255, 193, 7, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        .tag-love {
-            background: rgba(255, 105, 180, 0.2);
-            color: #ff69b4;
-            border-color: rgba(255, 105, 180, 0.3);
-        }
-
-        .tag-music {
-            background: rgba(156, 39, 176, 0.2);
-            color: #ce93d8;
-            border-color: rgba(156, 39, 176, 0.3);
-        }
-
-        .tag-action {
-            background: rgba(229, 46, 113, 0.2);
-            color: #ff6b9d;
-            border-color: rgba(229, 46, 113, 0.3);
-        }
-
-        .tag-classic {
-            background: rgba(0, 255, 204, 0.2);
-            color: #00ffcc;
-            border-color: rgba(0, 255, 204, 0.3);
-        }
-
-        .tag-puzzle {
-            background: rgba(33, 150, 243, 0.2);
-            color: #64b5f6;
-            border-color: rgba(33, 150, 243, 0.3);
-        }
-        
-        /* 新增樣式 */
-        .audio-control {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(45, 45, 68, 0.9);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-        }
-        
-        .audio-control:hover {
-            background: rgba(65, 65, 88, 0.9);
-            transform: scale(1.1);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .audio-control.muted {
-            background: rgba(255, 68, 68, 0.9);
-        }
-        
-        .speaker-icon {
-            width: 24px;
-            height: 24px;
-            fill: white;
-        }
-        
-        .speaker-muted {
-            display: none;
-        }
-        
-        .audio-control.muted .speaker-normal {
-            display: none;
-        }
-        
-        .audio-control.muted .speaker-muted {
-            display: block;
-        }
-        
-        /* 搜索框樣式 */
-        .search-container {
-            text-align: center;
-            margin: 30px 0;
-            position: relative;
-        }
-        
-        .search-input {
-            background: rgba(45, 45, 68, 0.8);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            padding: 15px 50px 15px 20px;
-            font-size: 1rem;
-            color: white;
-            width: 100%;
-            max-width: 400px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: rgba(0, 255, 204, 0.5);
-            background: rgba(55, 55, 78, 0.9);
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
-        }
-        
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-        
-        .search-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.6);
-            pointer-events: none;
-        }
-        
-        /* 主題切換按鈕 */
-        .theme-toggle {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: rgba(45, 45, 68, 0.9);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            z-index: 999;
-            backdrop-filter: blur(10px);
-            font-size: 0.9rem;
-            color: white;
-        }
-        
-        .theme-toggle:hover {
-            background: rgba(65, 65, 88, 0.9);
-            transform: scale(1.05);
-        }
-        
-        /* 深色主題 */
-        body.dark-theme {
-            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
-        }
-        
-        body.dark-theme .game-card {
-            background: linear-gradient(145deg, rgba(25, 25, 35, 0.95), rgba(15, 15, 25, 0.95));
-        }
-        
-        body.dark-theme .stats-section {
-            background: rgba(15, 15, 25, 0.8);
-        }
-        
-        /* 動畫改進 */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        .game-card.hidden {
-            animation: fadeOutDown 0.3s ease forwards;
-        }
-        
-        @keyframes fadeOutDown {
-            to {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-        }
-
-        /* 特別推薦卡片 */
-        .featured-card {
-            background: linear-gradient(145deg, rgba(157, 80, 187, 0.2), rgba(45, 45, 68, 0.9));
-            border: 2px solid rgba(157, 80, 187, 0.4);
-            position: relative;
-        }
-
-        .featured-card::after {
-            content: '🔥 熱門遊戲';
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: linear-gradient(45deg, #ff8a00, #e52e71);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 0.8rem;
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-right: 0.25rem;
+            margin-bottom: 0.25rem;
         }
 
-        /* 底部統計 */
-        .stats-section {
-            background: rgba(20, 20, 40, 0.6);
-            border-radius: 20px;
-            padding: 40px;
-            margin-top: 60px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 25px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 25px;
-        }
-
-        .stat-number {
-            font-size: 3rem;
-            font-weight: bold;
-            background: linear-gradient(45deg, #ff8a00, #e52e71);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            font-size: 1.1rem;
+        .dark .category-tag {
+            background: rgba(255, 255, 255, 0.1);
             color: #b0b0d0;
         }
 
-        /* 底部樣式 */
-        .footer {
-            text-align: center;
-            margin-top: 60px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #888;
-            font-size: 0.9rem;
+        .light .category-tag {
+            background: rgba(0, 0, 0, 0.05);
+            color: #64748b;
         }
 
-        .footer p {
-            margin: 10px 0;
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
         }
 
-        /* 動畫效果 */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
-            }
-        }
-
-        .game-card {
-            animation: fadeInUp 0.6s ease forwards;
-            opacity: 0;
-        }
-
-        /* 卡片出現動畫延遲 */
-        .game-card:nth-child(1) { animation-delay: 0.1s; }
-        .game-card:nth-child(2) { animation-delay: 0.2s; }
-        .game-card:nth-child(3) { animation-delay: 0.3s; }
-        .game-card:nth-child(4) { animation-delay: 0.4s; }
-        .game-card:nth-child(5) { animation-delay: 0.5s; }
-        .game-card:nth-child(6) { animation-delay: 0.6s; }
-        .game-card:nth-child(7) { animation-delay: 0.7s; }
-        .game-card:nth-child(8) { animation-delay: 0.8s; }
-        .game-card:nth-child(9) { animation-delay: 0.9s; }
-
-        /* 響應式設計 */
-        @media (max-width: 1200px) {
-            .games-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2.5rem;
-            }
-
-            .games-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 20px;
-            }
-
-            .game-icon {
-                font-size: 3.5rem;
-            }
-
-            .game-title {
-                font-size: 1.4rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .container {
-                padding: 10px;
-            }
-
-            .game-card {
-                padding: 25px 20px;
-            }
-
-            .games-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .category-tabs {
-                gap: 5px;
-            }
-
-            .tab-btn {
-                padding: 8px 16px;
-                font-size: 0.9rem;
-            }
+        .search-highlight {
+            background-color: rgba(230, 51, 116, 0.2);
+            border-radius: 0.25rem;
+            padding: 0 0.125rem;
         }
     </style>
 </head>
-<body>
-    <!-- 音效控制按鈕 -->
-    <div class="audio-control" id="audioControl" title="切換音效">
-        <svg class="speaker-icon speaker-normal" viewBox="0 0 24 24">
-            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-        </svg>
-        <svg class="speaker-icon speaker-muted" viewBox="0 0 24 24">
-            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-        </svg>
+<body class="font-display overflow-x-hidden min-h-screen flex flex-col transition-colors duration-300 dark:bg-background-dark dark:text-text-light light:bg-background-light light:text-charcoal">
+    <!-- Background Blobs -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="dark:bg-[#0f0c29] light:bg-[#f8f9fa] absolute inset-0"></div>
+        <div class="blob top-[-10%] left-[20%] w-[500px] h-[500px] dark:bg-purple-900 light:bg-purple-200"></div>
+        <div class="blob bottom-[-10%] right-[10%] w-[600px] h-[600px] dark:bg-pink-900 light:bg-pink-200"></div>
+        <div class="blob top-[40%] left-[-10%] w-[400px] h-[400px] dark:bg-blue-900 light:bg-blue-100"></div>
     </div>
-    
-    <!-- 主題切換按鈕 -->
-    <div class="theme-toggle" id="themeToggle" title="切換主題">
-        <span>🌙</span>
-        <span>深色</span>
-    </div>
-    
-    <div class="container">
-        <header class="header">
-            <h1>🎮 我的遊戲館</h1>
-            <p>集合經典與創意遊戲，現在擁有9款精彩遊戲！涵蓋動作、音樂、戀愛、益智等多種類型</p>
+
+    <div class="flex-grow flex flex-col w-full max-w-[1440px] mx-auto px-4">
+        <!-- Header -->
+        <header class="flex items-center justify-between py-4 md:py-6 sticky top-0 z-50 glass-panel border-b dark:border-white/10 light:border-slate-200 mt-4 rounded-2xl px-6">
+            <div class="flex items-center gap-3">
+                <div class="size-8 text-primary flex items-center justify-center dark:bg-primary/20 light:bg-primary/10 rounded-lg">
+                    <span class="material-symbols-outlined !text-[24px]">stadia_controller</span>
+                </div>
+                <h2 class="dark:text-white light:text-slate-800 text-lg font-bold tracking-wide hidden sm:block">Herta's Game Center</h2>
+            </div>
+            <div class="flex gap-3">
+                <button id="sound-toggle" aria-label="Toggle Sound" class="flex items-center justify-center size-10 rounded-full dark:bg-white/5 light:bg-black/5 dark:hover:bg-white/10 light:hover:bg-black/10 dark:text-gray-300 light:text-slate-700 transition-colors">
+                    <span class="material-symbols-outlined !text-[20px]">volume_up</span>
+                </button>
+                <button id="theme-toggle" aria-label="Toggle Theme" class="flex items-center justify-center size-10 rounded-full dark:bg-white/5 light:bg-black/5 dark:hover:bg-white/10 light:hover:bg-black/10 dark:text-gray-300 light:text-slate-700 transition-colors">
+                    <span id="theme-icon" class="material-symbols-outlined !text-[20px] dark:text-yellow-300 light:text-orange-500">dark_mode</span>
+                </button>
+                <button class="flex items-center justify-center size-10 rounded-full bg-primary hover:bg-primary/90 text-white transition-colors dark:shadow-glow light:shadow-glow-light">
+                    <span class="material-symbols-outlined !text-[20px]">person</span>
+                </button>
+            </div>
         </header>
 
-<!-- 搜索框 -->
-        <div class="search-container">
-            <input type="text" class="search-input" id="searchInput" placeholder="搜索遊戲名稱或描述...">
-            <span class="search-icon">🔍</span>
-        </div>
-
-        <!-- 遊戲分類標籤 -->
-        <div class="category-tabs">
-            <button class="tab-btn active" data-category="all">全部遊戲</button>
-            <button class="tab-btn" data-category="new">新遊戲</button>
-            <button class="tab-btn" data-category="action">動作遊戲</button>
-            <button class="tab-btn" data-category="music">音樂遊戲</button>
-            <button class="tab-btn" data-category="classic">經典遊戲</button>
-        </div>
-
-        <section class="games-section">
-            <h2 class="section-title">全部遊戲</h2>
-            <div class="games-grid">
-                <!-- 攻擊大作戰 -->
-                <a href="attack.html" class="game-card featured-card" data-category="new action">
-                    <div class="game-icon">⚔️</div>
-                    <h3 class="game-title">攻擊大作戰</h3>
-                    <p class="game-desc">全新動作遊戲！控制英雄使用連擊技能擊敗敵人，挑戰無限模式！</p>
-                    <div class="game-tags">
-                        <span class="game-tag tag-new">新遊戲</span>
-                        <span class="game-tag tag-action">動作</span>
-                    </div>
-                </a>
-                
-                <!-- 戀愛模擬遊戲 -->
-                <a href="love-sim.html" class="game-card" data-category="new">
-                    <div class="game-icon">💖</div>
-                    <h3 class="game-title">心動時刻</h3>
-                    <p class="game-desc">浪漫戀愛模擬遊戲，與虛擬角色互動，發展獨特的故事線！</p>
-                    <div class="game-tags">
-                        <span class="game-tag tag-new">新遊戲</span>
-                        <span class="game-tag tag-love">戀愛</span>
-                        <span class="game-tag tag-puzzle">劇情</span>
-                    </div>
-                </a>
-                
-                <!-- 躲貓貓遊戲 -->
-                <a href="hide-seek.html" class="game-card" data-category="new action">
-                    <div class="game-icon">👻</div>
-                    <h3 class="game-title">躲貓貓大作戰</h3>
-                    <p class="game-desc">躲藏與尋找的刺激遊戲，利用環境隱藏自己或找出所有玩家！</p>
-                    <div class="game-tags">
-                        <span class="game-tag tag-new">新遊戲</span>
-                        <span class="game-tag tag-action">動作</span>
-                    </div>
-                </a>
-                
-                <!-- 小提琴遊戲 -->
-                <a href="violin-game.html" class="game-card" data-category="new music">
-                    <div class="game-icon">🎻</div>
-                    <h3 class="game-title">小提琴大師</h3>
-                    <p class="game-desc">學習演奏小提琴，跟隨音符演奏經典樂曲，體驗音樂的魅力！</p>
-                    <div class="game-tags">
-                        <span class="game-tag tag-new">新遊戲</span>
-                        <span class="game-tag tag-music">音樂</span>
-                    </div>
-                </a>
-                
-                <!-- 音樂遊戲 -->
-                <a href="music-game.html" class="game-card" data-category="new music">
-                    <div class="game-icon">🎵</div>
-                    <h3 class="game-title">節奏大師</h3>
-                    <p class="game-desc">跟隨節奏點擊音符，挑戰你的反應速度與節奏感！</p>
-                    <div class="game-tags">
-                        <span class="game-tag tag-new">新遊戲</span>
-                        <span class="game-tag tag-music">音樂</span>
-                        <span class="game-tag tag-action">節奏</span>
-                    </div>
-                </a>
-                
-                <!-- 貪吃蛇遊戲 -->
-                <a href="snake.html" class="game-card" data-category="classic">
-                    <div class="game-icon">🐍</div>
-                    <h3 class="game-title">經典貪吃蛇</h3>
-                    <p class="game-desc">懷舊經典遊戲，控制小蛇吃食物成長，挑戰最高分數！</p>
-                    <div class="game-tags">
-                        <span class="game-tag tag-classic">經典</span>
-                        <span class="game-tag tag-puzzle">益智</span>
-                    </div>
-                </a>
-                
-                <!-- 賽車遊戲 -->
-                <a href="mario.html" class="game-card" data-category="action">
-                    <div class="game-icon">🏎️</div>
-                    <h3 class="game-title">極速賽車</h3>
-                    <p class="game-desc">駕駛賽車收集道具，避開障礙物，體驗刺激的競速快感！</p>
-                    <div class="game-tags">
-                        <span class="game-tag tag-action">競速</span>
-                        <span class="game-tag tag-classic">經典</span>
-                    </div>
-                </a>
-                
-                <!-- 猜數字遊戲 -->
-                <a href="game1.html" class="game-card" data-category="puzzle">
-                    <div class="game-icon">🎯</div>
-                    <h3 class="game-title">數字猜謎</h3>
-                    <p class="game-desc">考驗你的邏輯思維，用最少的次數猜中隱藏數字！</p>
-                    <div class="game-tags">
-                        <span class="game-tag tag-puzzle">益智</span>
-                        <span class="game-tag tag-classic">經典</span>
-                    </div>
-                </a>
-                
-                <!-- 包剪揼遊戲 -->
-                <a href="game2.html" class="game-card" data-category="classic">
-                    <div class="game-icon">✊</div>
-                    <h3 class="game-title">包剪揼對決</h3>
-                    <p class="game-desc">經典對戰遊戲，與電腦比拼策略與運氣，看誰能連勝！</p>
-                    <div class="game-tags">
-                        <span class="game-tag tag-classic">經典</span>
-                        <span class="game-tag tag-puzzle">策略</span>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- 統計區塊 -->
-        <div class="stats-section">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-number">9</span>
-                    <span class="stat-label">遊戲總數</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">5</span>
-                    <span class="stat-label">新遊戲</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">4</span>
-                    <span class="stat-label">遊戲類型</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">100%</span>
-                    <span class="stat-label">免費遊玩</span>
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col py-8 gap-8">
+            <!-- Hero Section -->
+            <div class="flex flex-col items-center justify-center text-center gap-4 py-8 relative">
+                <div class="z-10 flex flex-col gap-2">
+                    <h1 class="text-5xl md:text-7xl font-black tracking-tighter leading-tight neon-text-gradient drop-shadow-lg">
+                        🎮 我的遊戲館
+                    </h1>
+                    <p class="dark:text-text-light light:text-slate-text text-lg md:text-xl font-normal max-w-2xl mx-auto opacity-80">
+                        集合經典與創意遊戲，現在擁有10款精彩遊戲！涵蓋動作、音樂、戀愛、益智等多種類型
+                    </p>
                 </div>
             </div>
-        </div>
 
-        <footer class="footer">
-            <p>我的遊戲館 © 2023 | 多樣化遊戲集合，創造無限樂趣</p>
-            <p>使用 HTML5、CSS3 和 JavaScript 精心打造 | 持續更新中</p>
+            <!-- Search and Filter Section -->
+            <div class="flex flex-col gap-6 max-w-5xl mx-auto w-full z-10">
+                <!-- Search Box -->
+                <div class="relative group">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-neon-pink to-neon-blue rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                    <label class="relative flex items-center w-full h-14 dark:bg-[#2d2d44] light:bg-white rounded-xl border dark:border-white/10 light:border-slate-200 overflow-hidden shadow-sm">
+                        <div class="pl-5 dark:text-gray-400 light:text-slate-500">
+                            <span class="material-symbols-outlined !text-[28px]">search</span>
+                        </div>
+                        <input id="search-input" class="w-full h-full bg-transparent border-none dark:text-white light:text-charcoal placeholder-gray-500 px-4 text-lg focus:ring-0" placeholder="搜尋遊戲... (Ctrl+K)" type="text"/>
+                        <div class="pr-5 hidden sm:block">
+                            <span class="px-2 py-1 rounded dark:bg-white/10 light:bg-black/10 text-xs dark:text-gray-400 light:text-slate-500 font-mono border dark:border-white/5 light:border-black/5">Ctrl K</span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex flex-wrap gap-3 justify-center" id="category-filters">
+                    <button class="category-filter px-6 py-2 rounded-full bg-primary text-white text-sm font-bold shadow-lg shadow-primary/30 hover:scale-105 transition-transform" data-category="all">
+                        全部
+                    </button>
+                    <button class="category-filter px-6 py-2 rounded-full dark:bg-[#2d2d44] light:bg-white border dark:border-white/10 light:border-slate-200 dark:text-gray-300 light:text-slate-700 hover:border-neon-blue hover:text-neon-blue hover:bg-blue-900/30 text-sm font-medium transition-all hover:scale-105 shadow-sm" data-category="new">
+                        新遊戲
+                    </button>
+                    <button class="category-filter px-6 py-2 rounded-full dark:bg-[#2d2d44] light:bg-white border dark:border-white/10 light:border-slate-200 dark:text-gray-300 light:text-slate-700 hover:border-neon-orange hover:text-neon-orange hover:bg-orange-900/30 text-sm font-medium transition-all hover:scale-105 shadow-sm" data-category="action">
+                        動作
+                    </button>
+                    <button class="category-filter px-6 py-2 rounded-full dark:bg-[#2d2d44] light:bg-white border dark:border-white/10 light:border-slate-200 dark:text-gray-300 light:text-slate-700 hover:border-neon-purple hover:text-neon-purple hover:bg-purple-900/30 text-sm font-medium transition-all hover:scale-105 shadow-sm" data-category="music">
+                        音樂
+                    </button>
+                    <button class="category-filter px-6 py-2 rounded-full dark:bg-[#2d2d44] light:bg-white border dark:border-white/10 light:border-slate-200 dark:text-gray-300 light:text-slate-700 hover:border-neon-pink hover:text-neon-pink hover:bg-pink-900/30 text-sm font-medium transition-all hover:scale-105 shadow-sm" data-category="classic">
+                        經典
+                    </button>
+                    <button class="category-filter px-6 py-2 rounded-full dark:bg-[#2d2d44] light:bg-white border dark:border-white/10 light:border-slate-200 dark:text-gray-300 light:text-slate-700 hover:border-neon-blue hover:text-neon-blue hover:bg-blue-900/30 text-sm font-medium transition-all hover:scale-105 shadow-sm" data-category="puzzle">
+                        益智
+                    </button>
+                    <button class="category-filter px-6 py-2 rounded-full dark:bg-[#2d2d44] light:bg-white border dark:border-white/10 light:border-slate-200 dark:text-gray-300 light:text-slate-700 hover:border-green-500 hover:text-green-500 hover:bg-green-900/30 text-sm font-medium transition-all hover:scale-105 shadow-sm" data-category="love">
+                        戀愛
+                    </button>
+                    <button class="category-filter px-6 py-2 rounded-full dark:bg-[#2d2d44] light:bg-white border dark:border-white/10 light:border-slate-200 dark:text-gray-300 light:text-slate-700 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-900/30 text-sm font-medium transition-all hover:scale-105 shadow-sm" data-category="racing">
+                        競速
+                    </button>
+                </div>
+            </div>
+
+            <!-- Games Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto w-full py-6" id="games-grid">
+                <!-- Games will be dynamically inserted here -->
+            </div>
+
+            <!-- Stats Section -->
+            <div class="max-w-4xl mx-auto w-full mt-8">
+                <div class="dark:glass-panel light:glass-panel rounded-2xl p-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold dark:text-white light:text-charcoal">10</div>
+                            <div class="dark:text-text-light light:text-slate-text text-sm">遊戲總數</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-neon-pink">6</div>
+                            <div class="dark:text-text-light light:text-slate-text text-sm">新遊戲</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-neon-blue">8</div>
+                            <div class="dark:text-text-light light:text-slate-text text-sm">遊戲類型</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-500">100%</div>
+                            <div class="dark:text-text-light light:text-slate-text text-sm">免費遊玩</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-auto border-t dark:border-white/10 light:border-slate-200 dark:glass-panel light:glass-panel mt-10">
+            <div class="max-w-[1440px] mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex gap-8 text-sm dark:text-gray-400 light:text-slate-500">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined !text-lg text-primary">analytics</span>
+                        <span>總數: <b class="dark:text-white light:text-charcoal">10</b></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined !text-lg text-neon-blue">new_releases</span>
+                        <span>新遊戲: <b class="dark:text-white light:text-charcoal">6</b></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined !text-lg text-green-500">price_check</span>
+                        <span>免費: <b class="dark:text-white light:text-charcoal">100%</b></span>
+                    </div>
+                </div>
+                <div class="text-xs dark:text-gray-500 light:text-slate-400">
+                    © 2023 Herta's Game Center. 版權所有。
+                </div>
+            </div>
         </footer>
     </div>
 
     <script>
-        // 音效管理器
-        class AudioManager {
-            constructor() {
-                this.audioContext = null;
-                this.sounds = {};
-                this.volume = 0.3;
-                this.enabled = true;
-                this.init();
+        // Game data
+        const games = [
+            {
+                id: 1,
+                title: "攻擊數學實習老師",
+                filename: "attack.html",
+                description: "全新動作遊戲！控制英雄使用連擊技能擊敗敵人，挑戰無限模式！",
+                icon: "⚔️",
+                categories: ["action", "new"],
+                tags: ["新遊戲", "動作"],
+                color: "neon-orange",
+                isNew: true,
+                isHot: true
+            },
+            {
+                id: 2,
+                title: "夏日告白 - 7天戀愛遊戲",
+                filename: "love-sim.html",
+                description: "浪漫戀愛模擬遊戲，與虛擬角色互動，發展獨特的故事線！",
+                icon: "💖",
+                categories: ["love", "new"],
+                tags: ["新遊戲", "戀愛", "劇情"],
+                color: "neon-pink",
+                isNew: true,
+                isHot: false
+            },
+            {
+                id: 3,
+                title: "躲貓貓大作戰",
+                filename: "hide-seek.html",
+                description: "躲藏與尋找的刺激遊戲，利用環境隱藏自己或找出所有玩家！",
+                icon: "👻",
+                categories: ["action", "new"],
+                tags: ["新遊戲", "動作"],
+                color: "neon-purple",
+                isNew: true,
+                isHot: false
+            },
+            {
+                id: 4,
+                title: "小提琴大師",
+                filename: "violin-game.html",
+                description: "學習演奏小提琴，跟隨音符演奏經典樂曲，體驗音樂的魅力！",
+                icon: "🎻",
+                categories: ["music", "new"],
+                tags: ["新遊戲", "音樂"],
+                color: "neon-blue",
+                isNew: true,
+                isHot: false
+            },
+            {
+                id: 5,
+                title: "節奏大師 - Technical Ver.",
+                filename: "music-game.html",
+                description: "跟隨節奏點擊音符，挑戰你的反應速度與節奏感！",
+                icon: "🎵",
+                categories: ["music", "new"],
+                tags: ["新遊戲", "音樂", "節奏"],
+                color: "neon-purple",
+                isNew: true,
+                isHot: false
+            },
+            {
+                id: 6,
+                title: "黑色貪吃蛇",
+                filename: "snake.html",
+                description: "懷舊經典遊戲，控制小蛇吃食物成長，挑戰最高分數！",
+                icon: "🐍",
+                categories: ["classic", "puzzle"],
+                tags: ["經典", "益智"],
+                color: "green-500",
+                isNew: false,
+                isHot: true
+            },
+            {
+                id: 7,
+                title: "Super Mario Kart 體感賽車",
+                filename: "mario.html",
+                description: "駕駛賽車收集道具，避開障礙物，體驗刺激的競速快感！",
+                icon: "🏎️",
+                categories: ["racing", "classic"],
+                tags: ["競速", "經典"],
+                color: "red-500",
+                isNew: false,
+                isHot: false
+            },
+            {
+                id: 8,
+                title: "經典猜數字遊戲",
+                filename: "game1.html",
+                description: "考驗你的邏輯思維，用最少的次數猜中隱藏數字！",
+                icon: "🎯",
+                categories: ["puzzle", "classic"],
+                tags: ["益智", "經典"],
+                color: "yellow-500",
+                isNew: false,
+                isHot: false
+            },
+            {
+                id: 9,
+                title: "手勢包剪揼對戰",
+                filename: "game2.html",
+                description: "經典對戰遊戲，與電腦比拼策略與運氣，看誰能連勝！",
+                icon: "✊",
+                categories: ["classic", "puzzle"],
+                tags: ["經典", "策略"],
+                color: "blue-500",
+                isNew: false,
+                isHot: false
+            },
+            {
+                id: 10,
+                title: "Easy Piano: Fur Elise",
+                filename: "music-game2.html",
+                description: "學習演奏鋼琴，跟隨音符演奏經典樂曲，體驗音樂的魅力！",
+                icon: "🎹",
+                categories: ["music", "new"],
+                tags: ["新遊戲", "音樂"],
+                color: "neon-blue",
+                isNew: true,
+                isHot: false
             }
-            
-            init() {
-                try {
-                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.audioContext = new AudioContext();
-                    this.generateSounds();
-                } catch (e) {
-                    console.log('Web Audio API not supported');
-                    this.enabled = false;
-                }
+        ];
+
+        // Theme management
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const body = document.body;
+
+        // Check for saved theme or prefer dark mode
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        body.classList.add(savedTheme);
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            if (body.classList.contains('dark')) {
+                body.classList.replace('dark', 'light');
+                localStorage.setItem('theme', 'light');
+                updateThemeIcon('light');
+            } else {
+                body.classList.replace('light', 'dark');
+                localStorage.setItem('theme', 'dark');
+                updateThemeIcon('dark');
             }
-            
-            generateSounds() {
-                // 按鈕點擊音效
-                this.sounds.click = () => {
-                    if (!this.enabled) return;
-                    const oscillator = this.audioContext.createOscillator();
-                    const gainNode = this.audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(this.audioContext.destination);
-                    
-                    oscillator.frequency.setValueAtTime(600, this.audioContext.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(400, this.audioContext.currentTime + 0.05);
-                    
-                    gainNode.gain.setValueAtTime(this.volume * 0.2, this.audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.05);
-                    
-                    oscillator.start(this.audioContext.currentTime);
-                    oscillator.stop(this.audioContext.currentTime + 0.05);
-                };
-                
-                // 懸停音效
-                this.sounds.hover = () => {
-                    if (!this.enabled) return;
-                    const oscillator = this.audioContext.createOscillator();
-                    const gainNode = this.audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(this.audioContext.destination);
-                    
-                    oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
-                    
-                    gainNode.gain.setValueAtTime(this.volume * 0.1, this.audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
-                    
-                    oscillator.start(this.audioContext.currentTime);
-                    oscillator.stop(this.audioContext.currentTime + 0.1);
-                };
-            }
-            
-            play(soundName) {
-                if (this.sounds[soundName]) {
-                    if (this.audioContext.state === 'suspended') {
-                        this.audioContext.resume();
-                    }
-                    this.sounds[soundName]();
-                }
-            }
-            
-            setVolume(level) {
-                this.volume = Math.max(0, Math.min(1, level));
-            }
-            
-            toggle() {
-                this.enabled = !this.enabled;
-                return this.enabled;
+        });
+
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.textContent = 'dark_mode';
+                themeIcon.classList.remove('text-orange-500');
+                themeIcon.classList.add('text-yellow-300');
+            } else {
+                themeIcon.textContent = 'light_mode';
+                themeIcon.classList.remove('text-yellow-300');
+                themeIcon.classList.add('text-orange-500');
             }
         }
-        
-        // 分類過濾功能
-        document.addEventListener('DOMContentLoaded', function() {
-            // 初始化音效管理器
-            const audioManager = new AudioManager();
-            
-            // 音效控制
-            const audioControl = document.getElementById('audioControl');
-            const savedAudioState = localStorage.getItem('gameHubAudioEnabled');
-            if (savedAudioState !== null) {
-                audioManager.enabled = savedAudioState === 'true';
+
+        // Sound toggle
+        const soundToggle = document.getElementById('sound-toggle');
+        let soundEnabled = localStorage.getItem('sound') !== 'false';
+        updateSoundIcon();
+
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('sound', soundEnabled);
+            updateSoundIcon();
+            // Play a click sound if enabled
+            if (soundEnabled) {
+                playClickSound();
             }
-            
-            function updateAudioControlUI() {
-                if (audioManager.enabled) {
-                    audioControl.classList.remove('muted');
-                } else {
-                    audioControl.classList.add('muted');
-                }
-            }
-            
-            audioControl.addEventListener('click', () => {
-                audioManager.toggle();
-                localStorage.setItem('gameHubAudioEnabled', audioManager.enabled);
-                updateAudioControlUI();
-                audioManager.play('click');
-            });
-            
-            updateAudioControlUI();
-            
-            // 主題切換功能
-            const themeToggle = document.getElementById('themeToggle');
-            const savedTheme = localStorage.getItem('gameHubTheme');
-            
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-theme');
-                themeToggle.innerHTML = '<span>☀️</span><span>亮色</span>';
-            }
-            
-            themeToggle.addEventListener('click', () => {
-                document.body.classList.toggle('dark-theme');
-                const isDark = document.body.classList.contains('dark-theme');
-                
-                if (isDark) {
-                    themeToggle.innerHTML = '<span>☀️</span><span>亮色</span>';
-                    localStorage.setItem('gameHubTheme', 'dark');
-                } else {
-                    themeToggle.innerHTML = '<span>🌙</span><span>深色</span>';
-                    localStorage.setItem('gameHubTheme', 'light');
-                }
-                
-                audioManager.play('click');
-            });
-            
-            // 搜索功能
-            const searchInput = document.getElementById('searchInput');
-            const gameCards = document.querySelectorAll('.game-card');
-            
-            searchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                
-                gameCards.forEach(card => {
-                    const title = card.querySelector('.game-title').textContent.toLowerCase();
-                    const desc = card.querySelector('.game-desc').textContent.toLowerCase();
-                    
-                    if (title.includes(searchTerm) || desc.includes(searchTerm)) {
-                        card.style.display = 'flex';
-                        card.style.animation = 'fadeInUp 0.6s ease forwards';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-                
-                audioManager.play('hover');
-            });
-            
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            
-            // 卡片懸停效果
-            gameCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    const icon = this.querySelector('.game-icon');
-                    icon.style.transform = 'scale(1.3) rotate(8deg)';
-                    audioManager.play('hover');
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    const icon = this.querySelector('.game-icon');
-                    icon.style.transform = 'scale(1) rotate(0deg)';
-                });
-                
-                // 點擊音效
-                card.addEventListener('click', function() {
-                    audioManager.play('click');
-                });
-            });
-            
-            // 分類過濾
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // 移除所有按鈕的active類
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    
-                    // 添加active類到當前按鈕
-                    this.classList.add('active');
-                    
-                    const category = this.getAttribute('data-category');
-                    
-                    // 清空搜索框
-                    searchInput.value = '';
-                    
-                    // 過濾遊戲卡片
-                    gameCards.forEach(card => {
-                        const cardCategories = card.getAttribute('data-category').split(' ');
-                        
-                        if (category === 'all' || cardCategories.includes(category)) {
-                            card.style.display = 'flex';
-                            card.style.animation = 'fadeInUp 0.6s ease forwards';
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
-                    
-                    audioManager.play('click');
-                });
-            });
-            
-            // 為新遊戲添加閃爍效果
-            const newTags = document.querySelectorAll('.tag-new');
-            newTags.forEach(tag => {
-                const card = tag.closest('.game-card');
-                if (card) {
-                    card.addEventListener('mouseenter', function() {
-                        tag.style.animation = 'pulse 0.5s infinite';
-                    });
-                    
-                    card.addEventListener('mouseleave', function() {
-                        tag.style.animation = 'pulse 2s infinite';
-                    });
-                }
-            });
-            
-            // 添加鍵盤快捷鍵
-            document.addEventListener('keydown', (e) => {
-                // Ctrl/Cmd + K 聚焦搜索框
-                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                    e.preventDefault();
-                    searchInput.focus();
-                    searchInput.select();
-                    audioManager.play('click');
-                }
-                
-                // ESC 清空搜索框
-                if (e.key === 'Escape' && document.activeElement === searchInput) {
-                    searchInput.value = '';
-                    searchInput.blur();
-                    gameCards.forEach(card => {
-                        card.style.display = 'flex';
-                        card.style.animation = 'fadeInUp 0.6s ease forwards';
-                    });
-                    audioManager.play('click');
-                }
-                
-                // M 靜音切換
-                if (e.key === 'm' || e.key === 'M') {
-                    if (document.activeElement !== searchInput) {
-                        audioControl.click();
-                    }
-                }
-                
-                // T 主題切換
-                if (e.key === 't' || e.key === 'T') {
-                    if (document.activeElement !== searchInput) {
-                        themeToggle.click();
-                    }
-                }
-            });
-            
-            // 頁面載入動畫
-            setTimeout(() => {
-                document.body.style.opacity = 1;
-            }, 100);
-            
-            document.body.style.opacity = 0;
-            document.body.style.transition = 'opacity 0.5s ease';
         });
+
+        function updateSoundIcon() {
+            const icon = soundToggle.querySelector('.material-symbols-outlined');
+            icon.textContent = soundEnabled ? 'volume_up' : 'volume_off';
+        }
+
+        function playClickSound() {
+            // Simple click sound using Web Audio API
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        // Search and filter functionality
+        const searchInput = document.getElementById('search-input');
+        const categoryFilters = document.querySelectorAll('.category-filter');
+        const gamesGrid = document.getElementById('games-grid');
+        
+        let currentCategory = 'all';
+        let currentSearch = '';
+
+        // Initialize games grid
+        renderGames(games);
+
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            currentSearch = e.target.value.toLowerCase();
+            filterGames();
+        });
+
+        // Category filter functionality
+        categoryFilters.forEach(filter => {
+            filter.addEventListener('click', () => {
+                // Update active state
+                categoryFilters.forEach(f => {
+                    f.classList.remove('bg-primary', 'text-white', 'shadow-lg', 'shadow-primary/30');
+                    f.classList.add('dark:bg-[#2d2d44]', 'light:bg-white', 'dark:text-gray-300', 'light:text-slate-700');
+                });
+                
+                filter.classList.remove('dark:bg-[#2d2d44]', 'light:bg-white', 'dark:text-gray-300', 'light:text-slate-700');
+                filter.classList.add('bg-primary', 'text-white', 'shadow-lg', 'shadow-primary/30');
+                
+                currentCategory = filter.dataset.category;
+                filterGames();
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+K or Cmd+K to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            
+            // Escape to clear search
+            if (e.key === 'Escape' && document.activeElement === searchInput) {
+                searchInput.value = '';
+                currentSearch = '';
+                filterGames();
+            }
+            
+            // M to toggle sound
+            if (e.key === 'm' || e.key === 'M') {
+                soundEnabled = !soundEnabled;
+                localStorage.setItem('sound', soundEnabled);
+                updateSoundIcon();
+            }
+            
+            // T to toggle theme
+            if (e.key === 't' || e.key === 'T') {
+                themeToggle.click();
+            }
+        });
+
+        function filterGames() {
+            const filteredGames = games.filter(game => {
+                // Search filter
+                const matchesSearch = currentSearch === '' || 
+                    game.title.toLowerCase().includes(currentSearch) ||
+                    game.description.toLowerCase().includes(currentSearch) ||
+                    game.tags.some(tag => tag.toLowerCase().includes(currentSearch));
+                
+                // Category filter
+                const matchesCategory = currentCategory === 'all' || 
+                    game.categories.includes(currentCategory);
+                
+                return matchesSearch && matchesCategory;
+            });
+            
+            renderGames(filteredGames);
+        }
+
+        function renderGames(gamesToRender) {
+            gamesGrid.innerHTML = '';
+            
+            if (gamesToRender.length === 0) {
+                gamesGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <span class="material-symbols-outlined !text-[64px] dark:text-gray-600 light:text-slate-300 mb-4">search_off</span>
+                        <h3 class="text-xl font-bold dark:text-white light:text-charcoal mb-2">找不到遊戲</h3>
+                        <p class="dark:text-text-light light:text-slate-text">嘗試使用不同的搜尋關鍵字或選擇其他分類</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            gamesToRender.forEach(game => {
+                const gameElement = document.createElement('div');
+                gameElement.className = 'glass-card rounded-2xl p-6 flex flex-col gap-4 relative group cursor-pointer overflow-hidden fade-in';
+                gameElement.addEventListener('click', () => {
+                    // 跳轉到簡化加載畫面，使用 URL 哈希傳遞遊戲數據
+                    const gameData = {
+                        title: game.title,
+                        icon: game.icon,
+                        description: game.description,
+                        target: game.filename
+                    };
+                    const gameDataJson = encodeURIComponent(JSON.stringify(gameData));
+                    window.location.href = `loading-screen-simple.html#${gameDataJson}`;
+                    if (soundEnabled) playClickSound();
+                });
+                
+                // Highlight effect
+                const highlightColor = game.color.startsWith('neon-') ? `var(--${game.color})` : `rgb(var(--${game.color}))`;
+                gameElement.innerHTML = `
+                    ${game.isNew ? '<div class="game-card-new">NEW ✨</div>' : ''}
+                    ${game.isHot && !game.isNew ? '<div class="game-card-hot">HOT 🔥</div>' : ''}
+                    
+                    <div class="absolute -right-10 -top-10 w-32 h-32 blur-[50px] rounded-full pointer-events-none group-hover:opacity-50 transition-opacity" 
+                         style="background-color: ${highlightColor}; opacity: 0.2;"></div>
+                    
+                    <div class="size-16 rounded-2xl dark:bg-white/5 light:bg-black/5 border dark:border-white/10 light:border-black/10 flex items-center justify-center shadow-inner group-hover:border-${game.color}/50 transition-colors">
+                        <span class="text-4xl">${game.icon}</span>
+                    </div>
+                    
+                    <div class="flex flex-col gap-1 z-10">
+                        <h3 class="dark:text-white light:text-charcoal text-xl font-bold group-hover:text-${game.color} transition-colors">${highlightText(game.title)}</h3>
+                        <p class="dark:text-gray-400 light:text-slate-text text-sm leading-relaxed">${highlightText(game.description)}</p>
+                    </div>
+                    
+                    <div class="mt-auto flex flex-wrap gap-1">
+                        ${game.tags.map(tag => `<span class="category-tag">${highlightText(tag)}</span>`).join('')}
+                    </div>
+                `;
+                
+                gamesGrid.appendChild(gameElement);
+            });
+        }
+
+        function highlightText(text) {
+            if (!currentSearch) return text;
+            
+            const regex = new RegExp(`(${currentSearch})`, 'gi');
+            return text.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+
+        // Initialize with "全部" button active
+        document.querySelector('.category-filter[data-category="all"]').click();
     </script>
 </body>
 </html>

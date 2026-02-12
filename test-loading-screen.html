@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試加載畫面</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .test-card { border: 1px solid #ccc; border-radius: 10px; padding: 15px; }
+        .test-card h3 { margin-top: 0; }
+        .test-card button { margin-top: 10px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .test-card button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>測試 Herta's Game Center 加載畫面</h1>
+    <p>點擊以下按鈕測試不同遊戲的加載畫面：</p>
+    
+    <div class="test-list">
+        <div class="test-card">
+            <h3>攻擊數學實習老師</h3>
+            <p>測試深色模式加載畫面</p>
+            <button onclick="testLoading('攻擊數學實習老師', '⚔️', '全新動作遊戲！控制英雄使用連擊技能擊敗敵人，挑戰無限模式！', 'attack.html', 'dark')">
+                測試深色模式
+            </button>
+            <button onclick="testLoading('攻擊數學實習老師', '⚔️', '全新動作遊戲！控制英雄使用連擊技能擊敗敵人，挑戰無限模式！', 'attack.html', 'light')">
+                測試淺色模式
+            </button>
+        </div>
+        
+        <div class="test-card">
+            <h3>黑色貪吃蛇</h3>
+            <p>測試經典遊戲加載畫面</p>
+            <button onclick="testLoading('黑色貪吃蛇', '🐍', '懷舊經典遊戲，控制小蛇吃食物成長，挑戰最高分數！', 'snake.html', 'auto')">
+                測試自動主題
+            </button>
+        </div>
+        
+        <div class="test-card">
+            <h3>節奏大師</h3>
+            <p>測試音樂遊戲加載畫面</p>
+            <button onclick="testLoading('節奏大師 - Technical Ver.', '🎵', '跟隨節奏點擊音符，挑戰你的反應速度與節奏感！', 'music-game.html', 'auto')">
+                測試加載畫面
+            </button>
+        </div>
+        
+        <div class="test-card">
+            <h3>所有遊戲快速測試</h3>
+            <p>測試所有遊戲的加載畫面連結</p>
+            <button onclick="testAllGames()">
+                測試所有遊戲
+            </button>
+        </div>
+    </div>
+    
+    <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+        <h3>測試說明：</h3>
+        <ul>
+            <li>點擊按鈕會打開加載畫面，加載完成後會跳轉到對應的遊戲</li>
+            <li>加載畫面會根據主題設置顯示深色或淺色模式</li>
+            <li>按 ESC 鍵可以跳過加載（僅用於測試）</li>
+            <li>實際遊戲文件必須存在於目錄中</li>
+        </ul>
+    </div>
+    
+    <script>
+        function testLoading(title, icon, desc, target, theme) {
+            const params = new URLSearchParams({
+                title: encodeURIComponent(title),
+                icon: encodeURIComponent(icon),
+                desc: encodeURIComponent(desc),
+                target: target,
+                theme: theme
+            });
+            window.open(`loading-screen-template.html?${params.toString()}`, '_blank');
+        }
+        
+        function testAllGames() {
+            const games = [
+                { title: "攻擊數學實習老師", icon: "⚔️", desc: "全新動作遊戲！控制英雄使用連擊技能擊敗敵人，挑戰無限模式！", file: "attack.html" },
+                { title: "夏日告白 - 7天戀愛遊戲", icon: "💖", desc: "浪漫戀愛模擬遊戲，與虛擬角色互動，發展獨特的故事線！", file: "love-sim.html" },
+                { title: "躲貓貓大作戰", icon: "👻", desc: "躲藏與尋找的刺激遊戲，利用環境隱藏自己或找出所有玩家！", file: "hide-seek.html" },
+                { title: "小提琴大師", icon: "🎻", desc: "學習演奏小提琴，跟隨音符演奏經典樂曲，體驗音樂的魅力！", file: "violin-game.html" },
+                { title: "節奏大師 - Technical Ver.", icon: "🎵", desc: "跟隨節奏點擊音符，挑戰你的反應速度與節奏感！", file: "music-game.html" },
+                { title: "黑色貪吃蛇", icon: "🐍", desc: "懷舊經典遊戲，控制小蛇吃食物成長，挑戰最高分數！", file: "snake.html" },
+                { title: "Super Mario Kart 體感賽車", icon: "🏎️", desc: "駕駛賽車收集道具，避開障礙物，體驗刺激的競速快感！", file: "mario.html" },
+                { title: "經典猜數字遊戲", icon: "🎯", desc: "考驗你的邏輯思維，用最少的次數猜中隱藏數字！", file: "game1.html" },
+                { title: "手勢包剪揼對戰", icon: "✊", desc: "經典對戰遊戲，與電腦比拼策略與運氣，看誰能連勝！", file: "game2.html" },
+                { title: "Easy Piano: Fur Elise", icon: "🎹", desc: "學習演奏鋼琴，跟隨音符演奏經典樂曲，體驗音樂的魅力！", file: "music-game2.html" }
+            ];
+            
+            let confirmed = confirm(`將測試 ${games.length} 個遊戲的加載畫面。每個遊戲將在新標籤頁中打開。確定繼續嗎？`);
+            if (!confirmed) return;
+            
+            games.forEach((game, index) => {
+                setTimeout(() => {
+                    testLoading(game.title, game.icon, game.desc, game.file, 'auto');
+                }, index * 1000); // 每隔1秒打開一個
+            });
+        }
+        
+        // 設置主題測試
+        document.addEventListener('DOMContentLoaded', function() {
+            // 添加主題切換按鈕
+            const themeDiv = document.createElement('div');
+            themeDiv.style.marginTop = '20px';
+            themeDiv.style.padding = '15px';
+            themeDiv.style.background = '#e9ecef';
+            themeDiv.style.borderRadius = '10px';
+            themeDiv.innerHTML = `
+                <h3>主題設置測試：</h3>
+                <p>當前主題設置: <span id="current-theme">檢測中...</span></p>
+                <button onclick="setTheme('dark')">設置為深色模式</button>
+                <button onclick="setTheme('light')">設置為淺色模式</button>
+                <button onclick="clearTheme()">清除主題設置</button>
+            `;
+            document.body.appendChild(themeDiv);
+            
+            updateThemeDisplay();
+        });
+        
+        function setTheme(theme) {
+            localStorage.setItem('theme', theme);
+            updateThemeDisplay();
+            alert(`已設置主題為: ${theme === 'dark' ? '深色模式' : '淺色模式'}`);
+        }
+        
+        function clearTheme() {
+            localStorage.removeItem('theme');
+            updateThemeDisplay();
+            alert('已清除主題設置，將使用系統偏好');
+        }
+        
+        function updateThemeDisplay() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            let displayText;
+            
+            if (savedTheme === 'dark') {
+                displayText = '深色模式 (手動設置)';
+            } else if (savedTheme === 'light') {
+                displayText = '淺色模式 (手動設置)';
+            } else if (systemDark) {
+                displayText = '深色模式 (系統偏好)';
+            } else {
+                displayText = '淺色模式 (系統偏好)';
+            }
+            
+            document.getElementById('current-theme').textContent = displayText;
+        }
+    </script>
+</body>
+</html>

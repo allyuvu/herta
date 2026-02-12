@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Game Loading Screen (Dark Mode)</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00ffcc",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f231f",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "Noto Sans TC", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #1f2937 1px, transparent 1px), linear-gradient(to bottom, #1f2937 1px, transparent 1px)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom glow effects using standard CSS features compatible with Tailwind */
+        .neon-text-shadow {
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+        }
+        .neon-box-shadow {
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display h-screen w-full overflow-hidden flex flex-col relative text-white">
+<!-- Background Layer: Image with Overlay to match requested Midnight Blue #0f0c29 -->
+<div class="absolute inset-0 z-0">
+<!-- Abstract Tech Grid Background -->
+<div class="absolute inset-0 bg-cover bg-center opacity-30" data-alt="Abstract dark futuristic cybersecurity digital grid pattern" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBsxClkiA01QpdWTWuugsR0sRriArByIALbe1Zshw3b8uSiXHynU5eK-Q52Q7fzYoPlcInf8VT6JPYtQDGD_Px0GpukdXM5H7zl_6eJumWE4m_uvyzzVYIMkLBw__cmwgn28emKaYWxrEH_kYTO1BaulhMZZM8tNkfhPE6BEvkHQM4DniV3Ektp_s_g7Tm0HF-05A-orjBHV9aMEg5Vm7H9-RB2pBsSiYCej50rr2T093OSYhwKUUCzaYYx4E2jS987DHMKb67QT4A');"></div>
+<!-- Gradient Overlay to merge Theme Dark with Requested Midnight Blue -->
+<div class="absolute inset-0 bg-gradient-to-b from-[#0f0c29]/90 via-[#0f231f]/95 to-[#0f231f]"></div>
+<!-- Subtle Grid Lines overlay -->
+<div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#00ffcc 1px, transparent 1px); background-size: 40px 40px;"></div>
+</div>
+<!-- Main Content Container -->
+<div class="relative z-10 flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto px-6">
+<!-- Centerpiece: Glowing Sword & Ring -->
+<div class="relative mb-12 flex items-center justify-center">
+<!-- Outer Decorative Ring (Static representation of spinning) -->
+<div class="absolute w-48 h-48 rounded-full border border-primary/20"></div>
+<div class="absolute w-56 h-56 rounded-full border border-primary/10 border-dashed"></div>
+<!-- Main Spinner Ring -->
+<div class="w-40 h-40 rounded-full border-4 border-t-primary border-r-primary/50 border-b-primary/10 border-l-primary/10 neon-box-shadow flex items-center justify-center bg-[#0f0c29]/50 backdrop-blur-sm">
+<!-- Icon -->
+<span class="material-symbols-outlined text-6xl text-primary neon-text-shadow" style="font-size: 4rem;">
+                    swords
+                </span>
+</div>
+<!-- Decorative particles/tech elements -->
+<div class="absolute -right-12 top-0 text-primary/40 text-xs font-mono">SYS.01</div>
+<div class="absolute -left-12 bottom-0 text-primary/40 text-xs font-mono">LOAD.EXE</div>
+</div>
+<!-- System Text -->
+<div class="flex flex-col items-center gap-2 mb-10 w-full">
+<h1 class="text-4xl md:text-5xl font-bold text-white tracking-widest uppercase neon-text-shadow text-center">
+                系統啟動中...
+            </h1>
+<p class="text-primary/60 text-sm tracking-[0.2em] uppercase">System Initializing</p>
+</div>
+<!-- Progress Section -->
+<div class="w-full max-w-lg flex flex-col gap-3">
+<div class="flex justify-between items-end px-1">
+<span class="text-white/80 text-sm font-medium tracking-wide">Loading assets: core_modules</span>
+<span class="text-primary font-bold text-lg neon-text-shadow">72%</span>
+</div>
+<!-- Progress Bar -->
+<div class="h-2 w-full bg-white/10 rounded-full overflow-hidden backdrop-blur-sm border border-white/5">
+<div class="h-full bg-primary rounded-full relative shadow-[0_0_15px_#00ffcc]" style="width: 72%;">
+<!-- Leading edge highlight -->
+<div class="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div>
+</div>
+</div>
+</div>
+<!-- Flavor Text / Tactical Tip -->
+<div class="mt-16 p-4 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md max-w-xl w-full text-center relative group">
+<!-- Decorative corner accents -->
+<div class="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-primary"></div>
+<div class="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-primary"></div>
+<div class="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-primary"></div>
+<div class="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary"></div>
+<div class="flex items-center justify-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">
+                    lightbulb
+                </span>
+<p class="text-cyan-100/90 text-base md:text-lg font-light tracking-wide">
+                    戰術提示：閃避比硬拼更有效。
+                </p>
+</div>
+<p class="text-white/30 text-xs mt-2 font-mono">Tactical Tip: Dodging is more effective than brute force.</p>
+</div>
+</div>
+<!-- Bottom Status Bar -->
+<div class="absolute bottom-0 w-full border-t border-white/5 bg-[#0f0c29]/80 backdrop-blur-xl py-2 px-6 flex justify-between items-center text-[10px] text-white/40 font-mono tracking-widest z-20">
+<div class="flex gap-4">
+<span>VER: 4.2.0-ALPHA</span>
+<span>SERVER: HK_GAMES_04</span>
+</div>
+<div class="flex gap-4 items-center">
+<span>CONNECTION: STABLE</span>
+<div class="flex gap-1">
+<div class="w-1 h-3 bg-primary rounded-full"></div>
+<div class="w-1 h-3 bg-primary rounded-full"></div>
+<div class="w-1 h-3 bg-primary rounded-full"></div>
+<div class="w-1 h-3 bg-primary/30 rounded-full"></div>
+</div>
+</div>
+</div>
+</body></html>

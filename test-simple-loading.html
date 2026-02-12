@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試簡化加載畫面</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        h1 { color: #333; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+        .game-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 15px; }
+        .game-card { padding: 15px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .game-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .game-icon { font-size: 2rem; margin-bottom: 10px; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .dark-mode { background: #333; color: white; }
+        .light-mode { background: #f8f9fa; color: #333; }
+    </style>
+</head>
+<body>
+    <h1>測試簡化加載畫面</h1>
+    
+    <div class="test-section">
+        <h2>問題描述</h2>
+        <p>之前的加載畫面使用 URL 參數傳遞遊戲數據，可能會導致表情符號等特殊字符出現亂碼。</p>
+        <p>新的簡化加載畫面使用 URL 哈希 (#) 傳遞 JSON 數據，避免了編碼問題。</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>測試遊戲加載</h2>
+        <p>點擊以下遊戲卡片測試加載畫面：</p>
+        
+        <div class="game-list">
+            <div class="game-card" onclick="testGame('攻擊數學實習老師', '⚔️', '全新動作遊戲！控制英雄使用連擊技能擊敗敵人，挑戰無限模式！', 'attack.html')">
+                <div class="game-icon">⚔️</div>
+                <h3>攻擊數學實習老師</h3>
+                <p>動作遊戲</p>
+            </div>
+            
+            <div class="game-card" onclick="testGame('黑色貪吃蛇', '🐍', '懷舊經典遊戲，控制小蛇吃食物成長，挑戰最高分數！', 'snake.html')">
+                <div class="game-icon">🐍</div>
+                <h3>黑色貪吃蛇</h3>
+                <p>經典遊戲</p>
+            </div>
+            
+            <div class="game-card" onclick="testGame('節奏大師', '🎵', '跟隨節奏點擊音符，挑戰你的反應速度與節奏感！', 'music-game.html')">
+                <div class="game-icon">🎵</div>
+                <h3>節奏大師</h3>
+                <p>音樂遊戲</p>
+            </div>
+            
+            <div class="game-card" onclick="testGame('小提琴大師', '🎻', '學習演奏小提琴，跟隨音符演奏經典樂曲，體驗音樂的魅力！', 'violin-game.html')">
+                <div class="game-icon">🎻</div>
+                <h3>小提琴大師</h3>
+                <p>音樂遊戲</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="testAllGames()">測試所有遊戲</button>
+            <button onclick="setTheme('dark')">深色模式</button>
+            <button onclick="setTheme('light')">淺色模式</button>
+            <button onclick="clearTheme()">使用系統主題</button>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>技術說明</h2>
+        <p><strong>新方法：</strong>使用 URL 哈希傳遞 JSON 數據</p>
+        <pre><code>loading-screen-simple.html#{"title":"遊戲","icon":"🎮","description":"描述","target":"game.html"}</code></pre>
+        
+        <p><strong>優點：</strong></p>
+        <ul>
+            <li>避免 URL 參數編碼問題</li>
+            <li>支援所有 Unicode 字符（包括表情符號）</li>
+            <li>數據結構更清晰</li>
+            <li>瀏覽器兼容性更好</li>
+        </ul>
+        
+        <p><strong>測試結果：</strong> <span id="test-result">等待測試...</span></p>
+    </div>
+    
+    <script>
+        // 遊戲數據
+        const games = [
+            { title: "攻擊數學實習老師", icon: "⚔️", description: "全新動作遊戲！控制英雄使用連擊技能擊敗敵人，挑戰無限模式！", file: "attack.html" },
+            { title: "夏日告白 - 7天戀愛遊戲", icon: "💖", description: "浪漫戀愛模擬遊戲，與虛擬角色互動，發展獨特的故事線！", file: "love-sim.html" },
+            { title: "躲貓貓大作戰", icon: "👻", description: "躲藏與尋找的刺激遊戲，利用環境隱藏自己或找出所有玩家！", file: "hide-seek.html" },
+            { title: "小提琴大師", icon: "🎻", description: "學習演奏小提琴，跟隨音符演奏經典樂曲，體驗音樂的魅力！", file: "violin-game.html" },
+            { title: "節奏大師 - Technical Ver.", icon: "🎵", description: "跟隨節奏點擊音符，挑戰你的反應速度與節奏感！", file: "music-game.html" },
+            { title: "黑色貪吃蛇", icon: "🐍", description: "懷舊經典遊戲，控制小蛇吃食物成長，挑戰最高分數！", file: "snake.html" },
+            { title: "Super Mario Kart 體感賽車", icon: "🏎️", description: "駕駛賽車收集道具，避開障礙物，體驗刺激的競速快感！", file: "mario.html" },
+            { title: "經典猜數字遊戲", icon: "🎯", description: "考驗你的邏輯思維，用最少的次數猜中隱藏數字！", file: "game1.html" },
+            { title: "手勢包剪揼對戰", icon: "✊", description: "經典對戰遊戲，與電腦比拼策略與運氣，看誰能連勝！", file: "game2.html" },
+            { title: "Easy Piano: Fur Elise", icon: "🎹", description: "學習演奏鋼琴，跟隨音符演奏經典樂曲，體驗音樂的魅力！", file: "music-game2.html" }
+        ];
+        
+        // 測試單個遊戲
+        function testGame(title, icon, description, file) {
+            const gameData = {
+                title: title,
+                icon: icon,
+                description: description,
+                target: file
+            };
+            
+            const gameDataJson = encodeURIComponent(JSON.stringify(gameData));
+            const url = `loading-screen-simple.html#${gameDataJson}`;
+            
+            document.getElementById('test-result').textContent = `測試: ${title} (${icon})`;
+            console.log('加載畫面URL:', url);
+            
+            // 在新標籤頁打開
+            window.open(url, '_blank');
+        }
+        
+        // 測試所有遊戲
+        function testAllGames() {
+            let confirmed = confirm(`將測試 ${games.length} 個遊戲的加載畫面。每個遊戲將在新標籤頁中打開。確定繼續嗎？`);
+            if (!confirmed) return;
+            
+            games.forEach((game, index) => {
+                setTimeout(() => {
+                    testGame(game.title, game.icon, game.description, game.file);
+                }, index * 1500); // 每隔1.5秒打開一個
+            });
+            
+            document.getElementById('test-result').textContent = `正在測試 ${games.length} 個遊戲...`;
+        }
+        
+        // 主題設置
+        function setTheme(theme) {
+            localStorage.setItem('theme', theme);
+            alert(`已設置主題為: ${theme === 'dark' ? '深色模式' : '淺色模式'}`);
+            updateThemeDisplay();
+        }
+        
+        function clearTheme() {
+            localStorage.removeItem('theme');
+            alert('已清除主題設置，將使用系統偏好');
+            updateThemeDisplay();
+        }
+        
+        function updateThemeDisplay() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            let themeText;
+            if (savedTheme === 'dark') {
+                themeText = '深色模式 (手動設置)';
+            } else if (savedTheme === 'light') {
+                themeText = '淺色模式 (手動設置)';
+            } else if (systemDark) {
+                themeText = '深色模式 (系統偏好)';
+            } else {
+                themeText = '淺色模式 (系統偏好)';
+            }
+            
+            document.getElementById('test-result').textContent = `當前主題: ${themeText}`;
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateThemeDisplay();
+            
+            // 添加主題預覽
+            const themePreview = document.createElement('div');
+            themePreview.style.marginTop = '20px';
+            themePreview.style.padding = '15px';
+            themePreview.style.borderRadius = '10px';
+            themePreview.innerHTML = `
+                <h3>當前主題預覽</h3>
+                <p>加載畫面將根據此主題顯示</p>
+                <div id="theme-preview" style="padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    主題預覽區域
+                </div>
+            `;
+            document.querySelector('.test-section:last-child').appendChild(themePreview);
+            
+            updateThemePreview();
+        });
+        
+        function updateThemePreview() {
+            const preview = document.getElementById('theme-preview');
+            const savedTheme = localStorage.getItem('theme');
+            const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            let currentTheme;
+            if (savedTheme === 'dark' || savedTheme === 'light') {
+                currentTheme = savedTheme;
+            } else if (systemDark) {
+                currentTheme = 'dark';
+            } else {
+                currentTheme = 'light';
+            }
+            
+            if (currentTheme === 'dark') {
+                preview.className = 'dark-mode';
+                preview.textContent = '深色模式預覽 - 加載畫面將顯示深色背景和亮色文字';
+            } else {
+                preview.className = 'light-mode';
+                preview.textContent = '淺色模式預覽 - 加載畫面將顯示淺色背景和深色文字';
+            }
+        }
+    </script>
+</body>
+</html>
